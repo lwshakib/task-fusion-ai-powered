@@ -106,7 +106,7 @@ export default function MessageView() {
               </div>
             </div>
           ) : (
-            messages.map((message) => (
+            messages && messages.length > 0 && messages.map((message) => (
               <MessageItem key={message.id} message={message} />
             ))
           )}

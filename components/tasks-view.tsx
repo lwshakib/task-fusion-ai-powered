@@ -301,7 +301,7 @@ export default function TasksView() {
       ) : (
         <ScrollArea className="h-[calc(100vh-200px)]">
           <div className="space-y-3 pr-4">
-            {sortedTasks.map((task) => (
+            {sortedTasks && sortedTasks.length > 0 && sortedTasks.map((task) => (
               <Popover
                 key={task.id}
                 open={editingPopoverOpen && editingTask?.id === task.id}
