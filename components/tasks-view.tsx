@@ -210,13 +210,13 @@ export default function TasksView() {
           </div>
         </div>
         <p className="text-muted-foreground">
-          {sortedTasks.length} tasks •{" "}
+          {sortedTasks && sortedTasks.length} tasks •{" "}
           {
-            sortedTasks.filter((t) => t.priority === "HIGH" && !t.completed)
+            sortedTasks && sortedTasks.filter((t) => t.priority === "HIGH" && !t.completed)
               .length
           }{" "}
           high priority pending •{" "}
-          {sortedTasks.filter((t) => t.completed).length} completed
+          {sortedTasks && sortedTasks.filter((t) => t.completed).length} completed
         </p>
       </div>
 
@@ -289,7 +289,7 @@ export default function TasksView() {
         </DialogContent>
       </Dialog>
 
-      {tasks.length === 0 ? (
+      {tasks && tasks.length === 0 ? (
         <div className="h-[calc(100vh-200px)] flex items-center justify-center">
           <div className="text-center">
             <p className="text-muted-foreground mb-2">No tasks yet</p>

@@ -96,7 +96,7 @@ export default function MessageView() {
     <div className="h-full flex flex-col overflow-hidden">
       <ScrollArea className="flex-1 min-h-0" viewportRef={viewportRef}>
         <div className="px-4 space-y-2">
-          {messages.length === 0 ? (
+          {messages && messages.length === 0 ? (
             <div className="flex items-center justify-center h-32 text-muted-foreground">
               <div className="text-center">
                 <p className="text-sm">No messages yet</p>
