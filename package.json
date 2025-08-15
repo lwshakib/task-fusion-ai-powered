@@ -1,6 +1,6 @@
 {
   "name": "task-fusion-ai-powered",
-  "description":"TaskFusion is a modern, intelligent task management application that combines the power of AI with intuitive user experience. Built with Next.js 15, it offers seamless switching between chat and visual modes, AI-generated task suggestions, and intelligent organization based on priority and context.",
+  "description": "TaskFusion is a modern, intelligent task management application that combines the power of AI with intuitive user experience. Built with Next.js 15, it offers seamless switching between chat and visual modes, AI-generated task suggestions, and intelligent organization based on priority and context.",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -21,9 +21,11 @@
     "@prisma/client": "^6.13.0",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
+    "@radix-ui/react-hover-card": "^1.1.15",
     "@radix-ui/react-popover": "^1.1.14",
     "@radix-ui/react-scroll-area": "^1.2.9",
     "@radix-ui/react-select": "^2.2.5",
+    "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.12",
     "axios": "^1.11.0",

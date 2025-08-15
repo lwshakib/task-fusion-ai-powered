@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useTasks } from "../task-provider";
@@ -90,7 +91,7 @@ export default function AiInput() {
   };
   return (
     <div className="w-full py-4">
-      <div className="relative max-w-xl border rounded-[22px] border-black/5 p-1 w-full mx-auto">
+      <div className="relative max-w-full border rounded-[22px] border-black/5 p-1 w-full mx-auto">
         <div className="relative rounded-2xl border border-black/5 bg-neutral-800/5 flex flex-col">
           <div
             className="overflow-y-auto"
@@ -123,18 +124,18 @@ export default function AiInput() {
           </div>
 
           <div className="h-12 bg-black/5 dark:bg-white/5 rounded-b-xl flex items-center justify-end px-3">
-            <button
+            <Button
               type="button"
               onClick={handleSubmit}
+              variant={value ? "default" : "ghost"}
+              size="icon"
               className={cn(
-                "rounded-full p-2 transition-colors",
-                value
-                  ? "bg-[#ff3f17]/15 text-[#ff3f17]"
-                  : "bg-black/5 dark:bg-white/5 text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white"
+                "rounded-full",
+                value && "bg-primary hover:bg-primary/90"
               )}
             >
               <Send className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
       </div>
