@@ -3,6 +3,7 @@ import MessageView from "@/components/message-view";
 import { ModeToggle } from "@/components/mode-toggle";
 import TasksView from "@/components/tasks-view";
 import AiInput from "@/components/ui/ai-input";
+import { Button } from "@/components/ui/button";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -10,6 +11,7 @@ import {
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserButton } from "@clerk/nextjs";
+import { Github } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
@@ -39,6 +41,21 @@ function page({}: Props) {
           </>
         </Link>
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            asChild
+            className="hover:bg-accent"
+          >
+            <a
+              href="https://github.com/lwshakib/task-fusion-ai-powered"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View on GitHub"
+            >
+              <Github className="h-[1.2rem] w-[1.2rem]" />
+            </a>
+          </Button>
           <ModeToggle />
           <UserButton />
         </div>

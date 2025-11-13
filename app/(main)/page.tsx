@@ -107,7 +107,24 @@ export default function Home() {
               TaskFusion
             </span>
           </div>
-          <ModeToggle />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="hover:bg-accent"
+            >
+              <a
+                href="https://github.com/lwshakib/task-fusion-ai-powered"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="View on GitHub"
+              >
+                <Github className="h-[1.2rem] w-[1.2rem]" />
+              </a>
+            </Button>
+            <ModeToggle />
+          </div>
         </div>
       </header>
 
