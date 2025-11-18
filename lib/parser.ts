@@ -46,13 +46,37 @@ function validatePriority(
 }
 
 /**
- * Validates task ID format (basic UUID validation)
+ * Validates task ID format (supports both CUID and UUID)
+ * CUID format: typically starts with 'c' and is 25 chars (Prisma default)
+ * UUID format: standard UUID v4 format
  */
 function validateTaskId(id: string): boolean {
-  // Basic UUID v4 validation pattern
+  if (!id || typeof id !== "string" || id.trim().length === 0) {
+    return false;
+  }
+
+  const trimmedId = id.trim();
+
+  // CUID validation (Prisma default) - typically 25 chars, starts with 'c'
+  const cuidRegex = /^c[a-z0-9]{24}$/i;
+  if (cuidRegex.test(trimmedId)) {
+    return true;
+  }
+
+  // UUID v4 validation (fallback for other formats)
   const uuidPattern =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidPattern.test(id);
+  if (uuidPattern.test(trimmedId)) {
+    return true;
+  }
+
+  // More lenient CUID check (in case format varies)
+  // CUIDs are usually 20-25 characters, alphanumeric
+  if (trimmedId.length >= 20 && trimmedId.length <= 30 && /^[a-z0-9-]+$/i.test(trimmedId)) {
+    return true;
+  }
+
+  return false;
 }
 
 /**

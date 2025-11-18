@@ -129,76 +129,92 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-20">
-        {/* Background Pattern */}
+      <section className="relative overflow-hidden pt-20 pb-32 sm:pb-40">
+        {/* Enhanced Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.1),transparent_50%)]" />
+
+        {/* Animated Gradient Orbs */}
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+        <div
+          className="absolute bottom-20 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        />
 
         <div className="relative">
-          <div className="mx-auto max-w-7xl px-6 pt-10 pb-24 sm:pb-32 lg:flex lg:px-8 lg:pt-32">
+          <div className="mx-auto max-w-4xl px-6 pt-16 sm:pt-24 lg:pt-32 text-center">
             <motion.div
-              className="mx-auto max-w-2xl flex-shrink-0 lg:mx-0 lg:max-w-xl lg:pt-8"
-              {...slideInLeft}
+              className="flex flex-col items-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
             >
-              <div className="mt-24 sm:mt-32 lg:mt-16">
-                <motion.div
-                  className="inline-flex items-center space-x-4"
-                  {...scaleIn}
-                  transition={{ delay: 0.2 }}
+              <motion.div
+                className="inline-flex items-center space-x-4 mb-8"
+                {...scaleIn}
+                transition={{ delay: 0.2 }}
+              >
+                <Badge
+                  variant="secondary"
+                  className="bg-primary/10 text-primary border-primary/20 px-4 py-1.5 text-sm font-medium"
                 >
-                  <Badge
-                    variant="secondary"
-                    className="bg-primary/10 text-primary border-primary/20"
-                  >
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    AI-Powered
-                  </Badge>
-                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <span>Task Management Reimagined</span>
-                    <div className="flex space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className="w-3 h-3 fill-yellow-400 text-yellow-400"
-                        />
-                      ))}
-                    </div>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  AI-Powered
+                </Badge>
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <span>Task Management Reimagined</span>
+                  <div className="flex space-x-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400"
+                      />
+                    ))}
                   </div>
-                </motion.div>
-              </div>
+                </div>
+              </motion.div>
 
               <motion.h1
-                className="mt-10 text-4xl font-bold tracking-tight text-foreground sm:text-6xl"
+                className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-tight"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
               >
                 Meet TaskFusion
-                <span className="block bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                <span className="block mt-2 bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
                   Your AI Assistant
                 </span>
               </motion.h1>
 
               <motion.p
-                className="mt-6 text-lg leading-8 text-muted-foreground"
+                className="mt-8 text-xl sm:text-2xl leading-relaxed text-muted-foreground max-w-3xl mx-auto"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.8 }}
               >
                 Experience the future of task management with AI-powered
                 suggestions, intelligent organization, and seamless switching
-                between chat and visual modes. Get more done with less effort.
+                between chat and visual modes.
+              </motion.p>
+              <motion.p
+                className="mt-4 text-lg text-muted-foreground/80 max-w-2xl mx-auto"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.8 }}
+              >
+                Get more done with less effort.
               </motion.p>
 
               <motion.div
-                className="mt-10 flex items-center gap-x-6"
+                className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8, duration: 0.8 }}
               >
                 <Button
                   size="lg"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-7 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   onClick={() => (window.location.href = "/tasks")}
                 >
                   Get Started
@@ -210,7 +226,7 @@ export default function Home() {
                     <Button
                       variant="outline"
                       size="lg"
-                      className="px-8 py-6 text-lg font-semibold rounded-xl border-2 hover:bg-accent transition-all duration-300"
+                      className="px-10 py-7 text-lg font-semibold rounded-xl border-2 hover:bg-accent transition-all duration-300 hover:scale-105"
                     >
                       <Play className="mr-2 h-5 w-5" />
                       Watch Demo
@@ -231,47 +247,41 @@ export default function Home() {
                 </HoverCard>
               </motion.div>
 
-              {/* Stats */}
+              {/* Enhanced Stats */}
               <motion.div
-                className="mt-12 flex items-center space-x-8"
+                className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12 w-full max-w-2xl mx-auto"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1, duration: 0.8 }}
               >
-                <div className="flex items-center space-x-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  <span className="text-sm text-muted-foreground">
-                    10K+ Users
-                  </span>
+                <div className="flex flex-col items-center space-y-2 p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="text-2xl font-bold text-foreground">10K+</div>
+                  <div className="text-sm text-muted-foreground">
+                    Active Users
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <CheckSquare className="h-5 w-5 text-primary" />
-                  <span className="text-sm text-muted-foreground">
-                    1M+ Tasks
-                  </span>
+                <div className="flex flex-col items-center space-y-2 p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                    <CheckSquare className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="text-2xl font-bold text-foreground">1M+</div>
+                  <div className="text-sm text-muted-foreground">
+                    Tasks Completed
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-5 w-5 text-primary" />
-                  <span className="text-sm text-muted-foreground">24/7 AI</span>
+                <div className="flex flex-col items-center space-y-2 p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                    <Clock className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="text-2xl font-bold text-foreground">24/7</div>
+                  <div className="text-sm text-muted-foreground">
+                    AI Assistance
+                  </div>
                 </div>
               </motion.div>
-            </motion.div>
-
-            <motion.div
-              className="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32"
-              {...slideInRight}
-              transition={{ delay: 0.4 }}
-            >
-              <div className="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
-                <div className="relative">
-                  <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-3xl opacity-30" />
-                  <img
-                    src="/hero.png"
-                    alt="TaskFusion App Preview"
-                    className="relative w-full max-w-4xl rounded-2xl shadow-2xl ring-1 ring-border/50"
-                  />
-                </div>
-              </div>
             </motion.div>
           </div>
         </div>
