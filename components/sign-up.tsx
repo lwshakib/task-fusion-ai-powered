@@ -37,7 +37,7 @@ export default function SignUp() {
             }
 
             toast.success('Account created successfully!')
-            router.push('/notebooks')
+            router.push('/tasks')
             router.refresh()
         } catch (error) {
             toast.error('An unexpected error occurred')
@@ -51,7 +51,7 @@ export default function SignUp() {
         try {
             await authClient.signIn.social({
                 provider: 'google',
-                callbackURL: '/notebooks',
+                callbackURL: '/tasks',
             })
         } catch (error) {
             toast.error('Failed to sign up with Google')
