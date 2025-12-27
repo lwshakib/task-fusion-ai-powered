@@ -1,5 +1,7 @@
 import { Logo } from "@/components/logo";
 import { ModeToggle } from "@/components/mode-toggle";
+import { UserNav } from "@/components/tasks/user-nav";
+import { ClearMessagesButton } from "@/components/tasks/clear-messages-button";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -14,7 +16,12 @@ export default function TasksPage() {
       {/* Header */}
       <header className="flex h-16 shrink-0 items-center justify-between border-b px-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10">
         <Logo />
-        <ModeToggle />
+        <div className="flex items-center gap-4">
+          <ClearMessagesButton />
+          <div className="h-6 w-px bg-border hidden sm:block" />
+          <ModeToggle />
+          <UserNav />
+        </div>
       </header>
 
       {/* Main Content Area */}

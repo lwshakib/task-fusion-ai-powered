@@ -68,3 +68,28 @@ export async function POST(req: Request) {
     );
   }
 }
+export async function DELETE() {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    await prisma.message.deleteMany({
+      where: {
+        userId: session.user.id,
+      },
+    });
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error("[MESSAGES_DELETE]", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}

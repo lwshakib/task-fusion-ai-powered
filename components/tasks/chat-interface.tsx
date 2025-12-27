@@ -352,6 +352,14 @@ export function ChatInterface() {
       }
     };
     fetchMessages();
+
+    // Listen for clear-chat event
+    const handleClearChat = () => {
+      setMessages([]);
+    };
+
+    window.addEventListener("clear-chat", handleClearChat);
+    return () => window.removeEventListener("clear-chat", handleClearChat);
   }, [setMessages]);
 
   // Sync task store with tool outputs

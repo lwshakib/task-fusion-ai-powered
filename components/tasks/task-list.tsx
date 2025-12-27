@@ -9,6 +9,8 @@ import {
   CheckCircle2Icon,
   PencilIcon,
   TrashIcon,
+  ArrowUpDownIcon,
+  SortAscIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -38,6 +40,7 @@ export function TaskList() {
   const [selectedTask, setSelectedTask] = useState<Task | undefined>(undefined);
   const [viewTask, setViewTask] = useState<Task | undefined>(undefined);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [sortBy, setBy] = useState<"priority" | "date">("priority");
 
   const fetchTasks = async () => {
     try {
@@ -66,6 +69,28 @@ export function TaskList() {
       }
     }
   }, [tasks, viewTask]);
+
+  const sortedTasks = [...tasks].sort((a, b) => {
+    // 1. Status: COMPLETED tasks at the bottom (Universal Rule)
+    if (a.status !== b.status) {
+      return a.status === "COMPLETED" ? 1 : -1;
+    }
+
+    if (sortBy === "priority") {
+      // 2. Priority: HIGH > MEDIUM > LOW
+      const priorityWeight = {
+        HIGH: 3,
+        MEDIUM: 2,
+        LOW: 1,
+      };
+      if (a.priority !== b.priority) {
+        return priorityWeight[b.priority] - priorityWeight[a.priority];
+      }
+    }
+
+    // 3. Newest first (Primary for "date", Secondary for "priority")
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   const handleDelete = async (id: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -157,9 +182,29 @@ export function TaskList() {
             Manage your daily goals and assignments.
           </p>
         </div>
-        <Button size="sm" onClick={handleCreate}>
-          <PlusIcon className="mr-2 size-4" /> New Task
-        </Button>
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <ArrowUpDownIcon className="mr-2 size-3.5" />
+                Sort: {sortBy === "priority" ? "Priority" : "Newest"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem onClick={() => setBy("priority")}>
+                <SortAscIcon className="mr-2 size-4" />
+                Sort by Priority
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setBy("date")}>
+                <CalendarIcon className="mr-2 size-4" />
+                Sort by Date
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button size="sm" onClick={handleCreate}>
+            <PlusIcon className="mr-2 size-4" /> New Task
+          </Button>
+        </div>
       </div>
 
       <ScrollArea className="flex-1">
@@ -177,7 +222,7 @@ export function TaskList() {
             </div>
           ) : (
             <div className="space-y-1">
-              {tasks.map((task) => (
+              {sortedTasks.map((task) => (
                 <div
                   key={task.id}
                   onClick={() => handleTaskClick(task)}
