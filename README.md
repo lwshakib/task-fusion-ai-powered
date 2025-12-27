@@ -9,6 +9,22 @@
 
 ---
 
+## 📸 Demo
+
+<p align="center">
+  <img src="./public/dark-demo.png" alt="Task Fusion AI - Dark Mode" width="100%">
+  <br>
+  <em>Dark Mode</em>
+</p>
+
+<p align="center">
+  <img src="./public/light-demo.png" alt="Task Fusion AI - Light Mode" width="100%">
+  <br>
+  <em>Light Mode</em>
+</p>
+
+---
+
 ## ✨ Features
 
 - 🧠 **AI Task Decomposition**: Transform high-level objectives into granular, actionable steps automatically.
