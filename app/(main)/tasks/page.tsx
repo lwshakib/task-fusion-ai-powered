@@ -4,12 +4,14 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { ChatInterface } from "@/components/tasks/chat-interface";
+import { TaskList } from "@/components/tasks/task-list";
 
 export default function TasksPage() {
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
       {/* Header */}
-      <header className="flex h-16 shrink-0 items-center justify-between border-b px-6 bg-background">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b px-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10">
         <Logo />
       </header>
 
@@ -19,32 +21,18 @@ export default function TasksPage() {
           {/* Left Column: Chat Bar */}
           <ResizablePanel
             defaultSize={30}
-            minSize={20}
+            minSize={25}
             maxSize={40}
-            className="bg-muted/5"
+            className="bg-muted/5 border-r"
           >
-            <div className="flex h-full flex-col p-4">
-              <div className="flex-1 rounded-xl border bg-background p-4 shadow-sm">
-                <h2 className="font-semibold mb-2">Chat</h2>
-                <div className="text-muted-foreground text-sm">
-                  Chat interface will be here.
-                </div>
-              </div>
-            </div>
+            <ChatInterface />
           </ResizablePanel>
 
           <ResizableHandle withHandle />
 
           {/* Right Column: Task Management System */}
           <ResizablePanel defaultSize={70} className="bg-background">
-            <div className="flex h-full flex-col p-4">
-              <div className="flex-1 rounded-xl border bg-card p-4 shadow-sm">
-                <h2 className="font-semibold mb-2">Task Management</h2>
-                <div className="text-muted-foreground text-sm">
-                  Task board will be here.
-                </div>
-              </div>
-            </div>
+            <TaskList />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

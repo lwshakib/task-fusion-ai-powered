@@ -23,6 +23,8 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  tasks         Task[]
+  messages      Message[]
 
   @@unique([email])
   @@map("user")
@@ -74,4 +76,44 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+
+enum TASK_STATUS {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum TASK_PRIORITY {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum MESSAGE_ROLE {
+  user
+  assistant
+}
+
+model Task {
+  id  String @id @default(uuid())
+  userId  String
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title String
+  description  String?
+  status TASK_STATUS
+  priority TASK_PRIORITY
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id  String @id @default(uuid())
+  userId  String
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role  MESSAGE_ROLE
+  parts Json[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
