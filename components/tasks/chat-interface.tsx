@@ -29,7 +29,7 @@ import {
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
 import { Loader } from "@/components/ai-elements/loader";
-import { CheckCircle2, List, Trash2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, List, Search, Trash2 } from "lucide-react";
 import { useTaskStore } from "@/context";
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
@@ -101,6 +101,21 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
         </div>
       );
     }
+    if (isError) {
+      return (
+        <div className="flex flex-col gap-1.5 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
+          <div className="flex items-center gap-2 text-[13px] text-destructive font-semibold bg-destructive/5 dark:bg-destructive/10 px-3 py-1 rounded-lg border border-destructive/10 dark:border-destructive/20 w-fit">
+            <AlertCircle className="size-3.5" />
+            <span>Failed to create tasks</span>
+          </div>
+          {errorText && (
+            <div className="text-[11px] text-muted-foreground px-1 max-w-70 wrap-break-word">
+              {errorText}
+            </div>
+          )}
+        </div>
+      );
+    }
   }
 
   // Specific UI for updateTasks
@@ -139,6 +154,21 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
         </div>
       );
     }
+    if (isError) {
+      return (
+        <div className="flex flex-col gap-1.5 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
+          <div className="flex items-center gap-2 text-[13px] text-destructive font-semibold bg-destructive/5 dark:bg-destructive/10 px-3 py-1 rounded-lg border border-destructive/10 dark:border-destructive/20 w-fit">
+            <AlertCircle className="size-3.5" />
+            <span>Failed to update tasks</span>
+          </div>
+          {errorText && (
+            <div className="text-[11px] text-muted-foreground px-1 max-w-70 wrap-break-word">
+              {errorText}
+            </div>
+          )}
+        </div>
+      );
+    }
   }
 
   // Specific UI for deleteTasks
@@ -165,6 +195,93 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
         </div>
       );
     }
+    if (isError) {
+      return (
+        <div className="flex flex-col gap-1.5 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
+          <div className="flex items-center gap-2 text-[13px] text-destructive font-semibold bg-destructive/5 dark:bg-destructive/10 px-3 py-1 rounded-lg border border-destructive/10 dark:border-destructive/20 w-fit">
+            <AlertCircle className="size-3.5" />
+            <span>Failed to delete tasks</span>
+          </div>
+          {errorText && (
+            <div className="text-[11px] text-muted-foreground px-1 max-w-70 wrap-break-word">
+              {errorText}
+            </div>
+          )}
+        </div>
+      );
+    }
+  }
+
+  // Specific UI for getTasks
+  if (toolName === "getTasks") {
+    if (isPending) {
+      return (
+        <div className="flex items-center gap-2.5 px-3 py-1.5 my-2 rounded-full bg-primary/5 border border-primary/10 w-fit text-[13px] text-primary/80 animate-pulse">
+          <Loader size={14} className="text-primary" />
+          <span className="font-medium">Fetching tasks...</span>
+        </div>
+      );
+    }
+    if (isSuccess) {
+      const tasks = output?.tasks || [];
+      return (
+        <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium bg-muted/30 px-3 py-1 rounded-lg border border-muted-foreground/10 w-fit my-2">
+          <List className="size-3.5" />
+          <span>
+            Found {tasks.length} task{tasks.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+      );
+    }
+  }
+
+  // Specific UI for searchTasks
+  if (toolName === "searchTasks") {
+    if (isPending) {
+      return (
+        <div className="flex items-center gap-2.5 px-3 py-1.5 my-2 rounded-full bg-primary/5 border border-primary/10 w-fit text-[13px] text-primary/80 animate-pulse">
+          <Loader size={14} className="text-primary" />
+          <span className="font-medium">Searching tasks...</span>
+        </div>
+      );
+    }
+    if (isSuccess) {
+      const tasks = output?.tasks || [];
+      return (
+        <div className="flex flex-col gap-1.5 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
+          <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium bg-muted/30 px-3 py-1 rounded-lg border border-muted-foreground/10 w-fit">
+            <Search className="size-3.5" />
+            <span>
+              Found {tasks.length} result{tasks.length !== 1 ? "s" : ""} for "
+              {input?.query || "..."}"
+            </span>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // Handle errors for other task tools
+  if (isError) {
+    const errorAction =
+      toolName === "searchTasks"
+        ? "search tasks"
+        : toolName === "getTasks"
+        ? "fetch tasks"
+        : "execute task action";
+    return (
+      <div className="flex flex-col gap-1.5 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
+        <div className="flex items-center gap-2 text-[13px] text-destructive font-semibold bg-destructive/5 dark:bg-destructive/10 px-3 py-1 rounded-lg border border-destructive/10 dark:border-destructive/20 w-fit">
+          <AlertCircle className="size-3.5" />
+          <span>Failed to {errorAction}</span>
+        </div>
+        {errorText && (
+          <div className="text-[11px] text-muted-foreground px-1 max-w-70 wrap-break-word">
+            {errorText}
+          </div>
+        )}
+      </div>
+    );
   }
 
   // Fallback to standard Tool UI for others

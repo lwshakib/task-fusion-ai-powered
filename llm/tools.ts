@@ -8,7 +8,7 @@ export const taskSchema = z.object({
     .optional()
     .describe("A brief description of the task"),
   status: z
-    .enum(["TODO", "IN_PROGRESS", "COMPLETED"])
+    .enum(["TODO", "COMPLETED"])
     .default("TODO")
     .describe("The current status of the task"),
   priority: z
@@ -113,7 +113,11 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
       ids: z.array(z.string()).describe("List of task UUIDs to delete"),
     }),
     execute: async (args: any) => {
-      let ids = args.ids || args.id || (Array.isArray(args) ? args : null);
+      let ids =
+        args.ids ||
+        args.id ||
+        args.task_ids ||
+        (Array.isArray(args) ? args : null);
 
       if (typeof ids === "string") {
         ids = [ids];

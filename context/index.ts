@@ -4,7 +4,7 @@ export interface Task {
   id: string;
   title: string;
   description: string | null;
-  status: "TODO" | "IN_PROGRESS" | "COMPLETED";
+  status: "TODO" | "COMPLETED";
   priority: "LOW" | "MEDIUM" | "HIGH";
   createdAt: string;
   updatedAt: string;

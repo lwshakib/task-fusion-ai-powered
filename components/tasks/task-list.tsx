@@ -90,6 +90,48 @@ export function TaskList() {
     }
   };
 
+  const handleStatusToggle = async (task: Task, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const newStatus: "TODO" | "COMPLETED" =
+      task.status === "COMPLETED" ? "TODO" : "COMPLETED";
+
+    // Create optimistic task
+    const updatedTask = { ...task, status: newStatus };
+    const previousTasks = [...tasks];
+
+    // Optimistic update
+    setTasks(tasks.map((t) => (t.id === task.id ? updatedTask : t)));
+
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: task.title,
+          status: newStatus,
+          priority: task.priority, // Required by Zod schema if not provided? Actually PATCH usually allows partial, but our route uses full schema parse? No, let's check.
+          // The route uses `taskSchema.parse(body)`. It requires title, status, priority if they are not optional in schema.
+          // In route.ts: title is required. status/priority are enums. description is optional.
+          // So we should send full object just to be safe or update route to be partial.
+          // Since I can't easily change route logic efficiently without verify, I'll send full data I have.
+          description: task.description,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update status");
+
+      toast.success(
+        newStatus === "COMPLETED" ? "Task completed" : "Task uncompleted"
+      );
+    } catch (error) {
+      // Rollback
+      setTasks(previousTasks);
+      toast.error("Failed to update status");
+    }
+  };
+
   const handleEdit = (task: Task, e?: React.MouseEvent) => {
     e?.stopPropagation();
     setSelectedTask(task);
@@ -144,10 +186,7 @@ export function TaskList() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Add status toggle logic here if needed or keep existing behavior
-                    }}
+                    onClick={(e) => handleStatusToggle(task, e)}
                     className="shrink-0 text-muted-foreground hover:text-primary"
                   >
                     {task.status === "COMPLETED" ? (
@@ -234,7 +273,7 @@ export function TaskList() {
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent className="sm:max-w-md">
-          <SheetHeader>
+          <SheetHeader className="p-6">
             <SheetTitle>{viewTask?.title}</SheetTitle>
             <SheetDescription>
               Created on{" "}
@@ -242,7 +281,7 @@ export function TaskList() {
             </SheetDescription>
           </SheetHeader>
           {viewTask && (
-            <div className="mt-6 space-y-6">
+            <div className="p-6 pt-0 space-y-6">
               <div className="flex items-center gap-4">
                 <Badge
                   variant="outline"

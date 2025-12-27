@@ -140,7 +140,6 @@ export function TaskDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="TODO">To Do</SelectItem>
-                  <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
                   <SelectItem value="COMPLETED">Completed</SelectItem>
                 </SelectContent>
               </Select>

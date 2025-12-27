@@ -7,7 +7,7 @@ import { z } from "zod";
 const taskSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
-  status: z.enum(["TODO", "IN_PROGRESS", "COMPLETED"]),
+  status: z.enum(["TODO", "COMPLETED"]),
   priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
   dueDate: z.string().optional(), // We'll keep it as optional string for now as it's not in the main schema but in the UI code
 });
