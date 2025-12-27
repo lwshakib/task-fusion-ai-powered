@@ -27,30 +27,27 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
   createTasks: {
     description: "Create one or multiple new tasks.",
     parameters: z.object({
-      tasks: z.array(taskSchema),
+      tasks: z.array(taskSchema).describe("An array of tasks to create"),
     }),
     execute: async (args: any) => {
-      const { tasks } = args;
-      if (!tasks || !Array.isArray(tasks)) {
-        // If the AI accidentally sent a single task at the root, handle it gracefully
+      let tasks = args.tasks;
+
+      // Handle cases where the LLM might send a single task at the root or miss the 'tasks' key
+      if (!tasks) {
         if (args.title) {
-          const validatedTask = taskSchema.parse(args);
-          const createdTask = await prisma.task.create({
-            data: {
-              ...validatedTask,
-              userId,
-            },
-          });
-          return { success: true, tasks: [createdTask] };
+          tasks = [args];
+        } else if (Array.isArray(args)) {
+          tasks = args;
+        } else {
+          return {
+            success: false,
+            error: "Invalid input: 'tasks' array is required.",
+          };
         }
-        return {
-          success: false,
-          error: "Invalid input: 'tasks' array is required.",
-        };
       }
 
       const createdTasks = await Promise.all(
-        tasks.map((task: any) => {
+        tasks.map(async (task: any) => {
           const validatedTask = taskSchema.parse(task);
           return prisma.task.create({
             data: {
@@ -66,21 +63,46 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
   updateTasks: {
     description: "Update existing tasks by their IDs.",
     parameters: z.object({
-      updates: z.array(
-        z.object({
-          id: z.string().describe("The UUID of the task to update"),
-          updates: taskSchema.partial(),
-        })
-      ),
-    }),
-    execute: async ({ updates }: any) => {
-      const updatedTasks = await Promise.all(
-        updates.map(({ id, updates: taskUpdates }: any) =>
-          prisma.task.update({
-            where: { id, userId },
-            data: taskUpdates,
+      updates: z
+        .array(
+          z.object({
+            id: z.string().describe("The UUID of the task to update"),
+            updates: taskSchema.partial(),
           })
         )
+        .describe(
+          "An array of task updates, each containing an 'id' and the 'updates' object"
+        ),
+    }),
+    execute: async (args: any) => {
+      let updates =
+        args.updates || args.tasks || (Array.isArray(args) ? args : null);
+
+      if (!updates && args.id) {
+        updates = [args];
+      }
+
+      if (!updates || !Array.isArray(updates)) {
+        return {
+          success: false,
+          error: "Invalid input: 'updates' array is required with task IDs.",
+        };
+      }
+
+      const updatedTasks = await Promise.all(
+        updates.map(async (item: any) => {
+          const id = item.id;
+          // Support both { id, updates: { ... } } and { id, ...updates }
+          const taskUpdates = item.updates || { ...item };
+          if (taskUpdates.id) delete taskUpdates.id; // Remove ID from data if present
+
+          const validatedUpdates = taskSchema.partial().parse(taskUpdates);
+
+          return prisma.task.update({
+            where: { id, userId },
+            data: validatedUpdates,
+          });
+        })
       );
       return { success: true, tasks: updatedTasks };
     },
@@ -90,7 +112,20 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
     parameters: z.object({
       ids: z.array(z.string()).describe("List of task UUIDs to delete"),
     }),
-    execute: async ({ ids }: any) => {
+    execute: async (args: any) => {
+      let ids = args.ids || args.id || (Array.isArray(args) ? args : null);
+
+      if (typeof ids === "string") {
+        ids = [ids];
+      }
+
+      if (!ids || !Array.isArray(ids)) {
+        return {
+          success: false,
+          error: "Invalid input: 'ids' array is required.",
+        };
+      }
+
       await prisma.task.deleteMany({
         where: {
           id: { in: ids },

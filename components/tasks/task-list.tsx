@@ -21,6 +21,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { useTaskStore, Task } from "@/context";
 
@@ -29,6 +36,8 @@ export function TaskList() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | undefined>(undefined);
+  const [viewTask, setViewTask] = useState<Task | undefined>(undefined);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const fetchTasks = async () => {
     try {
@@ -49,7 +58,17 @@ export function TaskList() {
     fetchTasks();
   }, []);
 
-  const handleDelete = async (id: string) => {
+  useEffect(() => {
+    if (viewTask) {
+      const updatedTask = tasks.find((t) => t.id === viewTask.id);
+      if (updatedTask) {
+        setViewTask(updatedTask);
+      }
+    }
+  }, [tasks, viewTask]);
+
+  const handleDelete = async (id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     const previousTasks = [...tasks];
     try {
       // Optimistic update
@@ -61,6 +80,9 @@ export function TaskList() {
       if (!res.ok) throw new Error("Failed to delete task");
 
       toast.success("Task deleted");
+      if (viewTask?.id === id) {
+        setIsSheetOpen(false);
+      }
     } catch (error) {
       // Rollback
       setTasks(previousTasks);
@@ -68,7 +90,8 @@ export function TaskList() {
     }
   };
 
-  const handleEdit = (task: Task) => {
+  const handleEdit = (task: Task, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setSelectedTask(task);
     setIsDialogOpen(true);
   };
@@ -76,6 +99,11 @@ export function TaskList() {
   const handleCreate = () => {
     setSelectedTask(undefined);
     setIsDialogOpen(true);
+  };
+
+  const handleTaskClick = (task: Task) => {
+    setViewTask(task);
+    setIsSheetOpen(true);
   };
 
   return (
@@ -110,11 +138,16 @@ export function TaskList() {
               {tasks.map((task) => (
                 <div
                   key={task.id}
-                  className="group flex items-center gap-4 rounded-lg border p-3 hover:bg-muted/50 transition-colors"
+                  onClick={() => handleTaskClick(task)}
+                  className="group flex items-center gap-4 rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer"
                 >
                   <Button
                     variant="ghost"
                     size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Add status toggle logic here if needed or keep existing behavior
+                    }}
                     className="shrink-0 text-muted-foreground hover:text-primary"
                   >
                     {task.status === "COMPLETED" ? (
@@ -124,7 +157,7 @@ export function TaskList() {
                     )}
                   </Button>
 
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center gap-2 mb-1">
                       <span
                         className={cn(
@@ -138,7 +171,7 @@ export function TaskList() {
                       <Badge
                         variant="outline"
                         className={cn(
-                          "capitalize text-[10px] h-5 px-1.5 font-normal",
+                          "capitalize text-[10px] h-5 px-1.5 font-normal shrink-0",
                           task.priority === "HIGH"
                             ? "border-red-200 text-red-700 bg-red-50"
                             : task.priority === "MEDIUM"
@@ -150,8 +183,10 @@ export function TaskList() {
                       </Badge>
                     </div>
                     {task.description && (
-                      <p className="text-sm text-muted-foreground truncate">
-                        {task.description}
+                      <p className="text-sm text-muted-foreground">
+                        {task.description.length > 40
+                          ? `${task.description.slice(0, 40)}...`
+                          : task.description}
                       </p>
                     )}
                   </div>
@@ -169,19 +204,20 @@ export function TaskList() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          onClick={(e) => e.stopPropagation()}
                           className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <MoreHorizontalIcon className="size-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEdit(task)}>
+                        <DropdownMenuItem onClick={(e) => handleEdit(task, e)}>
                           <PencilIcon className="mr-2 size-4" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-red-600 focus:text-red-600"
-                          onClick={() => handleDelete(task.id)}
+                          onClick={(e) => handleDelete(task.id, e)}
                         >
                           <TrashIcon className="mr-2 size-4" />
                           Delete
@@ -195,6 +231,82 @@ export function TaskList() {
           )}
         </div>
       </ScrollArea>
+
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetContent className="sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>{viewTask?.title}</SheetTitle>
+            <SheetDescription>
+              Created on{" "}
+              {viewTask && new Date(viewTask.createdAt).toLocaleDateString()}
+            </SheetDescription>
+          </SheetHeader>
+          {viewTask && (
+            <div className="mt-6 space-y-6">
+              <div className="flex items-center gap-4">
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "capitalize",
+                    viewTask.priority === "HIGH"
+                      ? "border-red-200 text-red-700 bg-red-50"
+                      : viewTask.priority === "MEDIUM"
+                      ? "border-yellow-200 text-yellow-700 bg-yellow-50"
+                      : "border-green-200 text-green-700 bg-green-50"
+                  )}
+                >
+                  {viewTask.priority.toLowerCase()} Priority
+                </Badge>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  {viewTask.status === "COMPLETED" ? (
+                    <>
+                      <CheckCircle2Icon className="size-4 text-green-500" />
+                      Completed
+                    </>
+                  ) : (
+                    <>
+                      <CircleIcon className="size-4" />
+                      Pending
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {viewTask.description ? (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Description</h4>
+                  <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {viewTask.description}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground italic">
+                  No description provided.
+                </div>
+              )}
+
+              <div className="border-t pt-6 flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEdit(viewTask)}
+                >
+                  <PencilIcon className="mr-2 size-3.5" />
+                  Edit Task
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDelete(viewTask.id)}
+                >
+                  <TrashIcon className="mr-2 size-3.5" />
+                  Delete Task
+                </Button>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
       <TaskDialog
         open={isDialogOpen}

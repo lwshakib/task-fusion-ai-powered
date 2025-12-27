@@ -23,261 +23,353 @@ import {
   ToolInput,
   ToolOutput,
 } from "@/components/ai-elements/tool";
-import { MessageSquare } from "lucide-react";
+import {
+  Reasoning,
+  ReasoningContent,
+  ReasoningTrigger,
+} from "@/components/ai-elements/reasoning";
+import { Loader } from "@/components/ai-elements/loader";
+import { CheckCircle2, List, Trash2 } from "lucide-react";
 import { useTaskStore } from "@/context";
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
+import { MESSAGE_ROLE } from "@/generated/prisma/enums";
 
-const getToolDisplayName = (toolName: string, args: any, state: string) => {
+interface MessagePart {
+  type: string;
+  state?:
+    | "input-streaming"
+    | "input-available"
+    | "approval-requested"
+    | "output-available"
+    | "output-error";
+  input?: any;
+  output?: any;
+  errorText?: string;
+  reasoning?: string;
+  text?: string;
+  isStreaming?: boolean;
+  toolCallId?: string;
+}
+
+/**
+ * Custom renderer for task-related tool calls
+ */
+const TaskToolCall = ({ part }: { part: MessagePart }) => {
+  const toolName = part.type.replace("tool-", "");
+  const { state, input, output, errorText } = part;
   const isPending =
     state === "input-streaming" ||
     state === "input-available" ||
     state === "approval-requested";
+  const isSuccess = state === "output-available" && !errorText;
+  const isError = state === "output-error" || !!errorText;
 
-  switch (toolName) {
-    case "createTasks": {
-      const count = args?.tasks?.length || (args?.title ? 1 : 0);
-      if (count === 0)
-        return isPending ? "Preparing tasks..." : "Created tasks";
-      const action = isPending ? "Creating" : "Created";
-      return `${action} ${count} task${count !== 1 ? "s" : ""}`;
+  // Specific UI for createTasks as requested by the user
+  if (toolName === "createTasks") {
+    if (isPending) {
+      return (
+        <div className="flex items-center gap-2.5 px-3 py-1.5 my-2 rounded-full bg-primary/5 border border-primary/10 w-fit text-[13px] text-primary/80 animate-pulse">
+          <Loader size={14} className="text-primary" />
+          <span className="font-medium">Creating tasks...</span>
+        </div>
+      );
     }
-    case "updateTasks": {
-      const count = args?.updates?.length || 0;
-      const action = isPending ? "Updating" : "Updated";
-      return `${action} ${count} task${count !== 1 ? "s" : ""}`;
+    if (isSuccess) {
+      const createdTasks = output?.tasks || [];
+      return (
+        <div className="flex flex-col gap-2 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
+          <div className="flex items-center gap-2 text-[13px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50/50 dark:bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-100/50 dark:border-emerald-500/20 w-fit">
+            <CheckCircle2 className="size-3.5" />
+            <span>
+              Created task{createdTasks.length !== 1 ? "s" : ""} successfully
+            </span>
+          </div>
+          {createdTasks.length > 0 && (
+            <div className="flex flex-wrap gap-2 px-1">
+              {createdTasks.map((t: { id: string; title: string }) => (
+                <div
+                  key={t.id}
+                  className="text-[11px] font-medium bg-background border border-border shadow-sm px-2.5 py-0.5 rounded-full flex items-center gap-1.5"
+                >
+                  <div className="size-1 rounded-full bg-emerald-500" />
+                  {t.title}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
     }
-    case "deleteTasks": {
-      const count = args?.ids?.length || 0;
-      const action = isPending ? "Deleting" : "Deleted";
-      return `${action} ${count} task${count !== 1 ? "s" : ""}`;
-    }
-    case "getTasks":
-      return isPending ? "Fetching tasks..." : "Fetched tasks";
-    case "searchTasks":
-      return isPending
-        ? `Searching tasks for "${args?.query || "..."}"`
-        : `Searched tasks for "${args?.query}"`;
-    default:
-      return toolName;
   }
-};
 
-export function ChatInterface() {
-  const [input, setInput] = useState("");
-  const { addTasks, updateTasks, removeTasks } = useTaskStore();
-  const processedToolInvocationIds = useRef(new Set<string>());
+  // Specific UI for updateTasks
+  if (toolName === "updateTasks") {
+    if (isPending) {
+      return (
+        <div className="flex items-center gap-2.5 px-3 py-1.5 my-2 rounded-full bg-primary/5 border border-primary/10 w-fit text-[13px] text-primary/80 animate-pulse">
+          <Loader size={14} className="text-primary" />
+          <span className="font-medium">Updating tasks...</span>
+        </div>
+      );
+    }
+    if (isSuccess) {
+      const updatedTasks = output?.tasks || [];
+      return (
+        <div className="flex flex-col gap-2 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
+          <div className="flex items-center gap-2 text-[13px] text-blue-600 dark:text-blue-400 font-semibold bg-blue-50/50 dark:bg-blue-500/10 px-3 py-1 rounded-lg border border-blue-100/50 dark:border-blue-500/20 w-fit">
+            <CheckCircle2 className="size-3.5" />
+            <span>
+              Updated task{updatedTasks.length !== 1 ? "s" : ""} successfully
+            </span>
+          </div>
+          {updatedTasks.length > 0 && (
+            <div className="flex flex-wrap gap-2 px-1">
+              {updatedTasks.map((t: { id: string; title: string }) => (
+                <div
+                  key={t.id}
+                  className="text-[11px] font-medium bg-background border border-border shadow-sm px-2.5 py-0.5 rounded-full flex items-center gap-1.5"
+                >
+                  <div className="size-1 rounded-full bg-blue-500" />
+                  {t.title}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+  }
 
-  const { messages, sendMessage, status } = useChat();
+  // Specific UI for deleteTasks
+  if (toolName === "deleteTasks") {
+    if (isPending) {
+      return (
+        <div className="flex items-center gap-2.5 px-3 py-1.5 my-2 rounded-full bg-primary/5 border border-primary/10 w-fit text-[13px] text-primary/80 animate-pulse">
+          <Loader size={14} className="text-primary" />
+          <span className="font-medium">Deleting tasks...</span>
+        </div>
+      );
+    }
+    if (isSuccess) {
+      const deletedIds = output?.deletedIds || [];
+      return (
+        <div className="flex flex-col gap-2 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
+          <div className="flex items-center gap-2 text-[13px] text-destructive font-semibold bg-destructive/5 px-3 py-1 rounded-lg border border-destructive/10 w-fit">
+            <Trash2 className="size-3.5" />
+            <span>
+              Deleted {deletedIds.length} task
+              {deletedIds.length !== 1 ? "s" : ""} successfully
+            </span>
+          </div>
+        </div>
+      );
+    }
+  }
 
-  // Optimized Sync: Update store as soon as tool results appear in the stream
-  useEffect(() => {
-    messages.forEach((message: any) => {
-      // 1. Check toolInvocations (v3/v4 standard)
-      if (message.toolInvocations) {
-        message.toolInvocations.forEach((invocation: any) => {
-          if (invocation.state === "result") {
-            const { toolCallId, toolName, result } = invocation;
-            if (
-              toolCallId &&
-              !processedToolInvocationIds.current.has(toolCallId)
-            ) {
-              if (result && result.success) {
-                if (toolName === "createTasks") {
-                  addTasks(result.tasks);
-                } else if (toolName === "updateTasks") {
-                  updateTasks(
-                    result.tasks.map((t: any) => ({ id: t.id, updates: t }))
-                  );
-                } else if (toolName === "deleteTasks") {
-                  removeTasks(result.deletedIds);
-                }
-                processedToolInvocationIds.current.add(toolCallId);
-              }
-            }
-          }
-        });
-      }
-
-      // 2. Check parts (v4+ standard, and internal typed parts)
-      if (message.parts) {
-        message.parts.forEach((part: any) => {
-          // Check for various result part types
-          if (
-            part.type === "tool-result" ||
-            part.type === "tool-output-available"
-          ) {
-            const toolInvocation = part.toolInvocation || part;
-            const { toolCallId, toolName, result, output } = toolInvocation;
-            const actualResult = result || output;
-
-            if (
-              toolCallId &&
-              !processedToolInvocationIds.current.has(toolCallId)
-            ) {
-              if (actualResult && actualResult.success) {
-                if (toolName === "createTasks") {
-                  addTasks(actualResult.tasks);
-                } else if (toolName === "updateTasks") {
-                  updateTasks(
-                    actualResult.tasks.map((t: any) => ({
-                      id: t.id,
-                      updates: t,
-                    }))
-                  );
-                } else if (toolName === "deleteTasks") {
-                  removeTasks(actualResult.deletedIds);
-                }
-                processedToolInvocationIds.current.add(toolCallId);
-              }
-            }
-          }
-        });
-      }
-    });
-  }, [messages, addTasks, updateTasks, removeTasks]);
-
-  const handleSubmit = (message: { text: string; files: any[] }) => {
-    if (message.text.trim()) {
-      sendMessage({ text: message.text });
-      setInput("");
+  // Fallback to standard Tool UI for others
+  const getDisplayTitle = () => {
+    switch (toolName) {
+      case "updateTasks":
+        return "Updating Tasks";
+      case "deleteTasks":
+        return "Deleting Tasks";
+      case "getTasks":
+        return "Fetching Tasks";
+      case "searchTasks":
+        return `Searching for "${input?.query || "..."}"`;
+      default:
+        return toolName.replace(/([A-Z])/g, " $1").trim();
     }
   };
 
   return (
-    <div className="flex h-full flex-col bg-muted/5 relative">
-      <div className="flex-1 overflow-hidden relative">
-        <Conversation className="size-full">
-          <ConversationContent>
-            {messages.length === 0 ? (
-              <ConversationEmptyState
-                icon={<MessageSquare className="size-12" />}
-                title="Start a conversation"
-                description="Type a message below to begin chatting"
-              />
-            ) : (
-              messages.map((message) => (
-                <Message from={message.role} key={message.id}>
+    <Tool className="my-2" defaultOpen={isError}>
+      <ToolHeader
+        type={part.type as any}
+        state={state || "input-streaming"}
+        title={getDisplayTitle()}
+      />
+      <ToolContent>
+        <ToolInput input={input} />
+        <ToolOutput output={output} errorText={errorText} />
+      </ToolContent>
+    </Tool>
+  );
+};
+
+export function ChatInterface() {
+  const [inputValue, setInputValue] = useState("");
+  const { addTasks, updateTasks, removeTasks } = useTaskStore();
+  const processedToolInvocationIds = useRef(new Set<string>());
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { messages, sendMessage, status, setMessages } = useChat({
+    onFinish: async (data) => {
+      const body = {
+        parts: data.message.parts,
+        role: MESSAGE_ROLE.assistant,
+      };
+
+      await fetch("/api/message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+    },
+  });
+
+  // Fetch initial messages
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch("/api/message");
+        if (response.ok) {
+          const data = await response.json();
+          setMessages(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+      }
+    };
+    fetchMessages();
+  }, [setMessages]);
+
+  // Sync task store with tool outputs
+  useEffect(() => {
+    messages.forEach((message: any) => {
+      const parts = (message.parts as MessagePart[]) || [];
+      parts.forEach((part: MessagePart) => {
+        if (
+          part.type.startsWith("tool-") &&
+          part.state === "output-available" &&
+          part.toolCallId &&
+          !processedToolInvocationIds.current.has(part.toolCallId)
+        ) {
+          const toolName = part.type.replace("tool-", "");
+          const output = part.output;
+
+          if (output?.success) {
+            if (toolName === "createTasks" && output.tasks) {
+              addTasks(output.tasks);
+            } else if (toolName === "updateTasks" && output.tasks) {
+              updateTasks(
+                output.tasks.map((t: { id: string; [key: string]: any }) => ({
+                  id: t.id,
+                  updates: t,
+                }))
+              );
+            } else if (toolName === "deleteTasks" && output.deletedIds) {
+              removeTasks(output.deletedIds);
+            }
+          }
+          processedToolInvocationIds.current.add(part.toolCallId);
+        }
+      });
+    });
+  }, [messages, addTasks, updateTasks, removeTasks]);
+
+  // Handle scrolling
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, status]);
+
+  const handleSubmit = (message: { text: string; files: any[] }) => {
+    if (message.text.trim()) {
+      sendMessage({ text: message.text });
+      setInputValue("");
+    }
+  };
+
+  return (
+    <div className="flex h-full flex-col bg-background relative border-l shadow-inner overflow-hidden">
+      <Conversation className="flex-1 overflow-hidden">
+        <ConversationContent className="p-4 md:p-6 space-y-6">
+          {messages.length === 0 ? (
+            <ConversationEmptyState
+              icon={
+                <div className="p-4 rounded-full bg-primary/10 mb-4">
+                  <List className="size-10 text-primary/60" />
+                </div>
+              }
+              title="Task Assistant"
+              description="I'm here to help you manage your tasks. You can ask me to create, update, search or delete tasks."
+            />
+          ) : (
+            messages.map((message: any) => {
+              const parts = (message.parts as MessagePart[]) || [];
+
+              return (
+                <Message key={message.id} from={message.role}>
                   <MessageContent>
-                    {/* Render message text from content (legacy) or parts (modern) */}
-                    <MessageResponse>
-                      {(message as any).content ||
-                        (message as any).parts
-                          ?.filter((p: any) => p.type === "text")
-                          .map((p: any) => p.text)
-                          .join("")}
-                    </MessageResponse>
+                    {parts.map((part: MessagePart, i: number) => {
+                      const key = `${message.id}-${i}`;
 
-                    {/* Render tool invocations with broad fallback for all tool-related part types */}
-                    {(() => {
-                      const toolInvocations =
-                        (message as any).toolInvocations || [];
-                      const toolParts =
-                        (message as any).parts?.filter((p: any) =>
-                          p.type.startsWith("tool-")
-                        ) || [];
+                      if (part.type === "reasoning") {
+                        return (
+                          <Reasoning key={key} isStreaming={!!part.isStreaming}>
+                            <ReasoningTrigger />
+                            <ReasoningContent
+                              children={part.reasoning ?? part.text ?? ""}
+                            />
+                          </Reasoning>
+                        );
+                      }
 
-                      // Combine and ensure uniqueness by toolCallId if possible
-                      const uniqueTools = new Map();
-                      toolInvocations.forEach((ti: any) =>
-                        uniqueTools.set(ti.toolCallId || ti.id, ti)
-                      );
-                      toolParts.forEach((tp: any) => {
-                        const id =
-                          tp.toolCallId ||
-                          tp.toolInvocation?.toolCallId ||
-                          tp.id;
-                        uniqueTools.set(id, tp);
-                      });
+                      if (part.type === "text") {
+                        if (!part.text?.trim()) return null;
+                        return (
+                          <MessageResponse
+                            key={key}
+                            className="leading-relaxed"
+                          >
+                            {part.text}
+                          </MessageResponse>
+                        );
+                      }
 
-                      return Array.from(uniqueTools.values()).map(
-                        (tool: any, i: number) => {
-                          const toolInvocation = tool.toolInvocation || tool;
-                          const isResult =
-                            toolInvocation.state === "result" ||
-                            toolInvocation.type === "tool-result" ||
-                            toolInvocation.type === "tool-output-available" ||
-                            toolInvocation.type === "tool-output-error" ||
-                            !!toolInvocation.result ||
-                            !!toolInvocation.output ||
-                            !!toolInvocation.error ||
-                            !!toolInvocation.errorText;
+                      if (part.type.startsWith("tool-")) {
+                        return <TaskToolCall key={key} part={part} />;
+                      }
 
-                          const state =
-                            toolInvocation.state ||
-                            (toolInvocation.type === "tool-output-error"
-                              ? "output-error"
-                              : isResult
-                              ? "output-available"
-                              : "input-available");
-
-                          const args =
-                            toolInvocation.args || toolInvocation.input;
-                          const result =
-                            toolInvocation.result || toolInvocation.output;
-                          const error =
-                            toolInvocation.error ||
-                            toolInvocation.errorText ||
-                            result?.error;
-
-                          return (
-                            <Tool key={`${message.id}-tool-${i}`} defaultOpen>
-                              <ToolHeader
-                                state={state as any}
-                                title={getToolDisplayName(
-                                  toolInvocation.toolName,
-                                  isResult ? result : args,
-                                  state
-                                )}
-                                type={
-                                  (toolInvocation.type ||
-                                    (isResult
-                                      ? "tool-result"
-                                      : "tool-call")) as any
-                                }
-                              />
-                              <ToolContent>
-                                {!isResult || args ? (
-                                  <ToolInput input={args} />
-                                ) : null}
-                                {isResult && (
-                                  <ToolOutput
-                                    output={result}
-                                    errorText={error}
-                                  />
-                                )}
-                              </ToolContent>
-                            </Tool>
-                          );
-                        }
-                      );
-                    })()}
+                      return null;
+                    })}
                   </MessageContent>
                 </Message>
-              ))
-            )}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
-      </div>
+              );
+            })
+          )}
+          <div ref={scrollRef} className="h-4" />
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
 
-      <div className="p-4 border-t bg-background/50 backdrop-blur supports-backdrop-filter:bg-background/50">
-        <PromptInput
-          onSubmit={handleSubmit}
-          className="w-full max-w-2xl mx-auto relative"
-        >
-          <PromptInputTextarea
-            value={input}
-            placeholder="Type a message to create or manage tasks..."
-            onChange={(e) => setInput(e.currentTarget.value)}
-            className="pr-12"
-          />
-          <PromptInputSubmit
-            status={status === "streaming" ? "streaming" : "ready"}
-            disabled={!input.trim()}
-            className="absolute bottom-1 right-1"
-          />
-        </PromptInput>
+      <div className="p-4 border-t bg-background/95 backdrop-blur-md sticky bottom-0 z-10">
+        <div className="max-w-2xl mx-auto">
+          <PromptInput onSubmit={handleSubmit} className="relative">
+            <PromptInputTextarea
+              value={inputValue}
+              placeholder="How can I help with your tasks today?"
+              onChange={(e) => setInputValue(e.currentTarget.value)}
+              className="min-h-[56px] max-h-[200px] pr-14 py-3.5 rounded-[22px] border-border shadow-sm focus-visible:ring-1 focus-visible:ring-primary/30"
+            />
+            <div className="absolute bottom-1.5 right-1.5 flex items-center justify-center">
+              <PromptInputSubmit
+                status={
+                  status === "streaming" || status === "submitted"
+                    ? status
+                    : "ready"
+                }
+                disabled={!inputValue.trim() && status === "streaming"}
+                className="size-9 rounded-full shadow-md hover:shadow-lg transition-all duration-200"
+              />
+            </div>
+          </PromptInput>
+        </div>
       </div>
     </div>
   );

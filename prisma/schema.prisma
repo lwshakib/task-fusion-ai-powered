@@ -81,7 +81,6 @@ model Verification {
 
 enum TASK_STATUS {
   TODO
-  IN_PROGRESS
   COMPLETED
 }
 
