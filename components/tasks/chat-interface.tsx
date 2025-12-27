@@ -29,11 +29,22 @@ import {
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
 import { Loader } from "@/components/ai-elements/loader";
-import { AlertCircle, CheckCircle2, List, Search, Trash2 } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  List,
+  Search,
+  Trash2,
+  Sparkles,
+} from "lucide-react";
+import { PromptSuggestion } from "@/components/ai-elements/prompt-suggestion";
 import { useTaskStore } from "@/context";
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { MESSAGE_ROLE } from "@/generated/prisma/enums";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "../ui/skeleton";
 
 interface MessagePart {
   type: string;
@@ -315,8 +326,17 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
   );
 };
 
+const TASK_SUGGESTIONS = [
+  "Create a high priority task to finish the project report",
+  "List all my pending tasks",
+  "Mark my 'buy groceries' task as completed",
+  "Search for tasks related to documentation",
+  "Delete all tasks from last week",
+];
+
 export function ChatInterface() {
   const [inputValue, setInputValue] = useState("");
+  const [loading, setLoading] = useState(true);
   const { addTasks, updateTasks, removeTasks } = useTaskStore();
   const processedToolInvocationIds = useRef(new Set<string>());
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -336,12 +356,23 @@ export function ChatInterface() {
         body: JSON.stringify(body),
       });
     },
+    onError: (error) => {
+      toast.error("Failed to send message", {
+        description:
+          error.message || "An unexpected error occurred. Please try again.",
+      });
+    },
   });
+
+  const handleSuggestionClick = (text: string) => {
+    sendMessage({ text });
+  };
 
   // Fetch initial messages
   useEffect(() => {
     const fetchMessages = async () => {
       try {
+        setLoading(true);
         const response = await fetch("/api/message");
         if (response.ok) {
           const data = await response.json();
@@ -349,6 +380,8 @@ export function ChatInterface() {
         }
       } catch (error) {
         console.error("Failed to fetch messages:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchMessages();
@@ -414,16 +447,60 @@ export function ChatInterface() {
     <div className="flex h-full flex-col bg-background relative border-l shadow-inner overflow-hidden">
       <Conversation className="flex-1 overflow-hidden">
         <ConversationContent className="p-4 md:p-6 space-y-6">
-          {messages.length === 0 ? (
-            <ConversationEmptyState
-              icon={
-                <div className="p-4 rounded-full bg-primary/10 mb-4">
-                  <List className="size-10 text-primary/60" />
+          {loading ? (
+            <div className="flex flex-col gap-6">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "flex gap-3",
+                    i % 2 === 1 && "flex-row-reverse"
+                  )}
+                >
+                  <Skeleton className="h-8 w-8 rounded-full shrink-0" />
+                  <div
+                    className={cn(
+                      "space-y-2 flex-1 max-w-[80%]",
+                      i % 2 === 1 && "items-end flex flex-col"
+                    )}
+                  >
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
                 </div>
-              }
-              title="Task Assistant"
-              description="I'm here to help you manage your tasks. You can ask me to create, update, search or delete tasks."
-            />
+              ))}
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="flex flex-col h-full max-w-2xl mx-auto">
+              <ConversationEmptyState
+                icon={
+                  <div className="p-4 rounded-full bg-primary/10 mb-4">
+                    <List className="size-10 text-primary/60" />
+                  </div>
+                }
+                title="Task Assistant"
+                description="I'm here to help you manage your tasks. You can ask me to create, update, search or delete tasks."
+              />
+
+              <div className="mt-8 space-y-3 px-4">
+                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  <Sparkles className="size-3 text-primary/60" />
+                  Try asking
+                </div>
+                <div className="grid gap-2">
+                  {TASK_SUGGESTIONS.map((suggestion) => (
+                    <PromptSuggestion
+                      key={suggestion}
+                      highlight={inputValue}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all duration-200"
+                    >
+                      {suggestion}
+                    </PromptSuggestion>
+                  ))}
+                </div>
+              </div>
+            </div>
           ) : (
             messages.map((message: any) => {
               const parts = (message.parts as MessagePart[]) || [];
@@ -473,14 +550,18 @@ export function ChatInterface() {
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="p-4 border-t bg-background/95 backdrop-blur-md sticky bottom-0 z-10">
+      <div className="p-4 sticky bottom-0 z-10">
         <div className="max-w-2xl mx-auto">
-          <PromptInput onSubmit={handleSubmit} className="relative">
+          <PromptInput
+            onSubmit={handleSubmit}
+            onError={(err) => toast.error(err.message)}
+            className="rounded-[22px] border-border shadow-sm focus-within:ring-1 focus-within:ring-primary/30 transition-all px-1"
+          >
             <PromptInputTextarea
               value={inputValue}
               placeholder="How can I help with your tasks today?"
               onChange={(e) => setInputValue(e.currentTarget.value)}
-              className="min-h-[56px] max-h-[200px] pr-14 py-3.5 rounded-[22px] border-border shadow-sm focus-visible:ring-1 focus-visible:ring-primary/30"
+              className="min-h-[56px] max-h-[200px] pr-14 py-3.5"
             />
             <div className="absolute bottom-1.5 right-1.5 flex items-center justify-center">
               <PromptInputSubmit

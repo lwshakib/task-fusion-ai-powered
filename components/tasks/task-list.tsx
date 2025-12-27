@@ -12,6 +12,7 @@ import {
   ArrowUpDownIcon,
   SortAscIcon,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -210,8 +211,20 @@ export function TaskList() {
       <ScrollArea className="flex-1">
         <div className="p-6">
           {loading ? (
-            <div className="flex items-center justify-center p-8 text-muted-foreground">
-              Loading tasks...
+            <div className="space-y-1">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 rounded-lg border p-3"
+                >
+                  <Skeleton className="h-5 w-5 rounded-full shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                  <Skeleton className="h-4 w-20 shrink-0" />
+                </div>
+              ))}
             </div>
           ) : tasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-muted-foreground border border-dashed rounded-lg bg-muted/20">

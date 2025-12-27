@@ -433,7 +433,7 @@ export type PromptInputMessage = {
 };
 
 export type PromptInputProps = Omit<
-  HTMLAttributes<HTMLFormElement>,
+  HTMLAttributes<HTMLDivElement>,
   "onSubmit" | "onError"
 > & {
   accept?: string; // e.g., "image/*" or leave undefined for any
@@ -611,7 +611,7 @@ export const PromptInput = ({
   useEffect(() => {
     const form = formRef.current;
     if (!form) return;
-    if (globalDrop) return // when global drop is on, let the document-level handler own drops
+    if (globalDrop) return; // when global drop is on, let the document-level handler own drops
 
     const onDragOver = (e: DragEvent) => {
       if (e.dataTransfer?.types?.includes("Files")) {
@@ -783,13 +783,10 @@ export const PromptInput = ({
         title="Upload files"
         type="file"
       />
-      <form
-        className={cn("w-full", className)}
-        onSubmit={handleSubmit}
-        ref={formRef}
-        {...props}
-      >
-        <InputGroup className="overflow-hidden">{children}</InputGroup>
+      <form onSubmit={handleSubmit} ref={formRef} className="w-full">
+        <InputGroup className={cn("overflow-hidden", className)} {...props}>
+          {children}
+        </InputGroup>
       </form>
     </>
   );
