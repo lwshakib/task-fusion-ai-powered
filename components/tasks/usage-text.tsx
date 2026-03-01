@@ -12,12 +12,13 @@ export function UsageText() {
         const data = await res.json();
         setRemaining(Math.max(0, 10 - (data.count || 0)));
       }
-    } catch (err) {
-      console.error('Failed to fetch usage:', err);
+    } catch {
+      console.error('Failed to fetch usage');
     }
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUsage();
     
     const handleMessageSent = () => {

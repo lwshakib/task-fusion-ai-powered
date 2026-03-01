@@ -100,6 +100,20 @@ const addDefaultVariants = (variants: Variants) => ({
   visible: { ...defaultItemVariants.visible, ...variants.visible },
 });
 
+const MOTION_TAGS: Record<string, React.ElementType> = {
+  div: motion.div,
+  p: motion.p,
+  span: motion.span,
+  ul: motion.ul,
+  li: motion.li,
+  h1: motion.h1,
+  h2: motion.h2,
+  h3: motion.h3,
+  h4: motion.h4,
+  h5: motion.h5,
+  h6: motion.h6,
+};
+
 function AnimatedGroup({
   children,
   className,
@@ -115,8 +129,10 @@ function AnimatedGroup({
   const containerVariants = variants?.container || selectedVariants.container;
   const itemVariants = variants?.item || selectedVariants.item;
 
-  const MotionComponent = React.useMemo(() => motion.create(as), [as]);
-  const MotionChild = React.useMemo(() => motion.create(asChild), [asChild]);
+  const MotionComponent =
+    MOTION_TAGS[as as keyof typeof MOTION_TAGS] || motion.div;
+  const MotionChild =
+    MOTION_TAGS[asChild as keyof typeof MOTION_TAGS] || motion.div;
 
   return (
     <MotionComponent

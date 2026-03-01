@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 import type { FileUIPart, UIMessage } from 'ai';
 import {
   ChevronLeftIcon,
@@ -17,7 +18,7 @@ import {
   XIcon,
 } from 'lucide-react';
 import type { ComponentProps, HTMLAttributes, ReactElement } from 'react';
-import { createContext, memo, useContext, useEffect, useState } from 'react';
+import { Children, createContext, memo, useContext, useEffect, useMemo, useState } from 'react';
 import { Streamdown } from 'streamdown';
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
@@ -185,7 +186,10 @@ export const MessageBranchContent = ({
   ...props
 }: MessageBranchContentProps) => {
   const { currentBranch, setBranches, branches } = useMessageBranch();
-  const childrenArray = Array.isArray(children) ? children : [children];
+  const childrenArray = useMemo(
+    () => Children.toArray(children) as ReactElement[],
+    [children],
+  );
 
   // Use useEffect to update branches when they change
   useEffect(() => {
@@ -214,9 +218,10 @@ export type MessageBranchSelectorProps = HTMLAttributes<HTMLDivElement> & {
 
 export const MessageBranchSelector = ({
   className,
-  from,
+  from: _from,
   ...props
 }: MessageBranchSelectorProps) => {
+  void _from;
   const { totalBranches } = useMessageBranch();
 
   // Don't render if there's only one branch
@@ -226,7 +231,10 @@ export const MessageBranchSelector = ({
 
   return (
     <ButtonGroup
-      className="[&>*:not(:first-child)]:rounded-l-md [&>*:not(:last-child)]:rounded-r-md"
+      className={cn(
+        '[&>*:not(:first-child)]:rounded-l-md [&>*:not(:last-child)]:rounded-r-md',
+        className,
+      )}
       orientation="horizontal"
       {...props}
     />
@@ -260,7 +268,6 @@ export type MessageBranchNextProps = ComponentProps<typeof Button>;
 
 export const MessageBranchNext = ({
   children,
-  className,
   ...props
 }: MessageBranchNextProps) => {
   const { goToNext, totalBranches } = useMessageBranch();
@@ -346,7 +353,7 @@ export function MessageAttachment({
     >
       {isImage ? (
         <>
-          <img
+          <Image
             alt={filename || 'attachment'}
             className="size-full object-cover"
             height={100}

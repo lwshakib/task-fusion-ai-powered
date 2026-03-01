@@ -26,6 +26,7 @@ export async function streamText(messages: Messages, userId: string) {
   return _streamText({
     model: GeminiModel(),
     system: SYSTEM_PROMPT,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     messages: await convertToModelMessages(messages as any),
     maxOutputTokens: 65535,
     toolChoice: 'auto',

@@ -5,21 +5,23 @@ import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 
 function VerifyEmailContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('Verifying your email address...');
-
   const token = searchParams.get('token');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    token ? 'loading' : 'error',
+  );
+  const [message, setMessage] = useState(
+    token
+      ? 'Verifying your email address...'
+      : 'Invalid or missing verification token.',
+  );
 
   useEffect(() => {
     if (!token) {
-      setStatus('error');
-      setMessage('Invalid or missing verification token.');
       return;
     }
 
@@ -39,7 +41,7 @@ function VerifyEmailContent() {
 
         setStatus('success');
         setMessage('Your email has been successfully verified.');
-      } catch (error) {
+      } catch {
         setStatus('error');
         setMessage('An unexpected error occurred during verification.');
       }

@@ -7,12 +7,10 @@ import { Label } from '@/components/ui/label';
 import { authClient } from '@/lib/auth-client';
 import { Loader2, Mail } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function SignUp() {
-  const router = useRouter();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -40,7 +38,7 @@ export default function SignUp() {
 
       setIsEmailSent(true);
       toast.success('Verification email sent!');
-    } catch (error) {
+    } catch {
       toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
@@ -54,7 +52,7 @@ export default function SignUp() {
         provider: 'google',
         callbackURL: '/tasks',
       });
-    } catch (error) {
+    } catch {
       toast.error('Failed to sign up with Google');
       setIsGoogleLoading(false);
     }
@@ -71,7 +69,7 @@ export default function SignUp() {
           </div>
           <h1 className="text-xl font-semibold mb-2">Check your email</h1>
           <p className="text-sm text-muted-foreground mb-6">
-            We've sent a verification link to <span className="font-medium text-foreground">{email}</span>. You must verify your email before you can log in.
+            We&apos;ve sent a verification link to <span className="font-medium text-foreground">{email}</span>. You must verify your email before you can log in.
           </p>
           <div className="space-y-3">
             <Button asChild className="w-full">

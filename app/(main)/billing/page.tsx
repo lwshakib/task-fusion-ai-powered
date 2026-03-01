@@ -1,6 +1,6 @@
 'use client';
 
-import { Logo } from '@/components/logo';
+
 import { ModeToggle } from '@/components/mode-toggle';
 import { UserNav } from '@/components/tasks/user-nav';
 import { authClient } from '@/lib/auth-client';

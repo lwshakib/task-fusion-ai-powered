@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { TextEffect } from '@/components/ui/text-effect';
-import { AnimatedGroup } from '@/components/ui/animated-group';
 import { CheckCircle2, Terminal, Cpu, Sparkles } from 'lucide-react';
 
 const steps = [

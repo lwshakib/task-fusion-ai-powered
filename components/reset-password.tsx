@@ -56,7 +56,7 @@ function ResetPasswordForm() {
 
       setIsSuccess(true);
       toast.success('Password reset successfully!');
-    } catch (error) {
+    } catch {
       toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);

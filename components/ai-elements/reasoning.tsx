@@ -69,13 +69,14 @@ export const Reasoning = memo(
     useEffect(() => {
       if (isStreaming) {
         if (startTime === null) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setStartTime(Date.now());
         }
       } else if (startTime !== null) {
         setDuration(Math.ceil((Date.now() - startTime) / MS_IN_S));
         setStartTime(null);
       }
-    }, [isStreaming, startTime, setDuration]);
+    }, [isStreaming, startTime, setDuration, setStartTime]);
 
     // Auto-open when streaming starts, auto-close when streaming ends (once only)
     useEffect(() => {

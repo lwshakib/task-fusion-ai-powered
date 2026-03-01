@@ -18,6 +18,7 @@ export const taskSchema = z.object({
 });
 
 // Tool Category Factory Type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK tool registries use any for generality
 type ToolCategoryFactory = (userId: string) => Record<string, any>;
 
 /**
@@ -29,15 +30,16 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
     parameters: z.object({
       tasks: z.array(taskSchema).describe('An array of tasks to create'),
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     execute: async (args: any) => {
-      let tasks = args.tasks;
+      let tasks = args.tasks as unknown[];
 
       // Handle cases where the LLM might send a single task at the root or miss the 'tasks' key
       if (!tasks) {
         if (args.title) {
-          tasks = [args];
+          tasks = [args] as unknown[];
         } else if (Array.isArray(args)) {
-          tasks = args;
+          tasks = args as unknown[];
         } else {
           return {
             success: false,
@@ -47,6 +49,7 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
       }
 
       const createdTasks = await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         tasks.map(async (task: any) => {
           const validatedTask = taskSchema.parse(task);
           return prisma.task.create({
@@ -74,12 +77,13 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
           "An array of task updates, each containing an 'id' and the 'updates' object",
         ),
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     execute: async (args: any) => {
       let updates =
-        args.updates || args.tasks || (Array.isArray(args) ? args : null);
+        (args.updates || args.tasks || (Array.isArray(args) ? args : null)) as unknown[] | null;
 
       if (!updates && args.id) {
-        updates = [args];
+        updates = [args] as unknown[];
       }
 
       if (!updates || !Array.isArray(updates)) {
@@ -90,19 +94,21 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
       }
 
       const updatedTasks = await Promise.all(
-        updates.map(async (item: any) => {
-          const id = item.id;
-          // Support both { id, updates: { ... } } and { id, ...updates }
-          const taskUpdates = item.updates || { ...item };
-          if (taskUpdates.id) delete taskUpdates.id; // Remove ID from data if present
+        (updates as Array<{ id: string; updates?: Partial<z.infer<typeof taskSchema>> } | z.infer<typeof taskSchema>>).map(async (item) => {
+            const id = (item as { id: string }).id;
+            // Support both { id, updates: { ... } } and { id, ...item }
+            const taskUpdates = (item as { updates?: Partial<z.infer<typeof taskSchema>> }).updates || { ...item };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((taskUpdates as any).id) delete (taskUpdates as any).id;
 
-          const validatedUpdates = taskSchema.partial().parse(taskUpdates);
+            const validatedUpdates = taskSchema.partial().parse(taskUpdates);
 
-          return prisma.task.update({
-            where: { id, userId },
-            data: validatedUpdates,
-          });
-        }),
+            return prisma.task.update({
+              where: { id, userId },
+              data: validatedUpdates,
+            });
+          },
+        ),
       );
       return { success: true, tasks: updatedTasks };
     },
@@ -112,6 +118,7 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
     parameters: z.object({
       ids: z.array(z.string()).describe('List of task UUIDs to delete'),
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     execute: async (args: any) => {
       let ids =
         args.ids ||
@@ -120,7 +127,7 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
         (Array.isArray(args) ? args : null);
 
       if (typeof ids === 'string') {
-        ids = [ids];
+        ids = [ids] as string[];
       }
 
       if (!ids || !Array.isArray(ids)) {
@@ -157,6 +164,7 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
         .string()
         .describe('Text query to search for in titles and descriptions'),
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     execute: async ({ query }: any) => {
       const tasks = await prisma.task.findMany({
         where: {
@@ -189,6 +197,7 @@ export const getAllTools = (userId: string) => {
       ...acc,
       ...getTools(userId),
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     {} as Record<string, any>,
   );
 };

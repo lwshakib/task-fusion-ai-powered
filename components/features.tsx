@@ -1,12 +1,11 @@
 'use client';
 
-import React from 'react';
+
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { TextEffect } from '@/components/ui/text-effect';
 import { Brain, Zap, Layers, MessageSquare, Shield, Globe } from 'lucide-react';
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,

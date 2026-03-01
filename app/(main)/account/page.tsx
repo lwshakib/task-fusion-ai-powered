@@ -44,7 +44,7 @@ export default function AccountPage() {
   const { data: session, isPending: isSessionPending } = authClient.useSession();
   const [isUpdatingName, setIsUpdatingName] = useState(false);
   const [userName, setUserName] = useState('');
-  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<{ token: string; userAgent?: string; updatedAt: string }[]>([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
   const router = useRouter();
 
@@ -57,16 +57,17 @@ export default function AccountPage() {
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        if (typeof (authClient as any).listSessions === 'function') {
-          const res = await (authClient as any).listSessions();
+        if (typeof (authClient as unknown as Record<string, unknown>).listSessions === 'function') {
+          const res = await (authClient as unknown as { listSessions: () => Promise<unknown> }).listSessions();
           // better-auth returns { data: [...] } — extract the array safely
-          const list = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
-          setSessions(list);
+          const resObj = res as Record<string, unknown> | undefined;
+          const list = Array.isArray(res) ? res : Array.isArray(resObj?.data) ? resObj.data : [];
+          setSessions(list as { token: string; userAgent?: string; updatedAt: string }[]);
         } else {
           // Fallback: show current session only
           setSessions([
             {
-              token: session?.session.token,
+              token: session?.session.token ?? '',
               userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'Current Session',
               updatedAt: new Date().toISOString(),
             },
@@ -102,7 +103,7 @@ export default function AccountPage() {
 
   const handleRevokeSession = async (token: string) => {
     try {
-      await (authClient as any).revokeSession({ token });
+      await (authClient as unknown as { revokeSession: (opts: { token: string }) => Promise<void> }).revokeSession({ token });
       setSessions((prev) => prev.filter((s) => s.token !== token));
       toast.success('Session revoked');
     } catch (err) {

@@ -12,7 +12,7 @@ const taskSchema = z.object({
   dueDate: z.string().optional(), // We'll keep it as optional string for now as it's not in the main schema but in the UI code
 });
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),

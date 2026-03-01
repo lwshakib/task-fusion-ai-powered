@@ -25,7 +25,8 @@ import { toast } from 'sonner';
 interface TaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  task?: any; // Using any loosely here, but should ideally be Task type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- task shape is dynamic from API
+  task?: any;
   onSuccess: () => void;
 }
 
@@ -84,7 +85,7 @@ export function TaskDialog({
       toast.success(task ? 'Task updated' : 'Task created');
       onSuccess();
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       toast.error('Failed to save task');
     } finally {
       setLoading(false);

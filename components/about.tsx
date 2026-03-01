@@ -2,8 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { TextEffect } from '@/components/ui/text-effect';
-import { AnimatedGroup } from '@/components/ui/animated-group';
 import { Users, Star, Trophy, Target } from 'lucide-react';
 
 const stats = [
@@ -27,7 +25,7 @@ export const AboutSection = () => {
             </p>
             <p className="text-lg text-muted-foreground">
               Our AI-first approach ensures that you spend less time organizing
-              and more time creating. We're on a mission to reclaim 1 billion
+              and more time creating. We&apos;re on a mission to reclaim 1 billion
               hours of human potential by 2030.
             </p>
           </div>

@@ -55,7 +55,9 @@ interface MessagePart {
     | 'approval-requested'
     | 'output-available'
     | 'output-error';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK tool parts have dynamic shapes
   input?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK tool parts have dynamic shapes
   output?: any;
   errorText?: string;
   reasoning?: string;
@@ -264,8 +266,8 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
           <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium bg-muted/30 px-3 py-1 rounded-lg border border-muted-foreground/10 w-fit">
             <Search className="size-3.5" />
             <span>
-              Found {tasks.length} result{tasks.length !== 1 ? 's' : ''} for "
-              {input?.query || '...'}"
+              Found {tasks.length} result{tasks.length !== 1 ? 's' : ''} for &quot;
+              {(input as Record<string, string>)?.query || '...'}&quot;
             </span>
           </div>
         </div>
@@ -306,7 +308,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
       case 'getTasks':
         return 'Fetching Tasks';
       case 'searchTasks':
-        return `Searching for "${input?.query || '...'}"`;
+        return `Searching for "${(input as Record<string, string>)?.query || '...'}"`;
       default:
         return toolName.replace(/([A-Z])/g, ' $1').trim();
     }
@@ -315,7 +317,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
   return (
     <Tool className="my-2" defaultOpen={isError}>
       <ToolHeader
-        type={part.type as any}
+        type={part.type as 'tool-createTasks'}
         state={state || 'input-streaming'}
         title={getDisplayTitle()}
       />
@@ -407,6 +409,7 @@ export function ChatInterface() {
 
   // Sync task store with tool outputs
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- UIMessage parts have dynamic shapes from AI SDK
     messages.forEach((message: any) => {
       const parts = (message.parts as MessagePart[]) || [];
       parts.forEach((part: MessagePart) => {
@@ -424,7 +427,7 @@ export function ChatInterface() {
               addTasks(output.tasks);
             } else if (toolName === 'updateTasks' && output.tasks) {
               updateTasks(
-                output.tasks.map((t: { id: string; [key: string]: any }) => ({
+                output.tasks.map((t: { id: string; [key: string]: unknown }) => ({
                   id: t.id,
                   updates: t,
                 })),
@@ -446,15 +449,18 @@ export function ChatInterface() {
     }
   }, [messages, status]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PromptInput onSubmit provides any[] for files
   const handleSubmit = async (message: { text: string; files: any[] }) => {
     if (message.text.trim()) {
       try {
         await sendMessage({ text: message.text });
         setInputValue('');
         window.dispatchEvent(new CustomEvent('message-sent'));
-      } catch (err: any) {
-        // useChat's onError usually handles this, but we catch just in case
-        console.error('Chat error:', err);
+      } catch (err: unknown) {
+        // useChat's onError usually handles this
+        if (err instanceof Error) {
+          console.error('Chat error:', err.message);
+        }
       }
     }
   };
@@ -518,6 +524,7 @@ export function ChatInterface() {
               </div>
             </div>
           ) : (
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- UIMessage from AI SDK
             messages.map((message: any) => {
               const parts = (message.parts as MessagePart[]) || [];
 
@@ -531,9 +538,9 @@ export function ChatInterface() {
                         return (
                           <Reasoning key={key} isStreaming={!!part.isStreaming}>
                             <ReasoningTrigger />
-                            <ReasoningContent
-                              children={part.reasoning ?? part.text ?? ''}
-                            />
+                            <ReasoningContent>
+                              {part.reasoning ?? part.text ?? ''}
+                            </ReasoningContent>
                           </Reasoning>
                         );
                       }

@@ -32,7 +32,7 @@ export default function ForgotPassword() {
 
       setIsEmailSent(true);
       toast.success('Reset link sent to your email');
-    } catch (error) {
+    } catch {
       toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
@@ -51,7 +51,7 @@ export default function ForgotPassword() {
             </div>
             <h1 className="text-xl font-semibold mb-2">Check your email</h1>
             <p className="text-sm text-muted-foreground mb-6">
-              We've sent a password reset link to <span className="font-medium text-foreground">{email}</span>.
+              We&apos;ve sent a password reset link to <span className="font-medium text-foreground">{email}</span>.
             </p>
             <div className="space-y-3">
               <Button asChild className="w-full">
@@ -84,7 +84,7 @@ export default function ForgotPassword() {
               Forgot Password?
             </h1>
             <p className="text-sm text-muted-foreground">
-              Enter your email and we'll send you a link to reset your password.
+              Enter your email and we&apos;ll send you a link to reset your password.
             </p>
           </div>
 

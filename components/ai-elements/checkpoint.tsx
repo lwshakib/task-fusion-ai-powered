@@ -34,10 +34,10 @@ export type CheckpointIconProps = LucideProps;
 
 export const CheckpointIcon = ({
   className,
-  children,
+  children: _children,
   ...props
 }: CheckpointIconProps) =>
-  children ?? (
+  _children ?? (
     <BookmarkIcon className={cn('size-4 shrink-0', className)} {...props} />
   );
 
@@ -56,7 +56,13 @@ export const CheckpointTrigger = ({
   tooltip ? (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button size={size} type="button" variant={variant} {...props}>
+        <Button
+          className={className}
+          size={size}
+          type="button"
+          variant={variant}
+          {...props}
+        >
           {children}
         </Button>
       </TooltipTrigger>
@@ -65,7 +71,13 @@ export const CheckpointTrigger = ({
       </TooltipContent>
     </Tooltip>
   ) : (
-    <Button size={size} type="button" variant={variant} {...props}>
+    <Button
+      className={className}
+      size={size}
+      type="button"
+      variant={variant}
+      {...props}
+    >
       {children}
     </Button>
   );

@@ -7,6 +7,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { ChevronDownIcon, PaperclipIcon } from 'lucide-react';
 import type { ComponentProps } from 'react';
@@ -149,16 +150,25 @@ export type QueueItemImageProps = ComponentProps<'img'>;
 
 export const QueueItemImage = ({
   className,
+  src,
+  alt = '',
+  width: _w,
+  height: _h,
   ...props
-}: QueueItemImageProps) => (
-  <img
-    alt=""
-    className={cn('h-8 w-8 rounded border object-cover', className)}
-    height={32}
-    width={32}
-    {...props}
-  />
-);
+}: { className?: string; src: string; alt?: string } & Record<string, unknown>) => {
+  void _w;
+  void _h;
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      className={cn('h-8 w-8 rounded border object-cover', className)}
+      height={32}
+      width={32}
+      {...props}
+    />
+  );
+};
 
 export type QueueItemFileProps = ComponentProps<'span'>;
 

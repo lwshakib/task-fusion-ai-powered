@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { TaskDialog } from './task-dialog';
 import {
   DropdownMenu,
@@ -41,26 +41,26 @@ export function TaskList() {
   const [selectedTask, setSelectedTask] = useState<Task | undefined>(undefined);
   const [viewTask, setViewTask] = useState<Task | undefined>(undefined);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [sortBy, setBy] = useState<'priority' | 'date'>('priority');
+  const [sortBy, setSortBy] = useState<'priority' | 'date'>('priority');
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/tasks');
       if (!res.ok) throw new Error('Failed to fetch tasks');
       const data = await res.json();
       setTasks(data);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
+    } catch {
+      console.error('Error fetching tasks');
       toast.error('Failed to load tasks');
     } finally {
       setLoading(false);
     }
-  };
+  }, [setTasks]);
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [fetchTasks]);
 
   useEffect(() => {
     if (viewTask) {
@@ -69,7 +69,7 @@ export function TaskList() {
         setViewTask(updatedTask);
       }
     }
-  }, [tasks, viewTask]);
+  }, [tasks, viewTask, setViewTask]);
 
   const sortedTasks = [...tasks].sort((a, b) => {
     // 1. Status: COMPLETED tasks at the bottom (Universal Rule)
@@ -109,7 +109,7 @@ export function TaskList() {
       if (viewTask?.id === id) {
         setIsSheetOpen(false);
       }
-    } catch (error) {
+    } catch {
       // Rollback
       setTasks(previousTasks);
       toast.error('Failed to delete task');
@@ -151,7 +151,7 @@ export function TaskList() {
       toast.success(
         newStatus === 'COMPLETED' ? 'Task completed' : 'Task uncompleted',
       );
-    } catch (error) {
+    } catch {
       // Rollback
       setTasks(previousTasks);
       toast.error('Failed to update status');
@@ -192,11 +192,11 @@ export function TaskList() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onClick={() => setBy('priority')}>
+              <DropdownMenuItem onClick={() => setSortBy('priority')}>
                 <SortAscIcon className="mr-2 size-4" />
                 Sort by Priority
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setBy('date')}>
+              <DropdownMenuItem onClick={() => setSortBy('date')}>
                 <CalendarIcon className="mr-2 size-4" />
                 Sort by Date
               </DropdownMenuItem>
