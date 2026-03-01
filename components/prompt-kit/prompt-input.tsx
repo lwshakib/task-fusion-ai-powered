@@ -188,7 +188,7 @@ function PromptInputTextarea({
     } else {
       el.style.height = `min(${el.scrollHeight}px, ${maxHeight})`;
     }
-  }, [value, maxHeight, disableAutosize]);
+  }, [value, maxHeight, disableAutosize, textareaRef]);
 
   /**
    * Change Handler: Updates state and recalculates height.
