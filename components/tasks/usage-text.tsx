@@ -31,8 +31,8 @@ export function UsageText() {
    * Listens for the custom 'message-sent' event to trigger a re-fetch.
    */
   useEffect(() => {
-    // Initial fetch on component mount
-    fetchUsage();
+    // Initial fetch on component mount - defer to avoid synchronous setState warning
+    void Promise.resolve().then(fetchUsage);
 
     const handleMessageSent = () => {
       // Add a small delay (500ms) to ensure the server-side DB increment
@@ -42,7 +42,9 @@ export function UsageText() {
 
     // This event is dispatched by ChatInterface when the user submits a prompt
     window.addEventListener('message-sent', handleMessageSent);
-    return () => window.removeEventListener('message-sent', handleMessageSent);
+    return () => {
+      window.removeEventListener('message-sent', handleMessageSent);
+    };
   }, [fetchUsage]);
 
   // Don't render anything until the initial count is fetched
