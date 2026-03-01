@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 export async function GET() {
   try {
@@ -10,7 +10,7 @@ export async function GET() {
     });
 
     if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const messages = await prisma.message.findMany({
@@ -18,16 +18,16 @@ export async function GET() {
         userId: session.user.id,
       },
       orderBy: {
-        createdAt: "asc",
+        createdAt: 'asc',
       },
     });
 
     return NextResponse.json(messages);
   } catch (error) {
-    console.error("[MESSAGES_GET]", error);
+    console.error('[MESSAGES_GET]', error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
+      { error: 'Internal Server Error' },
+      { status: 500 },
     );
   }
 }
@@ -39,15 +39,15 @@ export async function POST(req: Request) {
     });
 
     if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const { parts, role } = await req.json();
 
     if (!parts || !role) {
       return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
+        { error: 'Missing required fields' },
+        { status: 400 },
       );
     }
 
@@ -61,10 +61,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json(message);
   } catch (error) {
-    console.error("[MESSAGE_POST]", error);
+    console.error('[MESSAGE_POST]', error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
+      { error: 'Internal Server Error' },
+      { status: 500 },
     );
   }
 }
@@ -75,7 +75,7 @@ export async function DELETE() {
     });
 
     if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     await prisma.message.deleteMany({
@@ -86,10 +86,10 @@ export async function DELETE() {
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.error("[MESSAGES_DELETE]", error);
+    console.error('[MESSAGES_DELETE]', error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
+      { error: 'Internal Server Error' },
+      { status: 500 },
     );
   }
 }

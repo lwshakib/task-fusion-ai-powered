@@ -1,20 +1,20 @@
-import { z } from "zod";
-import prisma from "@/lib/prisma";
+import { z } from 'zod';
+import prisma from '@/lib/prisma';
 
 export const taskSchema = z.object({
-  title: z.string().describe("The title of the task"),
+  title: z.string().describe('The title of the task'),
   description: z
     .string()
     .optional()
-    .describe("A brief description of the task"),
+    .describe('A brief description of the task'),
   status: z
-    .enum(["TODO", "COMPLETED"])
-    .default("TODO")
-    .describe("The current status of the task"),
+    .enum(['TODO', 'COMPLETED'])
+    .default('TODO')
+    .describe('The current status of the task'),
   priority: z
-    .enum(["LOW", "MEDIUM", "HIGH"])
-    .default("MEDIUM")
-    .describe("The priority level of the task"),
+    .enum(['LOW', 'MEDIUM', 'HIGH'])
+    .default('MEDIUM')
+    .describe('The priority level of the task'),
 });
 
 // Tool Category Factory Type
@@ -25,9 +25,9 @@ type ToolCategoryFactory = (userId: string) => Record<string, any>;
  */
 export const taskTools: ToolCategoryFactory = (userId: string) => ({
   createTasks: {
-    description: "Create one or multiple new tasks.",
+    description: 'Create one or multiple new tasks.',
     parameters: z.object({
-      tasks: z.array(taskSchema).describe("An array of tasks to create"),
+      tasks: z.array(taskSchema).describe('An array of tasks to create'),
     }),
     execute: async (args: any) => {
       let tasks = args.tasks;
@@ -55,23 +55,23 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
               userId,
             },
           });
-        })
+        }),
       );
       return { success: true, tasks: createdTasks };
     },
   },
   updateTasks: {
-    description: "Update existing tasks by their IDs.",
+    description: 'Update existing tasks by their IDs.',
     parameters: z.object({
       updates: z
         .array(
           z.object({
-            id: z.string().describe("The UUID of the task to update"),
+            id: z.string().describe('The UUID of the task to update'),
             updates: taskSchema.partial(),
-          })
+          }),
         )
         .describe(
-          "An array of task updates, each containing an 'id' and the 'updates' object"
+          "An array of task updates, each containing an 'id' and the 'updates' object",
         ),
     }),
     execute: async (args: any) => {
@@ -102,15 +102,15 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
             where: { id, userId },
             data: validatedUpdates,
           });
-        })
+        }),
       );
       return { success: true, tasks: updatedTasks };
     },
   },
   deleteTasks: {
-    description: "Delete existing tasks by their IDs.",
+    description: 'Delete existing tasks by their IDs.',
     parameters: z.object({
-      ids: z.array(z.string()).describe("List of task UUIDs to delete"),
+      ids: z.array(z.string()).describe('List of task UUIDs to delete'),
     }),
     execute: async (args: any) => {
       let ids =
@@ -119,7 +119,7 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
         args.task_ids ||
         (Array.isArray(args) ? args : null);
 
-      if (typeof ids === "string") {
+      if (typeof ids === 'string') {
         ids = [ids];
       }
 
@@ -140,33 +140,33 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
     },
   },
   getTasks: {
-    description: "Fetch all tasks for the current user.",
+    description: 'Fetch all tasks for the current user.',
     parameters: z.object({}),
     execute: async () => {
       const tasks = await prisma.task.findMany({
         where: { userId },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
       });
       return { success: true, tasks };
     },
   },
   searchTasks: {
-    description: "Search for tasks by title or description query.",
+    description: 'Search for tasks by title or description query.',
     parameters: z.object({
       query: z
         .string()
-        .describe("Text query to search for in titles and descriptions"),
+        .describe('Text query to search for in titles and descriptions'),
     }),
     execute: async ({ query }: any) => {
       const tasks = await prisma.task.findMany({
         where: {
           userId,
           OR: [
-            { title: { contains: query, mode: "insensitive" } },
-            { description: { contains: query, mode: "insensitive" } },
+            { title: { contains: query, mode: 'insensitive' } },
+            { description: { contains: query, mode: 'insensitive' } },
           ],
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
       });
       return { success: true, tasks };
     },
@@ -189,6 +189,6 @@ export const getAllTools = (userId: string) => {
       ...acc,
       ...getTools(userId),
     }),
-    {} as Record<string, any>
+    {} as Record<string, any>,
   );
 };

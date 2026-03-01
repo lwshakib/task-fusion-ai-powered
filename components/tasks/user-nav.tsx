@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,10 +9,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
-import { LogOut, User } from "lucide-react";
+} from '@/components/ui/dropdown-menu';
+import { authClient } from '@/lib/auth-client';
+import { useRouter } from 'next/navigation';
+import { LogOut, User } from 'lucide-react';
 
 export function UserNav() {
   const { data: session } = authClient.useSession();
@@ -26,7 +26,7 @@ export function UserNav() {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.push("/sign-in");
+          router.push('/sign-in');
         },
       },
     });
@@ -37,7 +37,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 w-9 rounded-full">
           <Avatar className="h-9 w-9">
-            <AvatarImage src={user?.image || ""} alt={user?.name} />
+            <AvatarImage src={user?.image || ''} alt={user?.name} />
             <AvatarFallback className="bg-primary/10 text-primary">
               {user.name?.charAt(0).toUpperCase() || (
                 <User className="size-4" />

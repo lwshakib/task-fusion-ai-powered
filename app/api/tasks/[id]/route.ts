@@ -1,19 +1,19 @@
-import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
-import { headers } from "next/headers";
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import { auth } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+import { headers } from 'next/headers';
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const taskSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
-  status: z.enum(["TODO", "COMPLETED"]),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
+  status: z.enum(['TODO', 'COMPLETED']),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']),
 });
 
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth.api.getSession({
@@ -21,7 +21,7 @@ export async function PATCH(
     });
 
     if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const { id } = await params;
@@ -35,11 +35,11 @@ export async function PATCH(
     });
 
     if (!existingTask) {
-      return new NextResponse("Not Found", { status: 404 });
+      return new NextResponse('Not Found', { status: 404 });
     }
 
     if (existingTask.userId !== session.user.id) {
-      return new NextResponse("Forbidden", { status: 403 });
+      return new NextResponse('Forbidden', { status: 403 });
     }
 
     const task = await prisma.task.update({
@@ -56,17 +56,17 @@ export async function PATCH(
 
     return NextResponse.json(task);
   } catch (error) {
-    console.error("[TASK_PATCH]", error);
+    console.error('[TASK_PATCH]', error);
     if (error instanceof z.ZodError) {
-      return new NextResponse("Invalid Request Data", { status: 400 });
+      return new NextResponse('Invalid Request Data', { status: 400 });
     }
-    return new NextResponse("Internal Error", { status: 500 });
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }
 
 export async function DELETE(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth.api.getSession({
@@ -74,7 +74,7 @@ export async function DELETE(
     });
 
     if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const { id } = await params;
@@ -86,11 +86,11 @@ export async function DELETE(
     });
 
     if (!existingTask) {
-      return new NextResponse("Not Found", { status: 404 });
+      return new NextResponse('Not Found', { status: 404 });
     }
 
     if (existingTask.userId !== session.user.id) {
-      return new NextResponse("Forbidden", { status: 403 });
+      return new NextResponse('Forbidden', { status: 403 });
     }
 
     await prisma.task.delete({
@@ -101,7 +101,7 @@ export async function DELETE(
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.error("[TASK_DELETE]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error('[TASK_DELETE]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }

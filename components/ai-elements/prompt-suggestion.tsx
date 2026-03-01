@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { VariantProps } from "class-variance-authority";
-import * as React from "react";
+import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { VariantProps } from 'class-variance-authority';
+import * as React from 'react';
 
 export type PromptSuggestionProps = {
   children: React.ReactNode;
-  variant?: VariantProps<typeof buttonVariants>["variant"];
-  size?: VariantProps<typeof buttonVariants>["size"];
+  variant?: VariantProps<typeof buttonVariants>['variant'];
+  size?: VariantProps<typeof buttonVariants>['size'];
   className?: string;
   highlight?: string;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
@@ -21,15 +21,15 @@ function PromptSuggestion({
   highlight,
   ...props
 }: PromptSuggestionProps) {
-  const isHighlightMode = highlight !== undefined && highlight.trim() !== "";
-  const content = typeof children === "string" ? children : "";
+  const isHighlightMode = highlight !== undefined && highlight.trim() !== '';
+  const content = typeof children === 'string' ? children : '';
 
   if (!isHighlightMode) {
     return (
       <Button
-        variant={variant || "outline"}
-        size={size || "lg"}
-        className={cn("rounded-full", className)}
+        variant={variant || 'outline'}
+        size={size || 'lg'}
+        className={cn('rounded-full', className)}
         {...props}
       >
         {children}
@@ -40,12 +40,12 @@ function PromptSuggestion({
   if (!content) {
     return (
       <Button
-        variant={variant || "ghost"}
-        size={size || "sm"}
+        variant={variant || 'ghost'}
+        size={size || 'sm'}
         className={cn(
-          "w-full cursor-pointer justify-start rounded-xl py-2 px-3",
-          "hover:bg-accent",
-          className
+          'w-full cursor-pointer justify-start rounded-xl py-2 px-3',
+          'hover:bg-accent',
+          className,
         )}
         {...props}
       >
@@ -61,12 +61,12 @@ function PromptSuggestion({
 
   return (
     <Button
-      variant={variant || "ghost"}
-      size={size || "sm"}
+      variant={variant || 'ghost'}
+      size={size || 'sm'}
       className={cn(
-        "w-full cursor-pointer justify-start gap-0 rounded-xl py-2 px-3",
-        "hover:bg-accent",
-        className
+        'w-full cursor-pointer justify-start gap-0 rounded-xl py-2 px-3',
+        'hover:bg-accent',
+        className,
       )}
       {...props}
     >
@@ -82,7 +82,7 @@ function PromptSuggestion({
 
           const actualHighlightedText = content.substring(
             index,
-            index + highlightLower.length
+            index + highlightLower.length,
           );
 
           const before = content.substring(0, index);

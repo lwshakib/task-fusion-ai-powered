@@ -1,34 +1,34 @@
-"use client";
+'use client';
 
 import {
   Conversation,
   ConversationContent,
   ConversationEmptyState,
   ConversationScrollButton,
-} from "@/components/ai-elements/conversation";
+} from '@/components/ai-elements/conversation';
 import {
   Message,
   MessageContent,
   MessageResponse,
-} from "@/components/ai-elements/message";
+} from '@/components/ai-elements/message';
 import {
   PromptInput,
   PromptInputTextarea,
   PromptInputSubmit,
-} from "@/components/ai-elements/prompt-input";
+} from '@/components/ai-elements/prompt-input';
 import {
   Tool,
   ToolContent,
   ToolHeader,
   ToolInput,
   ToolOutput,
-} from "@/components/ai-elements/tool";
+} from '@/components/ai-elements/tool';
 import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
-} from "@/components/ai-elements/reasoning";
-import { Loader } from "@/components/ai-elements/loader";
+} from '@/components/ai-elements/reasoning';
+import { Loader } from '@/components/ai-elements/loader';
 import {
   AlertCircle,
   CheckCircle2,
@@ -36,24 +36,24 @@ import {
   Search,
   Trash2,
   Sparkles,
-} from "lucide-react";
-import { PromptSuggestion } from "@/components/ai-elements/prompt-suggestion";
-import { useTaskStore } from "@/context";
-import { useEffect, useRef, useState } from "react";
-import { useChat } from "@ai-sdk/react";
-import { MESSAGE_ROLE } from "@/generated/prisma/enums";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { Skeleton } from "../ui/skeleton";
+} from 'lucide-react';
+import { PromptSuggestion } from '@/components/ai-elements/prompt-suggestion';
+import { useTaskStore } from '@/context';
+import { useEffect, useRef, useState } from 'react';
+import { useChat } from '@ai-sdk/react';
+import { MESSAGE_ROLE } from '@/generated/prisma/enums';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { Skeleton } from '../ui/skeleton';
 
 interface MessagePart {
   type: string;
   state?:
-    | "input-streaming"
-    | "input-available"
-    | "approval-requested"
-    | "output-available"
-    | "output-error";
+    | 'input-streaming'
+    | 'input-available'
+    | 'approval-requested'
+    | 'output-available'
+    | 'output-error';
   input?: any;
   output?: any;
   errorText?: string;
@@ -67,17 +67,17 @@ interface MessagePart {
  * Custom renderer for task-related tool calls
  */
 const TaskToolCall = ({ part }: { part: MessagePart }) => {
-  const toolName = part.type.replace("tool-", "");
+  const toolName = part.type.replace('tool-', '');
   const { state, input, output, errorText } = part;
   const isPending =
-    state === "input-streaming" ||
-    state === "input-available" ||
-    state === "approval-requested";
-  const isSuccess = state === "output-available" && !errorText;
-  const isError = state === "output-error" || !!errorText;
+    state === 'input-streaming' ||
+    state === 'input-available' ||
+    state === 'approval-requested';
+  const isSuccess = state === 'output-available' && !errorText;
+  const isError = state === 'output-error' || !!errorText;
 
   // Specific UI for createTasks as requested by the user
-  if (toolName === "createTasks") {
+  if (toolName === 'createTasks') {
     if (isPending) {
       return (
         <div className="flex items-center gap-2.5 px-3 py-1.5 my-2 rounded-full bg-primary/5 border border-primary/10 w-fit text-[13px] text-primary/80 animate-pulse">
@@ -93,7 +93,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
           <div className="flex items-center gap-2 text-[13px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50/50 dark:bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-100/50 dark:border-emerald-500/20 w-fit">
             <CheckCircle2 className="size-3.5" />
             <span>
-              Created task{createdTasks.length !== 1 ? "s" : ""} successfully
+              Created task{createdTasks.length !== 1 ? 's' : ''} successfully
             </span>
           </div>
           {createdTasks.length > 0 && (
@@ -130,7 +130,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
   }
 
   // Specific UI for updateTasks
-  if (toolName === "updateTasks") {
+  if (toolName === 'updateTasks') {
     if (isPending) {
       return (
         <div className="flex items-center gap-2.5 px-3 py-1.5 my-2 rounded-full bg-primary/5 border border-primary/10 w-fit text-[13px] text-primary/80 animate-pulse">
@@ -146,7 +146,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
           <div className="flex items-center gap-2 text-[13px] text-blue-600 dark:text-blue-400 font-semibold bg-blue-50/50 dark:bg-blue-500/10 px-3 py-1 rounded-lg border border-blue-100/50 dark:border-blue-500/20 w-fit">
             <CheckCircle2 className="size-3.5" />
             <span>
-              Updated task{updatedTasks.length !== 1 ? "s" : ""} successfully
+              Updated task{updatedTasks.length !== 1 ? 's' : ''} successfully
             </span>
           </div>
           {updatedTasks.length > 0 && (
@@ -183,7 +183,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
   }
 
   // Specific UI for deleteTasks
-  if (toolName === "deleteTasks") {
+  if (toolName === 'deleteTasks') {
     if (isPending) {
       return (
         <div className="flex items-center gap-2.5 px-3 py-1.5 my-2 rounded-full bg-primary/5 border border-primary/10 w-fit text-[13px] text-primary/80 animate-pulse">
@@ -200,7 +200,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
             <Trash2 className="size-3.5" />
             <span>
               Deleted {deletedIds.length} task
-              {deletedIds.length !== 1 ? "s" : ""} successfully
+              {deletedIds.length !== 1 ? 's' : ''} successfully
             </span>
           </div>
         </div>
@@ -224,7 +224,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
   }
 
   // Specific UI for getTasks
-  if (toolName === "getTasks") {
+  if (toolName === 'getTasks') {
     if (isPending) {
       return (
         <div className="flex items-center gap-2.5 px-3 py-1.5 my-2 rounded-full bg-primary/5 border border-primary/10 w-fit text-[13px] text-primary/80 animate-pulse">
@@ -239,7 +239,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
         <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium bg-muted/30 px-3 py-1 rounded-lg border border-muted-foreground/10 w-fit my-2">
           <List className="size-3.5" />
           <span>
-            Found {tasks.length} task{tasks.length !== 1 ? "s" : ""}
+            Found {tasks.length} task{tasks.length !== 1 ? 's' : ''}
           </span>
         </div>
       );
@@ -247,7 +247,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
   }
 
   // Specific UI for searchTasks
-  if (toolName === "searchTasks") {
+  if (toolName === 'searchTasks') {
     if (isPending) {
       return (
         <div className="flex items-center gap-2.5 px-3 py-1.5 my-2 rounded-full bg-primary/5 border border-primary/10 w-fit text-[13px] text-primary/80 animate-pulse">
@@ -263,8 +263,8 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
           <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium bg-muted/30 px-3 py-1 rounded-lg border border-muted-foreground/10 w-fit">
             <Search className="size-3.5" />
             <span>
-              Found {tasks.length} result{tasks.length !== 1 ? "s" : ""} for "
-              {input?.query || "..."}"
+              Found {tasks.length} result{tasks.length !== 1 ? 's' : ''} for "
+              {input?.query || '...'}"
             </span>
           </div>
         </div>
@@ -275,11 +275,11 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
   // Handle errors for other task tools
   if (isError) {
     const errorAction =
-      toolName === "searchTasks"
-        ? "search tasks"
-        : toolName === "getTasks"
-        ? "fetch tasks"
-        : "execute task action";
+      toolName === 'searchTasks'
+        ? 'search tasks'
+        : toolName === 'getTasks'
+          ? 'fetch tasks'
+          : 'execute task action';
     return (
       <div className="flex flex-col gap-1.5 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
         <div className="flex items-center gap-2 text-[13px] text-destructive font-semibold bg-destructive/5 dark:bg-destructive/10 px-3 py-1 rounded-lg border border-destructive/10 dark:border-destructive/20 w-fit">
@@ -298,16 +298,16 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
   // Fallback to standard Tool UI for others
   const getDisplayTitle = () => {
     switch (toolName) {
-      case "updateTasks":
-        return "Updating Tasks";
-      case "deleteTasks":
-        return "Deleting Tasks";
-      case "getTasks":
-        return "Fetching Tasks";
-      case "searchTasks":
-        return `Searching for "${input?.query || "..."}"`;
+      case 'updateTasks':
+        return 'Updating Tasks';
+      case 'deleteTasks':
+        return 'Deleting Tasks';
+      case 'getTasks':
+        return 'Fetching Tasks';
+      case 'searchTasks':
+        return `Searching for "${input?.query || '...'}"`;
       default:
-        return toolName.replace(/([A-Z])/g, " $1").trim();
+        return toolName.replace(/([A-Z])/g, ' $1').trim();
     }
   };
 
@@ -315,7 +315,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
     <Tool className="my-2" defaultOpen={isError}>
       <ToolHeader
         type={part.type as any}
-        state={state || "input-streaming"}
+        state={state || 'input-streaming'}
         title={getDisplayTitle()}
       />
       <ToolContent>
@@ -327,15 +327,15 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
 };
 
 const TASK_SUGGESTIONS = [
-  "Create a high priority task to finish the project report",
-  "List all my pending tasks",
+  'Create a high priority task to finish the project report',
+  'List all my pending tasks',
   "Mark my 'buy groceries' task as completed",
-  "Search for tasks related to documentation",
-  "Delete all tasks from last week",
+  'Search for tasks related to documentation',
+  'Delete all tasks from last week',
 ];
 
 export function ChatInterface() {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(true);
   const { addTasks, updateTasks, removeTasks } = useTaskStore();
   const processedToolInvocationIds = useRef(new Set<string>());
@@ -348,18 +348,18 @@ export function ChatInterface() {
         role: MESSAGE_ROLE.assistant,
       };
 
-      await fetch("/api/message", {
-        method: "POST",
+      await fetch('/api/message', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
       });
     },
     onError: (error) => {
-      toast.error("Failed to send message", {
+      toast.error('Failed to send message', {
         description:
-          error.message || "An unexpected error occurred. Please try again.",
+          error.message || 'An unexpected error occurred. Please try again.',
       });
     },
   });
@@ -373,13 +373,13 @@ export function ChatInterface() {
     const fetchMessages = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/message");
+        const response = await fetch('/api/message');
         if (response.ok) {
           const data = await response.json();
           setMessages(data);
         }
       } catch (error) {
-        console.error("Failed to fetch messages:", error);
+        console.error('Failed to fetch messages:', error);
       } finally {
         setLoading(false);
       }
@@ -391,8 +391,8 @@ export function ChatInterface() {
       setMessages([]);
     };
 
-    window.addEventListener("clear-chat", handleClearChat);
-    return () => window.removeEventListener("clear-chat", handleClearChat);
+    window.addEventListener('clear-chat', handleClearChat);
+    return () => window.removeEventListener('clear-chat', handleClearChat);
   }, [setMessages]);
 
   // Sync task store with tool outputs
@@ -401,25 +401,25 @@ export function ChatInterface() {
       const parts = (message.parts as MessagePart[]) || [];
       parts.forEach((part: MessagePart) => {
         if (
-          part.type.startsWith("tool-") &&
-          part.state === "output-available" &&
+          part.type.startsWith('tool-') &&
+          part.state === 'output-available' &&
           part.toolCallId &&
           !processedToolInvocationIds.current.has(part.toolCallId)
         ) {
-          const toolName = part.type.replace("tool-", "");
+          const toolName = part.type.replace('tool-', '');
           const output = part.output;
 
           if (output?.success) {
-            if (toolName === "createTasks" && output.tasks) {
+            if (toolName === 'createTasks' && output.tasks) {
               addTasks(output.tasks);
-            } else if (toolName === "updateTasks" && output.tasks) {
+            } else if (toolName === 'updateTasks' && output.tasks) {
               updateTasks(
                 output.tasks.map((t: { id: string; [key: string]: any }) => ({
                   id: t.id,
                   updates: t,
-                }))
+                })),
               );
-            } else if (toolName === "deleteTasks" && output.deletedIds) {
+            } else if (toolName === 'deleteTasks' && output.deletedIds) {
               removeTasks(output.deletedIds);
             }
           }
@@ -432,14 +432,14 @@ export function ChatInterface() {
   // Handle scrolling
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, status]);
 
   const handleSubmit = (message: { text: string; files: any[] }) => {
     if (message.text.trim()) {
       sendMessage({ text: message.text });
-      setInputValue("");
+      setInputValue('');
     }
   };
 
@@ -453,15 +453,15 @@ export function ChatInterface() {
                 <div
                   key={i}
                   className={cn(
-                    "flex gap-3",
-                    i % 2 === 1 && "flex-row-reverse"
+                    'flex gap-3',
+                    i % 2 === 1 && 'flex-row-reverse',
                   )}
                 >
                   <Skeleton className="h-8 w-8 rounded-full shrink-0" />
                   <div
                     className={cn(
-                      "space-y-2 flex-1 max-w-[80%]",
-                      i % 2 === 1 && "items-end flex flex-col"
+                      'space-y-2 flex-1 max-w-[80%]',
+                      i % 2 === 1 && 'items-end flex flex-col',
                     )}
                   >
                     <Skeleton className="h-4 w-full" />
@@ -511,18 +511,18 @@ export function ChatInterface() {
                     {parts.map((part: MessagePart, i: number) => {
                       const key = `${message.id}-${i}`;
 
-                      if (part.type === "reasoning") {
+                      if (part.type === 'reasoning') {
                         return (
                           <Reasoning key={key} isStreaming={!!part.isStreaming}>
                             <ReasoningTrigger />
                             <ReasoningContent
-                              children={part.reasoning ?? part.text ?? ""}
+                              children={part.reasoning ?? part.text ?? ''}
                             />
                           </Reasoning>
                         );
                       }
 
-                      if (part.type === "text") {
+                      if (part.type === 'text') {
                         if (!part.text?.trim()) return null;
                         return (
                           <MessageResponse
@@ -534,7 +534,7 @@ export function ChatInterface() {
                         );
                       }
 
-                      if (part.type.startsWith("tool-")) {
+                      if (part.type.startsWith('tool-')) {
                         return <TaskToolCall key={key} part={part} />;
                       }
 
@@ -566,11 +566,11 @@ export function ChatInterface() {
             <div className="absolute bottom-1.5 right-1.5 flex items-center justify-center">
               <PromptInputSubmit
                 status={
-                  status === "streaming" || status === "submitted"
+                  status === 'streaming' || status === 'submitted'
                     ? status
-                    : "ready"
+                    : 'ready'
                 }
-                disabled={!inputValue.trim() && status === "streaming"}
+                disabled={!inputValue.trim() && status === 'streaming'}
                 className="size-9 rounded-full shadow-md hover:shadow-lg transition-all duration-200"
               />
             </div>

@@ -1,47 +1,47 @@
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { ChevronsUpDown } from "lucide-react";
-import Link from "next/link";
+import { Logo } from '@/components/logo';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+import { ChevronsUpDown } from 'lucide-react';
+import Link from 'next/link';
 
 const links = [
   {
-    group: "Product",
+    group: 'Product',
     items: [
-      { title: "Features", href: "#features" },
-      { title: "Solution", href: "#solution" },
-      { title: "Pricing", href: "#pricing" },
-      { title: "About", href: "#about" },
+      { title: 'Features', href: '#features' },
+      { title: 'Solution', href: '#solution' },
+      { title: 'Pricing', href: '#pricing' },
+      { title: 'About', href: '#about' },
     ],
   },
   {
-    group: "Solution",
+    group: 'Solution',
     items: [
-      { title: "Startup", href: "#" },
-      { title: "Freelancers", href: "#" },
-      { title: "Organizations", href: "#" },
-      { title: "Students", href: "#" },
-      { title: "Collaboration", href: "#" },
-      { title: "Design", href: "#" },
-      { title: "Management", href: "#" },
+      { title: 'Startup', href: '#' },
+      { title: 'Freelancers', href: '#' },
+      { title: 'Organizations', href: '#' },
+      { title: 'Students', href: '#' },
+      { title: 'Collaboration', href: '#' },
+      { title: 'Design', href: '#' },
+      { title: 'Management', href: '#' },
     ],
   },
   {
-    group: "Company",
+    group: 'Company',
     items: [
-      { title: "Blog", href: "#" },
-      { title: "Careers", href: "#" },
-      { title: "Contact", href: "#" },
+      { title: 'Blog', href: '#' },
+      { title: 'Careers', href: '#' },
+      { title: 'Contact', href: '#' },
     ],
   },
   {
-    group: "Legal",
+    group: 'Legal',
     items: [
-      { title: "Privacy", href: "#" },
-      { title: "Terms", href: "#" },
-      { title: "Security", href: "#" },
+      { title: 'Privacy', href: '#' },
+      { title: 'Terms', href: '#' },
+      { title: 'Security', href: '#' },
     ],
   },
 ];
@@ -237,7 +237,7 @@ export default function FooterSection() {
               />
               <select
                 className={cn(
-                  "border-input h-9 min-w-32 appearance-none rounded-md border bg-transparent px-3 py-1 text-sm outline-none transition-all"
+                  'border-input h-9 min-w-32 appearance-none rounded-md border bg-transparent px-3 py-1 text-sm outline-none transition-all',
                 )}
                 name="language"
               >

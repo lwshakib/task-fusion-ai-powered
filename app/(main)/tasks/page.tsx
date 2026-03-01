@@ -1,16 +1,16 @@
-import { Logo } from "@/components/logo";
-import { ModeToggle } from "@/components/mode-toggle";
-import { UserNav } from "@/components/tasks/user-nav";
-import { ClearMessagesButton } from "@/components/tasks/clear-messages-button";
+import { Logo } from '@/components/logo';
+import { ModeToggle } from '@/components/mode-toggle';
+import { UserNav } from '@/components/tasks/user-nav';
+import { ClearMessagesButton } from '@/components/tasks/clear-messages-button';
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { ChatInterface } from "@/components/tasks/chat-interface";
-import { TaskList } from "@/components/tasks/task-list";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquareIcon, ListTodoIcon } from "lucide-react";
+} from '@/components/ui/resizable';
+import { ChatInterface } from '@/components/tasks/chat-interface';
+import { TaskList } from '@/components/tasks/task-list';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MessageSquareIcon, ListTodoIcon } from 'lucide-react';
 
 export default function TasksPage() {
   return (

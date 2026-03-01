@@ -1,59 +1,59 @@
-"use client";
+'use client';
 
-import React from "react";
-import { AnimatedGroup } from "@/components/ui/animated-group";
-import { TextEffect } from "@/components/ui/text-effect";
-import { Brain, Zap, Layers, MessageSquare, Shield, Globe } from "lucide-react";
+import React from 'react';
+import { AnimatedGroup } from '@/components/ui/animated-group';
+import { TextEffect } from '@/components/ui/text-effect';
+import { Brain, Zap, Layers, MessageSquare, Shield, Globe } from 'lucide-react';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 
 const features = [
   {
-    title: "AI Task Decomposition",
+    title: 'AI Task Decomposition',
     description:
-      "Give our AI a goal, and watch it break it down into actionable, manageable tasks in seconds.",
+      'Give our AI a goal, and watch it break it down into actionable, manageable tasks in seconds.',
     icon: Brain,
-    color: "from-blue-500 to-cyan-400",
+    color: 'from-blue-500 to-cyan-400',
   },
   {
-    title: "Smart Context Fusion",
+    title: 'Smart Context Fusion',
     description:
-      "Seamlessly merge tasks from your email, calendar, and Slack into one unified, intelligent workspace.",
+      'Seamlessly merge tasks from your email, calendar, and Slack into one unified, intelligent workspace.',
     icon: Layers,
-    color: "from-purple-500 to-pink-400",
+    color: 'from-purple-500 to-pink-400',
   },
   {
-    title: "Real-time Agent Chat",
+    title: 'Real-time Agent Chat',
     description:
-      "Interact with your task manager using natural language. No more complex menus or forms.",
+      'Interact with your task manager using natural language. No more complex menus or forms.',
     icon: MessageSquare,
-    color: "from-orange-500 to-yellow-400",
+    color: 'from-orange-500 to-yellow-400',
   },
   {
-    title: "Instant Prioritization",
+    title: 'Instant Prioritization',
     description:
-      "Our AI analyzes deadlines, importance, and your energy levels to suggest the best next step.",
+      'Our AI analyzes deadlines, importance, and your energy levels to suggest the best next step.',
     icon: Zap,
-    color: "from-green-500 to-emerald-400",
+    color: 'from-green-500 to-emerald-400',
   },
   {
-    title: "Enterprise Security",
+    title: 'Enterprise Security',
     description:
-      "Your data is encrypted and handled with the highest standards of privacy and security protocols.",
+      'Your data is encrypted and handled with the highest standards of privacy and security protocols.',
     icon: Shield,
-    color: "from-red-500 to-orange-400",
+    color: 'from-red-500 to-orange-400',
   },
   {
-    title: "Global Sync",
+    title: 'Global Sync',
     description:
-      "Access your intelligent workspace from any device, anywhere in the world, perfectly synced.",
+      'Access your intelligent workspace from any device, anywhere in the world, perfectly synced.',
     icon: Globe,
-    color: "from-indigo-500 to-blue-400",
+    color: 'from-indigo-500 to-blue-400',
   },
 ];
 
@@ -90,7 +90,7 @@ export const FeaturesSection = () => {
               visible: {
                 opacity: 1,
                 y: 0,
-                transition: { type: "spring", bounce: 0.3 },
+                transition: { type: 'spring', bounce: 0.3 },
               },
             },
           }}

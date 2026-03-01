@@ -1,10 +1,10 @@
-import { streamText } from "@/llm/streamText";
+import { streamText } from '@/llm/streamText';
 
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { MESSAGE_ROLE } from "@/generated/prisma/enums";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+import { MESSAGE_ROLE } from '@/generated/prisma/enums';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 export async function POST(req: Request) {
   try {
@@ -13,16 +13,16 @@ export async function POST(req: Request) {
     });
 
     if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
     const { messages } = await req.json();
 
     // Get the last message (user's current message)
     const lastMessage = messages[messages.length - 1];
-    if (!lastMessage || lastMessage.role !== "user") {
+    if (!lastMessage || lastMessage.role !== 'user') {
       return NextResponse.json(
-        { error: "Last message must be from user" },
-        { status: 400 }
+        { error: 'Last message must be from user' },
+        { status: 400 },
       );
     }
 
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    console.error("[CHAT]", error);
-    return NextResponse.json({ error: "Failed to chat" }, { status: 500 });
+    console.error('[CHAT]', error);
+    return NextResponse.json({ error: 'Failed to chat' }, { status: 500 });
   }
 }

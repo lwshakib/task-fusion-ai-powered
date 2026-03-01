@@ -1,33 +1,33 @@
-"use client";
+'use client';
 
-import React from "react";
-import { TextEffect } from "@/components/ui/text-effect";
-import { AnimatedGroup } from "@/components/ui/animated-group";
-import { CheckCircle2, Terminal, Cpu, Sparkles } from "lucide-react";
+import React from 'react';
+import { TextEffect } from '@/components/ui/text-effect';
+import { AnimatedGroup } from '@/components/ui/animated-group';
+import { CheckCircle2, Terminal, Cpu, Sparkles } from 'lucide-react';
 
 const steps = [
   {
-    title: "Define Your Objective",
+    title: 'Define Your Objective',
     description:
-      "Simply tell the AI what you want to achieve. No rigid structures required.",
+      'Simply tell the AI what you want to achieve. No rigid structures required.',
     icon: Terminal,
   },
   {
-    title: "AI Synthesis",
+    title: 'AI Synthesis',
     description:
-      "Our agents analyze your redundant tasks and merge them into a streamlined workflow.",
+      'Our agents analyze your redundant tasks and merge them into a streamlined workflow.',
     icon: Cpu,
   },
   {
-    title: "Optimized Action Plan",
+    title: 'Optimized Action Plan',
     description:
-      "Receive a prioritized list of tasks designed to maximize impact and efficiency.",
+      'Receive a prioritized list of tasks designed to maximize impact and efficiency.',
     icon: Sparkles,
   },
   {
-    title: "Seamless Execution",
+    title: 'Seamless Execution',
     description:
-      "Track progress in real-time with automated updates and smart reminders.",
+      'Track progress in real-time with automated updates and smart reminders.',
     icon: CheckCircle2,
   },
 ];

@@ -1,11 +1,11 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 export interface Task {
   id: string;
   title: string;
   description: string | null;
-  status: "TODO" | "COMPLETED";
-  priority: "LOW" | "MEDIUM" | "HIGH";
+  status: 'TODO' | 'COMPLETED';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH';
   createdAt: string;
   updatedAt: string;
 }

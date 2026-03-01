@@ -1,9 +1,9 @@
-import FooterSection from "@/components/footer";
-import Pricing from "@/components/pricing";
-import HeroSection from "@/components/hero-section";
-import { FeaturesSection } from "@/components/features";
-import { SolutionSection } from "@/components/solution";
-import { AboutSection } from "@/components/about";
+import FooterSection from '@/components/footer';
+import Pricing from '@/components/pricing';
+import HeroSection from '@/components/hero-section';
+import { FeaturesSection } from '@/components/features';
+import { SolutionSection } from '@/components/solution';
+import { AboutSection } from '@/components/about';
 
 export default function Home() {
   return (

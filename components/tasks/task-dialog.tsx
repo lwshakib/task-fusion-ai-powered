@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,19 +8,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 interface TaskDialogProps {
   open: boolean;
@@ -37,26 +37,26 @@ export function TaskDialog({
 }: TaskDialogProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    status: "TODO",
-    priority: "MEDIUM",
+    title: '',
+    description: '',
+    status: 'TODO',
+    priority: 'MEDIUM',
   });
 
   useEffect(() => {
     if (task) {
       setFormData({
         title: task.title,
-        description: task.description || "",
+        description: task.description || '',
         status: task.status,
         priority: task.priority,
       });
     } else {
       setFormData({
-        title: "",
-        description: "",
-        status: "TODO",
-        priority: "MEDIUM",
+        title: '',
+        description: '',
+        status: 'TODO',
+        priority: 'MEDIUM',
       });
     }
   }, [task, open]);
@@ -66,26 +66,26 @@ export function TaskDialog({
     setLoading(true);
 
     try {
-      const url = task ? `/api/tasks/${task.id}` : "/api/tasks";
-      const method = task ? "PATCH" : "POST";
+      const url = task ? `/api/tasks/${task.id}` : '/api/tasks';
+      const method = task ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {
         method,
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
 
       if (!res.ok) {
-        throw new Error("Something went wrong");
+        throw new Error('Something went wrong');
       }
 
-      toast.success(task ? "Task updated" : "Task created");
+      toast.success(task ? 'Task updated' : 'Task created');
       onSuccess();
       onOpenChange(false);
     } catch (error) {
-      toast.error("Failed to save task");
+      toast.error('Failed to save task');
     } finally {
       setLoading(false);
     }
@@ -95,11 +95,11 @@ export function TaskDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{task ? "Edit Task" : "Create Task"}</DialogTitle>
+          <DialogTitle>{task ? 'Edit Task' : 'Create Task'}</DialogTitle>
           <DialogDescription>
             {task
-              ? "Make changes to your task here."
-              : "Add a new task to your list."}
+              ? 'Make changes to your task here.'
+              : 'Add a new task to your list.'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -172,7 +172,7 @@ export function TaskDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Save changes"}
+              {loading ? 'Saving...' : 'Save changes'}
             </Button>
           </DialogFooter>
         </form>

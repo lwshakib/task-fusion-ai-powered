@@ -1,8 +1,8 @@
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 export const Logo = ({ className }: { className?: string }) => {
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn('flex items-center gap-2', className)}>
       <LogoIcon className="size-8" />
       <span className="text-xl font-bold tracking-tight">
         Task <span className="text-primary">Fusion</span>
@@ -18,7 +18,7 @@ export const LogoIcon = ({
   className?: string;
   uniColor?: boolean;
 }) => {
-  const fill = uniColor ? "currentColor" : "url(#stack-logo-gradient)";
+  const fill = uniColor ? 'currentColor' : 'url(#stack-logo-gradient)';
 
   return (
     <svg
@@ -27,7 +27,7 @@ export const LogoIcon = ({
       viewBox="-4 0 48 48"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("size-6", className)}
+      className={cn('size-6', className)}
     >
       <g fill={fill}>
         <path

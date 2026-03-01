@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   PlusIcon,
   CalendarIcon,
@@ -11,28 +11,28 @@ import {
   TrashIcon,
   ArrowUpDownIcon,
   SortAscIcon,
-} from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
-import { TaskDialog } from "./task-dialog";
+} from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
+import { TaskDialog } from './task-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
-import { toast } from "sonner";
-import { useTaskStore, Task } from "@/context";
+} from '@/components/ui/sheet';
+import { toast } from 'sonner';
+import { useTaskStore, Task } from '@/context';
 
 export function TaskList() {
   const { tasks, setTasks, removeTask } = useTaskStore();
@@ -41,18 +41,18 @@ export function TaskList() {
   const [selectedTask, setSelectedTask] = useState<Task | undefined>(undefined);
   const [viewTask, setViewTask] = useState<Task | undefined>(undefined);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [sortBy, setBy] = useState<"priority" | "date">("priority");
+  const [sortBy, setBy] = useState<'priority' | 'date'>('priority');
 
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/tasks");
-      if (!res.ok) throw new Error("Failed to fetch tasks");
+      const res = await fetch('/api/tasks');
+      if (!res.ok) throw new Error('Failed to fetch tasks');
       const data = await res.json();
       setTasks(data);
     } catch (error) {
-      console.error("Error fetching tasks:", error);
-      toast.error("Failed to load tasks");
+      console.error('Error fetching tasks:', error);
+      toast.error('Failed to load tasks');
     } finally {
       setLoading(false);
     }
@@ -74,10 +74,10 @@ export function TaskList() {
   const sortedTasks = [...tasks].sort((a, b) => {
     // 1. Status: COMPLETED tasks at the bottom (Universal Rule)
     if (a.status !== b.status) {
-      return a.status === "COMPLETED" ? 1 : -1;
+      return a.status === 'COMPLETED' ? 1 : -1;
     }
 
-    if (sortBy === "priority") {
+    if (sortBy === 'priority') {
       // 2. Priority: HIGH > MEDIUM > LOW
       const priorityWeight = {
         HIGH: 3,
@@ -101,25 +101,25 @@ export function TaskList() {
       removeTask(id);
 
       const res = await fetch(`/api/tasks/${id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
-      if (!res.ok) throw new Error("Failed to delete task");
+      if (!res.ok) throw new Error('Failed to delete task');
 
-      toast.success("Task deleted");
+      toast.success('Task deleted');
       if (viewTask?.id === id) {
         setIsSheetOpen(false);
       }
     } catch (error) {
       // Rollback
       setTasks(previousTasks);
-      toast.error("Failed to delete task");
+      toast.error('Failed to delete task');
     }
   };
 
   const handleStatusToggle = async (task: Task, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    const newStatus: "TODO" | "COMPLETED" =
-      task.status === "COMPLETED" ? "TODO" : "COMPLETED";
+    const newStatus: 'TODO' | 'COMPLETED' =
+      task.status === 'COMPLETED' ? 'TODO' : 'COMPLETED';
 
     // Create optimistic task
     const updatedTask = { ...task, status: newStatus };
@@ -130,9 +130,9 @@ export function TaskList() {
 
     try {
       const res = await fetch(`/api/tasks/${task.id}`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           title: task.title,
@@ -146,15 +146,15 @@ export function TaskList() {
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to update status");
+      if (!res.ok) throw new Error('Failed to update status');
 
       toast.success(
-        newStatus === "COMPLETED" ? "Task completed" : "Task uncompleted"
+        newStatus === 'COMPLETED' ? 'Task completed' : 'Task uncompleted',
       );
     } catch (error) {
       // Rollback
       setTasks(previousTasks);
-      toast.error("Failed to update status");
+      toast.error('Failed to update status');
     }
   };
 
@@ -188,15 +188,15 @@ export function TaskList() {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
                 <ArrowUpDownIcon className="mr-2 size-3.5" />
-                Sort: {sortBy === "priority" ? "Priority" : "Newest"}
+                Sort: {sortBy === 'priority' ? 'Priority' : 'Newest'}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onClick={() => setBy("priority")}>
+              <DropdownMenuItem onClick={() => setBy('priority')}>
                 <SortAscIcon className="mr-2 size-4" />
                 Sort by Priority
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setBy("date")}>
+              <DropdownMenuItem onClick={() => setBy('date')}>
                 <CalendarIcon className="mr-2 size-4" />
                 Sort by Date
               </DropdownMenuItem>
@@ -247,7 +247,7 @@ export function TaskList() {
                     onClick={(e) => handleStatusToggle(task, e)}
                     className="shrink-0 text-muted-foreground hover:text-primary"
                   >
-                    {task.status === "COMPLETED" ? (
+                    {task.status === 'COMPLETED' ? (
                       <CheckCircle2Icon className="size-5 text-green-500" />
                     ) : (
                       <CircleIcon className="size-5" />
@@ -258,9 +258,9 @@ export function TaskList() {
                     <div className="flex items-center gap-2 mb-1">
                       <span
                         className={cn(
-                          "font-medium truncate",
-                          task.status === "COMPLETED" &&
-                            "line-through text-muted-foreground"
+                          'font-medium truncate',
+                          task.status === 'COMPLETED' &&
+                            'line-through text-muted-foreground',
                         )}
                       >
                         {task.title}
@@ -268,12 +268,12 @@ export function TaskList() {
                       <Badge
                         variant="outline"
                         className={cn(
-                          "capitalize text-[10px] h-5 px-1.5 font-normal shrink-0",
-                          task.priority === "HIGH"
-                            ? "border-red-200 text-red-700 bg-red-50"
-                            : task.priority === "MEDIUM"
-                            ? "border-yellow-200 text-yellow-700 bg-yellow-50"
-                            : "border-green-200 text-green-700 bg-green-50"
+                          'capitalize text-[10px] h-5 px-1.5 font-normal shrink-0',
+                          task.priority === 'HIGH'
+                            ? 'border-red-200 text-red-700 bg-red-50'
+                            : task.priority === 'MEDIUM'
+                              ? 'border-yellow-200 text-yellow-700 bg-yellow-50'
+                              : 'border-green-200 text-green-700 bg-green-50',
                         )}
                       >
                         {task.priority.toLowerCase()}
@@ -334,7 +334,7 @@ export function TaskList() {
           <SheetHeader className="p-6">
             <SheetTitle>{viewTask?.title}</SheetTitle>
             <SheetDescription>
-              Created on{" "}
+              Created on{' '}
               {viewTask && new Date(viewTask.createdAt).toLocaleDateString()}
             </SheetDescription>
           </SheetHeader>
@@ -344,18 +344,18 @@ export function TaskList() {
                 <Badge
                   variant="outline"
                   className={cn(
-                    "capitalize",
-                    viewTask.priority === "HIGH"
-                      ? "border-red-200 text-red-700 bg-red-50"
-                      : viewTask.priority === "MEDIUM"
-                      ? "border-yellow-200 text-yellow-700 bg-yellow-50"
-                      : "border-green-200 text-green-700 bg-green-50"
+                    'capitalize',
+                    viewTask.priority === 'HIGH'
+                      ? 'border-red-200 text-red-700 bg-red-50'
+                      : viewTask.priority === 'MEDIUM'
+                        ? 'border-yellow-200 text-yellow-700 bg-yellow-50'
+                        : 'border-green-200 text-green-700 bg-green-50',
                   )}
                 >
                   {viewTask.priority.toLowerCase()} Priority
                 </Badge>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  {viewTask.status === "COMPLETED" ? (
+                  {viewTask.status === 'COMPLETED' ? (
                     <>
                       <CheckCircle2Icon className="size-4 text-green-500" />
                       Completed

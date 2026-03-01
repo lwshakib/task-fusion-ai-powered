@@ -1,0 +1,12 @@
+node_modules
+.next
+dist
+build
+.env
+bun.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+public
+prisma/generated
+generated

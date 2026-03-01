@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { useState } from "react";
+import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 export function ClearMessagesButton() {
   const [isClearing, setIsClearing] = useState(false);
@@ -23,20 +23,20 @@ export function ClearMessagesButton() {
   const handleClear = async () => {
     setIsClearing(true);
     try {
-      const response = await fetch("/api/message", {
-        method: "DELETE",
+      const response = await fetch('/api/message', {
+        method: 'DELETE',
       });
 
       if (response.ok) {
         // Dispatch custom event to notify ChatInterface
-        window.dispatchEvent(new CustomEvent("clear-chat"));
-        toast.success("Chat history cleared");
+        window.dispatchEvent(new CustomEvent('clear-chat'));
+        toast.success('Chat history cleared');
       } else {
-        throw new Error("Failed to clear chat history");
+        throw new Error('Failed to clear chat history');
       }
     } catch (error) {
       console.error(error);
-      toast.error("Failed to clear chat history");
+      toast.error('Failed to clear chat history');
     } finally {
       setIsClearing(false);
       setIsOpen(false);
@@ -74,7 +74,7 @@ export function ClearMessagesButton() {
             disabled={isClearing}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {isClearing ? "Clearing..." : "Yes, clear chat"}
+            {isClearing ? 'Clearing...' : 'Yes, clear chat'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

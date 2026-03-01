@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -7,8 +7,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Check } from "lucide-react";
+} from '@/components/ui/card';
+import { Check } from 'lucide-react';
 
 export default function Pricing() {
   return (
@@ -40,10 +40,10 @@ export default function Pricing() {
 
               <ul className="list-outside space-y-3 text-sm">
                 {[
-                  "100 AI Task Syntheses",
-                  "Basic Agent Chat",
-                  "Single Device Sync",
-                  "Community Support",
+                  '100 AI Task Syntheses',
+                  'Basic Agent Chat',
+                  'Single Device Sync',
+                  'Community Support',
                 ].map((item, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <Check className="size-4 text-primary" />
@@ -83,12 +83,12 @@ export default function Pricing() {
                 <hr className="border-dashed" />
                 <ul className="list-outside space-y-3 text-sm">
                   {[
-                    "Unlimited AI Task Synthesis",
-                    "Advanced Context Fusion (Email/Slack)",
-                    "Priority Agent Response",
-                    "Multi-device Real-time Sync",
-                    "Smart Energy-based Priority",
-                    "Custom AI Prompting",
+                    'Unlimited AI Task Synthesis',
+                    'Advanced Context Fusion (Email/Slack)',
+                    'Priority Agent Response',
+                    'Multi-device Real-time Sync',
+                    'Smart Energy-based Priority',
+                    'Custom AI Prompting',
                   ].map((item, index) => (
                     <li key={index} className="flex items-center gap-2">
                       <Check className="size-4 text-primary" />
@@ -128,11 +128,11 @@ export default function Pricing() {
 
               <ul className="list-outside space-y-3 text-sm">
                 {[
-                  "Everything in Pro",
-                  "Team Collaboration Tools",
-                  "Admin Analytics Dashboard",
-                  "Dedicated Success Manager",
-                  "SSO & Advanced Security",
+                  'Everything in Pro',
+                  'Team Collaboration Tools',
+                  'Admin Analytics Dashboard',
+                  'Dedicated Success Manager',
+                  'SSO & Advanced Security',
                 ].map((item, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <Check className="size-4 text-primary" />

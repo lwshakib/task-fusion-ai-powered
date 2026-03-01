@@ -2,10 +2,10 @@ import {
   streamText as _streamText,
   convertToModelMessages,
   stepCountIs,
-} from "ai";
-import { SYSTEM_PROMPT } from "./prompts";
-import { GeminiModel } from "./model";
-import { getAllTools } from "./tools";
+} from 'ai';
+import { SYSTEM_PROMPT } from './prompts';
+import { GeminiModel } from './model';
+import { getAllTools } from './tools';
 
 interface ToolResult<Name extends string, Args, Result> {
   toolCallId: string;
@@ -15,7 +15,7 @@ interface ToolResult<Name extends string, Args, Result> {
 }
 
 interface Message {
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   content: string;
   toolInvocations?: ToolResult<string, unknown, unknown>[];
 }
@@ -28,7 +28,7 @@ export async function streamText(messages: Messages, userId: string) {
     system: SYSTEM_PROMPT,
     messages: await convertToModelMessages(messages as any),
     maxOutputTokens: 65535,
-    toolChoice: "auto",
+    toolChoice: 'auto',
     stopWhen: stepCountIs(5),
     tools: getAllTools(userId),
   });

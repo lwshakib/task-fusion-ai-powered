@@ -1,14 +1,14 @@
-import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
-import { headers } from "next/headers";
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import { auth } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+import { headers } from 'next/headers';
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const taskSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
-  status: z.enum(["TODO", "COMPLETED"]),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
+  status: z.enum(['TODO', 'COMPLETED']),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']),
   dueDate: z.string().optional(), // We'll keep it as optional string for now as it's not in the main schema but in the UI code
 });
 
@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     });
 
     if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const tasks = await prisma.task.findMany({
@@ -27,14 +27,14 @@ export async function GET(req: Request) {
         userId: session.user.id,
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
     });
 
     return NextResponse.json(tasks);
   } catch (error) {
-    console.error("[TASKS_GET]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error('[TASKS_GET]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }
 
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     });
 
     if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const body = await req.json();
@@ -63,10 +63,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json(task);
   } catch (error) {
-    console.error("[TASKS_POST]", error);
+    console.error('[TASKS_POST]', error);
     if (error instanceof z.ZodError) {
-      return new NextResponse("Invalid Request Data", { status: 400 });
+      return new NextResponse('Invalid Request Data', { status: 400 });
     }
-    return new NextResponse("Internal Error", { status: 500 });
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }

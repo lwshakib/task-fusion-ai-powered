@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import React from "react";
-import Link from "next/link";
-import { TextEffect } from "@/components/ui/text-effect";
-import { AnimatedGroup } from "@/components/ui/animated-group";
-import { Users, Star, Trophy, Target } from "lucide-react";
+import React from 'react';
+import Link from 'next/link';
+import { TextEffect } from '@/components/ui/text-effect';
+import { AnimatedGroup } from '@/components/ui/animated-group';
+import { Users, Star, Trophy, Target } from 'lucide-react';
 
 const stats = [
-  { label: "Active Users", value: "50K+", icon: Users },
-  { label: "Tasks Fused", value: "1M+", icon: Star },
-  { label: "Awards Won", value: "12", icon: Trophy },
-  { label: "Focus Score", value: "98%", icon: Target },
+  { label: 'Active Users', value: '50K+', icon: Users },
+  { label: 'Tasks Fused', value: '1M+', icon: Star },
+  { label: 'Awards Won', value: '12', icon: Trophy },
+  { label: 'Focus Score', value: '98%', icon: Target },
 ];
 
 export const AboutSection = () => {
