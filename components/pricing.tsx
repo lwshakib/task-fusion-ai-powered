@@ -10,17 +10,25 @@ import {
 } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 
+/**
+ * Pricing Component
+ * Displays the platform's subscription tiers: Standard, Pro, and Enterprise.
+ * Designed to showcase features and encourage conversion through clear visual hierarchy.
+ */
 export default function Pricing() {
   return (
     <section className="py-16 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
+        {/* Header Section */}
         <div className="mx-auto max-w-2xl space-y-6 text-center">
           <h1 className="text-center text-4xl font-semibold lg:text-5xl">
             Pricing that Scales with You
           </h1>
         </div>
 
+        {/* Pricing Grid */}
         <div className="mt-8 grid gap-6 md:mt-20 md:grid-cols-3">
+          {/* Plan: Standard (Free) */}
           <Card className="flex flex-col border-border/50 bg-background/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="font-medium text-xl">Standard</CardTitle>
@@ -37,7 +45,6 @@ export default function Pricing() {
 
             <CardContent className="space-y-4">
               <hr className="border-dashed" />
-
               <ul className="list-outside space-y-3 text-sm">
                 {[
                   '100 AI Task Syntheses',
@@ -60,7 +67,9 @@ export default function Pricing() {
             </CardFooter>
           </Card>
 
+          {/* Plan: Pro (Featured Tier) - Highlighted with scaling and shadow */}
           <Card className="relative border-primary/50 shadow-xl shadow-primary/5 bg-background scale-105 z-10">
+            {/* Featured Badge */}
             <span className="bg-linear-to-br from-primary to-primary/80 absolute inset-x-0 -top-3 mx-auto flex h-6 w-fit items-center rounded-full px-3 py-1 text-xs font-semibold text-primary-foreground ring-1 ring-inset ring-white/20">
               Most Popular
             </span>
@@ -109,6 +118,7 @@ export default function Pricing() {
             </div>
           </Card>
 
+          {/* Plan: Enterprise */}
           <Card className="flex flex-col border-border/50 bg-background/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="font-medium text-xl">Enterprise</CardTitle>
@@ -125,7 +135,6 @@ export default function Pricing() {
 
             <CardContent className="space-y-4">
               <hr className="border-dashed" />
-
               <ul className="list-outside space-y-3 text-sm">
                 {[
                   'Everything in Pro',

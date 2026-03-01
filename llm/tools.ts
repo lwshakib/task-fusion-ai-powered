@@ -79,8 +79,9 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
     }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     execute: async (args: any) => {
-      let updates =
-        (args.updates || args.tasks || (Array.isArray(args) ? args : null)) as unknown[] | null;
+      let updates = (args.updates ||
+        args.tasks ||
+        (Array.isArray(args) ? args : null)) as unknown[] | null;
 
       if (!updates && args.id) {
         updates = [args] as unknown[];
@@ -94,21 +95,27 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
       }
 
       const updatedTasks = await Promise.all(
-        (updates as Array<{ id: string; updates?: Partial<z.infer<typeof taskSchema>> } | z.infer<typeof taskSchema>>).map(async (item) => {
-            const id = (item as { id: string }).id;
-            // Support both { id, updates: { ... } } and { id, ...item }
-            const taskUpdates = (item as { updates?: Partial<z.infer<typeof taskSchema>> }).updates || { ...item };
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            if ((taskUpdates as any).id) delete (taskUpdates as any).id;
+        (
+          updates as Array<
+            | { id: string; updates?: Partial<z.infer<typeof taskSchema>> }
+            | z.infer<typeof taskSchema>
+          >
+        ).map(async (item) => {
+          const id = (item as { id: string }).id;
+          // Support both { id, updates: { ... } } and { id, ...item }
+          const taskUpdates = (
+            item as { updates?: Partial<z.infer<typeof taskSchema>> }
+          ).updates || { ...item };
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((taskUpdates as any).id) delete (taskUpdates as any).id;
 
-            const validatedUpdates = taskSchema.partial().parse(taskUpdates);
+          const validatedUpdates = taskSchema.partial().parse(taskUpdates);
 
-            return prisma.task.update({
-              where: { id, userId },
-              data: validatedUpdates,
-            });
-          },
-        ),
+          return prisma.task.update({
+            where: { id, userId },
+            data: validatedUpdates,
+          });
+        }),
       );
       return { success: true, tasks: updatedTasks };
     },

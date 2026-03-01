@@ -1,5 +1,9 @@
 import { cn } from '@/lib/utils';
 
+/**
+ * Logo Component
+ * Renders the full brand identity: the LogoIcon followed by the "Task Fusion" wordmark.
+ */
 export const Logo = ({ className }: { className?: string }) => {
   return (
     <div className={cn('flex items-center gap-2', className)}>
@@ -11,6 +15,13 @@ export const Logo = ({ className }: { className?: string }) => {
   );
 };
 
+/**
+ * LogoIcon Component
+ * A standalone SVG representation of the brand.
+ * Features a multi-layered geometric "stack" design.
+ *
+ * @param uniColor If true, uses `currentColor` for all paths (good for monochrome overlays).
+ */
 export const LogoIcon = ({
   className,
   uniColor,
@@ -18,6 +29,7 @@ export const LogoIcon = ({
   className?: string;
   uniColor?: boolean;
 }) => {
+  // Determine fill color based on uniColor prop
   const fill = uniColor ? 'currentColor' : 'url(#stack-logo-gradient)';
 
   return (
@@ -30,6 +42,7 @@ export const LogoIcon = ({
       className={cn('size-6', className)}
     >
       <g fill={fill}>
+        {/* Layered Paths with varying opacities to create depth */}
         <path
           d="m9.72461 41.7983h18.49589c1.2717 0 2.4469-.6785 3.0827-1.7798l4.1102-7.1191h-20.5481z"
           opacity=".7"
@@ -50,6 +63,7 @@ export const LogoIcon = ({
         <path d="m35.4181 15.1015-5.1378-8.89886-5.1377 8.89886 5.1377 8.8989z" />
       </g>
 
+      {/* Define the signature brand gradient if not in uniColor mode */}
       {!uniColor && (
         <defs>
           <linearGradient

@@ -11,6 +11,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { toast } from 'sonner';
 
+/**
+ * ResetPasswordForm Component
+ * The core logic for handling password resets.
+ * Reads a verification token from the URL and submits the new password to Better Auth.
+ */
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -19,8 +24,13 @@ function ResetPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // Extract the reset token from the URL query string
   const token = searchParams.get('token');
 
+  /**
+   * Effect: Validates the presence of the reset token on mount.
+   * If missing, redirects the user back to the forgot-password flow.
+   */
   useEffect(() => {
     if (!token) {
       toast.error('Invalid or missing reset token');
@@ -28,6 +38,10 @@ function ResetPasswordForm() {
     }
   }, [token, router]);
 
+  /**
+   * Handles the password reset submission.
+   * Performs client-side validation for password matching and strength.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -63,6 +77,9 @@ function ResetPasswordForm() {
     }
   };
 
+  /**
+   * Success View: Rendered after a successful password update.
+   */
   if (isSuccess) {
     return (
       <section className="flex min-h-screen px-4 py-16 md:py-32 bg-transparent">
@@ -73,9 +90,12 @@ function ResetPasswordForm() {
                 <CheckCircle2 className="h-6 w-6" />
               </div>
             </div>
-            <h1 className="text-xl font-semibold mb-2">Password Reset Successful</h1>
+            <h1 className="text-xl font-semibold mb-2">
+              Password Reset Successful
+            </h1>
             <p className="text-sm text-muted-foreground mb-6">
-              Your password has been successfully reset. You can now log in with your new password.
+              Your password has been successfully reset. You can now log in with
+              your new password.
             </p>
             <Button asChild className="w-full">
               <Link href="/sign-in">Back to Login</Link>
@@ -86,6 +106,9 @@ function ResetPasswordForm() {
     );
   }
 
+  /**
+   * Default View: The password reset form.
+   */
   return (
     <section className="flex min-h-screen px-4 py-16 md:py-32 bg-transparent">
       <form
@@ -97,9 +120,7 @@ function ResetPasswordForm() {
             <Link href="/" aria-label="go home">
               <LogoIcon />
             </Link>
-            <h1 className="mb-1 mt-4 text-xl font-semibold">
-              Reset Password
-            </h1>
+            <h1 className="mb-1 mt-4 text-xl font-semibold">Reset Password</h1>
             <p className="text-sm text-muted-foreground">
               Enter your new password below to reset your account access.
             </p>
@@ -107,7 +128,11 @@ function ResetPasswordForm() {
 
           <div className="mt-6 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password" title='Password' className="block text-sm">
+              <Label
+                htmlFor="password"
+                title="Password"
+                className="block text-sm"
+              >
                 New Password
               </Label>
               <Input
@@ -122,7 +147,11 @@ function ResetPasswordForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" title='Confirm Password' className="block text-sm">
+              <Label
+                htmlFor="confirmPassword"
+                title="Confirm Password"
+                className="block text-sm"
+              >
                 Confirm New Password
               </Label>
               <Input
@@ -157,15 +186,22 @@ function ResetPasswordForm() {
   );
 }
 
+/**
+ * ResetPassword Component (Entry Point)
+ * Wraps the form in a `Suspense` boundary because `useSearchParams`
+ * triggers a client-side de-optimization in Next.js.
+ */
 export default function ResetPassword() {
   return (
-    <Suspense fallback={
-      <section className="flex min-h-screen px-4 py-16 md:py-32 bg-transparent">
-        <div className="m-auto flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </section>
-    }>
+    <Suspense
+      fallback={
+        <section className="flex min-h-screen px-4 py-16 md:py-32 bg-transparent">
+          <div className="m-auto flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </section>
+      }
+    >
       <ResetPasswordForm />
     </Suspense>
   );

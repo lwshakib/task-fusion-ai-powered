@@ -3,6 +3,10 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 
+/**
+ * Global Metadata Configuration
+ * Defines SEO titles, descriptions, icons, and social media previews for the entire application.
+ */
 export const metadata: Metadata = {
   title: 'Task Fusion AI - Intelligent Task Management & Automation',
   description:
@@ -44,6 +48,11 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * RootLayout Component
+ * The top-level layout that wraps the entire application.
+ * Manages global providers: Theme (Dark/Light mode) and Toast notifications.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -51,14 +60,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className="antialiased">
+      <body className="antialiased font-sans">
+        {/* ThemeProvider manages light/dark mode based on user preference or system settings */}
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
+          {/* Main application content */}
           {children}
+
+          {/* Toaster component manages global floating notifications */}
           <Toaster />
         </ThemeProvider>
       </body>

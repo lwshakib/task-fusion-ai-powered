@@ -1,6 +1,5 @@
 'use client';
 
-
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { TextEffect } from '@/components/ui/text-effect';
 import { Brain, Zap, Layers, MessageSquare, Shield, Globe } from 'lucide-react';
@@ -11,6 +10,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
+/**
+ * Feature set data for the marketing landing page.
+ * Each feature includes a title, description, icon, and a unique gradient color theme.
+ */
 const features = [
   {
     title: 'AI Task Decomposition',
@@ -56,15 +59,22 @@ const features = [
   },
 ];
 
+/**
+ * FeaturesSection Component
+ * Showcases the core capabilities of the Task Fusion AI platform.
+ * Utilizes framer-motion based components (AnimatedGroup, TextEffect) for a premium feel.
+ */
 export const FeaturesSection = () => {
   return (
     <section className="py-24 relative overflow-hidden">
+      {/* Decorative background blurring blobs */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-30 dark:opacity-20 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[120px]" />
       </div>
 
       <div className="container mx-auto px-6 max-w-7xl">
+        {/* Animated Headline */}
         <div className="text-center mb-16 px-4">
           <TextEffect
             preset="fade-in-blur"
@@ -75,6 +85,7 @@ export const FeaturesSection = () => {
           </TextEffect>
         </div>
 
+        {/* Grid of feature cards with staggered entrance animation */}
         <AnimatedGroup
           variants={{
             container: {
@@ -101,11 +112,13 @@ export const FeaturesSection = () => {
               className="group hover:shadow-xl transition-all duration-300 border-border/50 bg-background/50 backdrop-blur-sm overflow-hidden border-t-2 border-t-transparent hover:border-t-primary/50"
             >
               <CardHeader>
+                {/* Feature Icon with Dynamic Gradient Background */}
                 <div
                   className={`w-12 h-12 rounded-xl bg-linear-to-br ${feature.color} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-lg shadow-black/5`}
                 >
                   <feature.icon className="text-white size-6" />
                 </div>
+                {/* Feature Title and Description */}
                 <CardTitle className="text-xl group-hover:text-primary transition-colors">
                   {feature.title}
                 </CardTitle>

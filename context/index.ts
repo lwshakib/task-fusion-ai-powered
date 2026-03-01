@@ -31,7 +31,9 @@ export const useTaskStore = create<TaskState>((set) => ({
   addTasks: (newTasks) =>
     set((state) => {
       const newIds = new Set(newTasks.map((t) => t.id));
-      return { tasks: [...newTasks, ...state.tasks.filter((t) => !newIds.has(t.id))] };
+      return {
+        tasks: [...newTasks, ...state.tasks.filter((t) => !newIds.has(t.id))],
+      };
     }),
   updateTask: (id, updates) =>
     set((state) => ({

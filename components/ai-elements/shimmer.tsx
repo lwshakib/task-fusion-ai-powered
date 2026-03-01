@@ -2,12 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
-import {
-  type CSSProperties,
-  type ElementType,
-  memo,
-  useMemo,
-} from 'react';
+import { type CSSProperties, type ElementType, memo, useMemo } from 'react';
 
 export type TextShimmerProps = {
   children: string;

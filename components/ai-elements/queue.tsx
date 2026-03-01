@@ -155,7 +155,10 @@ export const QueueItemImage = ({
   width: _w,
   height: _h,
   ...props
-}: { className?: string; src: string; alt?: string } & Record<string, unknown>) => {
+}: { className?: string; src: string; alt?: string } & Record<
+  string,
+  unknown
+>) => {
   void _w;
   void _h;
   return (

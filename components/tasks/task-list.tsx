@@ -34,6 +34,11 @@ import {
 import { toast } from 'sonner';
 import { useTaskStore, Task } from '@/context';
 
+/**
+ * TaskList Component
+ * The central hub for displaying and managing all tasks.
+ * Handles fetching, sorting, quick status toggling (optimistic), and detailed task viewing.
+ */
 export function TaskList() {
   const { tasks, setTasks, removeTask } = useTaskStore();
   const [loading, setLoading] = useState(true);
@@ -43,6 +48,9 @@ export function TaskList() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'priority' | 'date'>('priority');
 
+  /**
+   * Fetches the latest tasks from the server and updates the local store.
+   */
   const fetchTasks = useCallback(async () => {
     try {
       setLoading(true);
@@ -58,10 +66,14 @@ export function TaskList() {
     }
   }, [setTasks]);
 
+  // Initial fetch on mount
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
 
+  /**
+   * Sync viewTask details if the tasks list is updated (e.g. via AI tools) while the sheet is open.
+   */
   useEffect(() => {
     if (viewTask) {
       const updatedTask = tasks.find((t) => t.id === viewTask.id);
@@ -71,14 +83,18 @@ export function TaskList() {
     }
   }, [tasks, viewTask, setViewTask]);
 
+  /**
+   * Computed property: Sorts tasks based on the current user preference.
+   * Order: TODO > COMPLETED, then either Priority or Creation Date.
+   */
   const sortedTasks = [...tasks].sort((a, b) => {
-    // 1. Status: COMPLETED tasks at the bottom (Universal Rule)
+    // 1. Status: COMPLETED tasks always move to the bottom
     if (a.status !== b.status) {
       return a.status === 'COMPLETED' ? 1 : -1;
     }
 
     if (sortBy === 'priority') {
-      // 2. Priority: HIGH > MEDIUM > LOW
+      // 2. Priority: HIGH (3) > MEDIUM (2) > LOW (1)
       const priorityWeight = {
         HIGH: 3,
         MEDIUM: 2,
@@ -89,15 +105,18 @@ export function TaskList() {
       }
     }
 
-    // 3. Newest first (Primary for "date", Secondary for "priority")
+    // 3. Date: Newest first (Primary sort for "date", backup tie-breaker for "priority")
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
+  /**
+   * Handles optimistic task deletion.
+   */
   const handleDelete = async (id: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     const previousTasks = [...tasks];
     try {
-      // Optimistic update
+      // Optimistic update: Remove from UI immediately
       removeTask(id);
 
       const res = await fetch(`/api/tasks/${id}`, {
@@ -107,15 +126,18 @@ export function TaskList() {
 
       toast.success('Task deleted');
       if (viewTask?.id === id) {
-        setIsSheetOpen(false);
+        setIsSheetOpen(false); // Close details sheet if the deleted task was being viewed
       }
     } catch {
-      // Rollback
+      // Rollback UI to previous state on failure
       setTasks(previousTasks);
       toast.error('Failed to delete task');
     }
   };
 
+  /**
+   * Handles optimistic status toggling (TODO <-> COMPLETED).
+   */
   const handleStatusToggle = async (task: Task, e?: React.MouseEvent) => {
     e?.stopPropagation();
     const newStatus: 'TODO' | 'COMPLETED' =
@@ -125,7 +147,7 @@ export function TaskList() {
     const updatedTask = { ...task, status: newStatus };
     const previousTasks = [...tasks];
 
-    // Optimistic update
+    // Optimistic update: Toggle icon immediately
     setTasks(tasks.map((t) => (t.id === task.id ? updatedTask : t)));
 
     try {
@@ -139,7 +161,6 @@ export function TaskList() {
           status: newStatus,
           priority: task.priority, // Required by Zod schema if not provided? Actually PATCH usually allows partial, but our route uses full schema parse? No, let's check.
           // The route uses `taskSchema.parse(body)`. It requires title, status, priority if they are not optional in schema.
-          // In route.ts: title is required. status/priority are enums. description is optional.
           // So we should send full object just to be safe or update route to be partial.
           // Since I can't easily change route logic efficiently without verify, I'll send full data I have.
           description: task.description,
@@ -152,23 +173,32 @@ export function TaskList() {
         newStatus === 'COMPLETED' ? 'Task completed' : 'Task uncompleted',
       );
     } catch {
-      // Rollback
+      // Rollback on failure
       setTasks(previousTasks);
       toast.error('Failed to update status');
     }
   };
 
+  /**
+   * Opens the edit dialog for a specific task.
+   */
   const handleEdit = (task: Task, e?: React.MouseEvent) => {
     e?.stopPropagation();
     setSelectedTask(task);
     setIsDialogOpen(true);
   };
 
+  /**
+   * Opens the creation dialog for a new task.
+   */
   const handleCreate = () => {
     setSelectedTask(undefined);
     setIsDialogOpen(true);
   };
 
+  /**
+   * Opens the side sheet to view full task details.
+   */
   const handleTaskClick = (task: Task) => {
     setViewTask(task);
     setIsSheetOpen(true);
@@ -176,6 +206,7 @@ export function TaskList() {
 
   return (
     <div className="h-full flex flex-col bg-background">
+      {/* List Header with Sorting and Create actions */}
       <div className="flex items-center justify-between p-6 border-b">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Tasks</h1>
@@ -184,6 +215,7 @@ export function TaskList() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {/* Sorting Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
@@ -208,9 +240,11 @@ export function TaskList() {
         </div>
       </div>
 
+      {/* Main Task List Area */}
       <ScrollArea className="flex-1">
         <div className="p-6">
           {loading ? (
+            // Skeleton loader state
             <div className="space-y-1">
               {[...Array(5)].map((_, i) => (
                 <div
@@ -227,6 +261,7 @@ export function TaskList() {
               ))}
             </div>
           ) : tasks.length === 0 ? (
+            // Empty state view
             <div className="flex flex-col items-center justify-center p-8 text-muted-foreground border border-dashed rounded-lg bg-muted/20">
               <p className="mb-2">No tasks found</p>
               <Button variant="outline" size="sm" onClick={handleCreate}>
@@ -234,6 +269,7 @@ export function TaskList() {
               </Button>
             </div>
           ) : (
+            // Rendered task items
             <div className="space-y-1">
               {sortedTasks.map((task) => (
                 <div
@@ -241,6 +277,7 @@ export function TaskList() {
                   onClick={() => handleTaskClick(task)}
                   className="group flex items-center gap-4 rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer"
                 >
+                  {/* Status Toggle Button */}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -254,6 +291,7 @@ export function TaskList() {
                     )}
                   </Button>
 
+                  {/* Task Info (Title and Truncated Description) */}
                   <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center gap-2 mb-1">
                       <span
@@ -265,6 +303,7 @@ export function TaskList() {
                       >
                         {task.title}
                       </span>
+                      {/* Priority Badge */}
                       <Badge
                         variant="outline"
                         className={cn(
@@ -288,6 +327,7 @@ export function TaskList() {
                     )}
                   </div>
 
+                  {/* Meta Info (Date and More Actions) */}
                   <div className="flex items-center gap-4 text-muted-foreground text-sm shrink-0">
                     <div className="flex items-center gap-1">
                       <CalendarIcon className="size-3.5" />
@@ -296,6 +336,7 @@ export function TaskList() {
                       </span>
                     </div>
 
+                    {/* Quick Action Dropdown (Visible on Hover) */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -329,6 +370,7 @@ export function TaskList() {
         </div>
       </ScrollArea>
 
+      {/* Side Sheet for Detailed Task View */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent className="sm:max-w-md">
           <SheetHeader className="p-6">
@@ -340,6 +382,7 @@ export function TaskList() {
           </SheetHeader>
           {viewTask && (
             <div className="p-6 pt-0 space-y-6">
+              {/* Status and Priority Summary */}
               <div className="flex items-center gap-4">
                 <Badge
                   variant="outline"
@@ -369,6 +412,7 @@ export function TaskList() {
                 </div>
               </div>
 
+              {/* Full Description View */}
               {viewTask.description ? (
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium">Description</h4>
@@ -382,6 +426,7 @@ export function TaskList() {
                 </div>
               )}
 
+              {/* Action Buttons in the Sheet */}
               <div className="border-t pt-6 flex justify-end gap-2">
                 <Button
                   variant="outline"
@@ -405,6 +450,7 @@ export function TaskList() {
         </SheetContent>
       </Sheet>
 
+      {/* Shared Task Creator/Editor Dialog */}
       <TaskDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}

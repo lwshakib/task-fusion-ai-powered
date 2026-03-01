@@ -1,16 +1,23 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
+/**
+ * Loading Component
+ * Provides a skeleton UI for the Tasks page during data fetching.
+ * Imitates the layout of the main dashboard to reduce layout shift.
+ */
 export default function Loading() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
-      {/* Header Skeleton */}
+      {/* Header Skeleton: Imitates the navigation bar with logo and user controls */}
       <header className="flex h-16 shrink-0 items-center justify-between border-b px-6 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-10">
         <div className="flex items-center gap-2">
+          {/* Logo Placeholder */}
           <Skeleton className="h-8 w-8 rounded-lg" />
           <Skeleton className="h-6 w-24" />
         </div>
         <div className="flex items-center gap-4">
+          {/* Action buttons and user profile placeholders */}
           <Skeleton className="h-8 w-28 hidden sm:block" />
           <div className="h-6 w-px bg-border hidden sm:block" />
           <Skeleton className="h-8 w-8 rounded-full" />
@@ -20,9 +27,9 @@ export default function Loading() {
 
       {/* Main Content Skeleton */}
       <div className="flex-1 overflow-hidden">
-        {/* Desktop View Skeleton */}
+        {/* Desktop View Skeleton: Side-by-side Chat and Task List */}
         <div className="hidden md:flex h-full">
-          {/* Chat Panel Skeleton */}
+          {/* Chat Panel Skeleton: Left side panel for AI interaction */}
           <div className="w-[30%] border-r bg-muted/5 flex flex-col">
             <div className="flex-1 p-6 space-y-6 overflow-hidden">
               {[...Array(4)].map((_, i) => (
@@ -46,13 +53,15 @@ export default function Loading() {
                 </div>
               ))}
             </div>
+            {/* Input area placeholder */}
             <div className="p-4 mt-auto border-t bg-background">
               <Skeleton className="h-12 w-full rounded-2xl" />
             </div>
           </div>
 
-          {/* Task List Panel Skeleton */}
+          {/* Task List Panel Skeleton: Right side main workspace */}
           <div className="flex-1 flex flex-col bg-background">
+            {/* List Header Placeholder */}
             <div className="p-6 border-b flex justify-between items-start">
               <div className="space-y-2">
                 <Skeleton className="h-8 w-32" />
@@ -63,6 +72,7 @@ export default function Loading() {
                 <Skeleton className="h-8 w-24" />
               </div>
             </div>
+            {/* Individual Task Item Placeholders */}
             <div className="flex-1 p-6 space-y-4">
               {[...Array(6)].map((_, i) => (
                 <div
@@ -84,10 +94,10 @@ export default function Loading() {
           </div>
         </div>
 
-        {/* Mobile View Skeleton */}
+        {/* Mobile View Skeleton: Single column with tabbed navigation */}
         <div className="md:hidden h-full flex flex-col">
           <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Imitate active Chat tab */}
+            {/* Active Content Placeholder (defaulting to Chat layout) */}
             <div className="flex-1 p-4 space-y-6 overflow-hidden">
               {[...Array(5)].map((_, i) => (
                 <div
@@ -114,7 +124,7 @@ export default function Loading() {
               <Skeleton className="h-12 w-full rounded-2xl" />
             </div>
           </div>
-          {/* Mobile Tab Bar Skeleton */}
+          {/* Mobile Tab Bar Skeleton indicator */}
           <div className="h-16 border-t flex items-center px-4 gap-4 bg-background">
             <Skeleton className="h-10 flex-1 rounded-md" />
             <Skeleton className="h-10 flex-1 rounded-md" />

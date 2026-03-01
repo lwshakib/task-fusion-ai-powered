@@ -1,8 +1,8 @@
 ---
 name: 🚀 Feature Request
 about: Suggest an idea for the Task Fusion AI project
-title: "[FEAT] "
-labels: ["enhancement"]
+title: '[FEAT] '
+labels: ['enhancement']
 assignees: []
 ---
 

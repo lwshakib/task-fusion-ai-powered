@@ -6,6 +6,10 @@ import { cn } from '@/lib/utils';
 import { ChevronsUpDown } from 'lucide-react';
 import Link from 'next/link';
 
+/**
+ * Navigation links grouped by category for the footer.
+ * Organizes product, solutions, company, and legal information.
+ */
 const links = [
   {
     group: 'Product',
@@ -46,15 +50,22 @@ const links = [
   },
 ];
 
+/**
+ * FooterSection Component
+ * The global footer for the application.
+ * Includes logo, social media links, structured navigation, newsletter signup, and localization options.
+ */
 export default function FooterSection() {
   return (
     <footer className="border-t bg-background/50 backdrop-blur-md pt-20">
       <div className="mx-auto max-w-7xl px-6">
+        {/* Top Section: Logo and Social Links */}
         <div className="flex flex-wrap items-center justify-between gap-6 pb-12">
           <Link href="/" aria-label="go home" className="block size-fit">
             <Logo />
           </Link>
           <div className="flex flex-wrap items-center gap-6">
+            {/* Social Media SVG Icons */}
             <Link
               href="#"
               target="_blank"
@@ -183,7 +194,9 @@ export default function FooterSection() {
           </div>
         </div>
 
+        {/* Middle Section: Navigation Grid and Newsletter */}
         <div className="grid gap-12 md:grid-cols-5 md:gap-0 lg:grid-cols-4 pb-12">
+          {/* Main Links Grid */}
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 md:col-span-5 lg:col-span-3">
             {links.map((link, index) => (
               <div key={index} className="space-y-4 text-sm">
@@ -204,6 +217,7 @@ export default function FooterSection() {
             ))}
           </div>
 
+          {/* Newsletter Form */}
           <div className="md:col-span-2 lg:col-span-1">
             <form className="space-y-4">
               <Label htmlFor="mail" className="block font-semibold text-sm">
@@ -225,6 +239,7 @@ export default function FooterSection() {
           </div>
         </div>
 
+        {/* Bottom Section: Copyright and Language Picker */}
         <div className="mt-12 flex flex-wrap items-center justify-between gap-6 border-t py-8">
           <small className="text-muted-foreground block text-sm">
             © {new Date().getFullYear()} Task Fusion AI. All rights reserved.

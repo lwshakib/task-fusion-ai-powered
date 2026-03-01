@@ -1,6 +1,6 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '@playwright/test';
 
 test('home page has correct title', async ({ page }) => {
-  await page.goto('/')
-  await expect(page).toHaveTitle(/Task Fusion AI/)
-})
+  await page.goto('/');
+  await expect(page).toHaveTitle(/Task Fusion AI/);
+});

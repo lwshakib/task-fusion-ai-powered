@@ -23,17 +23,33 @@ import {
 } from '@/components/ui/alert-dialog';
 import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
-import { LogOut, User, Settings, LayoutDashboard, CreditCard } from 'lucide-react';
+import {
+  LogOut,
+  User,
+  Settings,
+  LayoutDashboard,
+  CreditCard,
+} from 'lucide-react';
 import Link from 'next/link';
 
+/**
+ * UserNav Component
+ * Provides a user menu with profile info, app links (Account, Billing), and sign-out functionality.
+ * Integrates with Better Auth SDK for session and sign-out management.
+ */
 export function UserNav() {
   const { data: session } = authClient.useSession();
   const router = useRouter();
 
+  // Guard: If no active session, hide the nav menu
   if (!session) return null;
 
   const user = session.user;
 
+  /**
+   * Handles the sign-out process using the Better Auth client.
+   * Redirects to the sign-in page upon successful logout.
+   */
   const handleSignOut = async () => {
     await authClient.signOut({
       fetchOptions: {
@@ -48,6 +64,7 @@ export function UserNav() {
     <div className="flex items-center gap-2">
       <AlertDialog>
         <DropdownMenu>
+          {/* User Profile Trigger Button */}
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
               <Avatar className="h-9 w-9">
@@ -60,7 +77,10 @@ export function UserNav() {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
+
+          {/* User Menu Content */}
           <DropdownMenuContent className="w-56" align="end" forceMount>
+            {/* Header: User Info Summary */}
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">{user.name}</p>
@@ -70,6 +90,8 @@ export function UserNav() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+
+            {/* Main App Navigation Links */}
             <DropdownMenuItem asChild>
               <Link href="/tasks" className="flex items-center">
                 <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -88,7 +110,10 @@ export function UserNav() {
                 <span>Billing</span>
               </Link>
             </DropdownMenuItem>
+
             <DropdownMenuSeparator />
+
+            {/* Logout Action (Protected by AlertDialog) */}
             <AlertDialogTrigger asChild>
               <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
@@ -98,16 +123,21 @@ export function UserNav() {
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Global Sign-out Confirmation Modal */}
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Are you sure you want to log out?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               You will be redirected to the sign-in page.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSignOut}>Continue</AlertDialogAction>
+            <AlertDialogAction onClick={handleSignOut}>
+              Continue
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

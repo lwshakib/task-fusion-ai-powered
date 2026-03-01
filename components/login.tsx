@@ -11,6 +11,12 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+/**
+ * LoginPage Component
+ * Provides a unified interface for users to sign in via email/password
+ * or social providers (Google).
+ * Integrates with Better Auth for authentication logic and session management.
+ */
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -18,6 +24,10 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
+  /**
+   * Handles traditional email/password sign-in.
+   * On success, redirects the user to the main tasks dashboard.
+   */
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -43,6 +53,10 @@ export default function LoginPage() {
     }
   };
 
+  /**
+   * Initiates the OAuth flow with Google.
+   * Better Auth handles the redirect and callback logic.
+   */
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
@@ -63,6 +77,7 @@ export default function LoginPage() {
         className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)]"
       >
         <div className="p-8 pb-6">
+          {/* Header and Branding */}
           <div>
             <Link href="/" aria-label="go home">
               <LogoIcon />
@@ -73,6 +88,7 @@ export default function LoginPage() {
             <p className="text-sm">Welcome back! Sign in to continue</p>
           </div>
 
+          {/* Social Login Options */}
           <div className="mt-6 grid grid-cols-2 gap-3">
             <Button
               type="button"
@@ -109,6 +125,7 @@ export default function LoginPage() {
               )}
               <span>Google</span>
             </Button>
+            {/* Placeholder for future Microsoft auth integration */}
             <Button type="button" variant="outline" disabled>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -133,7 +150,9 @@ export default function LoginPage() {
 
           <hr className="my-4 border-dashed" />
 
+          {/* Email Sign In Form */}
           <div className="space-y-6">
+            {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email" className="block text-sm">
                 Email
@@ -149,6 +168,7 @@ export default function LoginPage() {
               />
             </div>
 
+            {/* Password Field with Forgot Link */}
             <div className="space-y-0.5">
               <div className="flex items-center justify-between">
                 <Label htmlFor="pwd" className="text-sm">
@@ -161,7 +181,6 @@ export default function LoginPage() {
                   >
                     Forgot your Password ?
                   </Link>
-
                 </Button>
               </div>
               <Input
@@ -175,6 +194,7 @@ export default function LoginPage() {
               />
             </div>
 
+            {/* Submit Button */}
             <Button
               type="submit"
               className="w-full"
@@ -192,6 +212,7 @@ export default function LoginPage() {
           </div>
         </div>
 
+        {/* Footnote: Navigation to Sign Up */}
         <div className="bg-muted rounded-(--radius) border p-3">
           <p className="text-accent-foreground text-center text-sm">
             Don&apos;t have an account ?

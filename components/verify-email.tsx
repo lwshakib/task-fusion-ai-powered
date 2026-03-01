@@ -103,13 +103,15 @@ function VerifyEmailContent() {
 
 export default function VerifyEmail() {
   return (
-    <Suspense fallback={
-      <section className="flex min-h-screen px-4 py-16 md:py-32 bg-transparent">
-        <div className="m-auto flex items-center justify-center text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </section>
-    }>
+    <Suspense
+      fallback={
+        <section className="flex min-h-screen px-4 py-16 md:py-32 bg-transparent">
+          <div className="m-auto flex items-center justify-center text-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </section>
+      }
+    >
       <VerifyEmailContent />
     </Suspense>
   );

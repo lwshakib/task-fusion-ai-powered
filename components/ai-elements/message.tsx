@@ -18,7 +18,15 @@ import {
   XIcon,
 } from 'lucide-react';
 import type { ComponentProps, HTMLAttributes, ReactElement } from 'react';
-import { Children, createContext, memo, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  Children,
+  createContext,
+  memo,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Streamdown } from 'streamdown';
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {

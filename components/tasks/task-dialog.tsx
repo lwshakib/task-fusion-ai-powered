@@ -30,6 +30,11 @@ interface TaskDialogProps {
   onSuccess: () => void;
 }
 
+/**
+ * TaskDialog Component
+ * A modal dialog used to either create a new task or edit an existing one.
+ * Orchestrates form state management and API calls for task persistence.
+ */
 export function TaskDialog({
   open,
   onOpenChange,
@@ -44,6 +49,9 @@ export function TaskDialog({
     priority: 'MEDIUM',
   });
 
+  /**
+   * Synchronize form state with the selected task whenever the dialog opens or the task changes.
+   */
   useEffect(() => {
     if (task) {
       setFormData({
@@ -53,6 +61,7 @@ export function TaskDialog({
         priority: task.priority,
       });
     } else {
+      // Default state for creating a new task
       setFormData({
         title: '',
         description: '',
@@ -62,6 +71,10 @@ export function TaskDialog({
     }
   }, [task, open]);
 
+  /**
+   * Handles form submission to the Tasks API.
+   * Dynamically determines whether to use POST (create) or PATCH (update).
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -79,14 +92,14 @@ export function TaskDialog({
       });
 
       if (!res.ok) {
-        throw new Error('Something went wrong');
+        throw new Error('Something went wrong during task persistence');
       }
 
       toast.success(task ? 'Task updated' : 'Task created');
-      onSuccess();
-      onOpenChange(false);
+      onSuccess(); // Triggers a re-fetch in the TaskList component
+      onOpenChange(false); // Close the dialog
     } catch {
-      toast.error('Failed to save task');
+      toast.error('Failed to save task. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -95,6 +108,7 @@ export function TaskDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
+        {/* Modal Heading */}
         <DialogHeader>
           <DialogTitle>{task ? 'Edit Task' : 'Create Task'}</DialogTitle>
           <DialogDescription>
@@ -103,7 +117,10 @@ export function TaskDialog({
               : 'Add a new task to your list.'}
           </DialogDescription>
         </DialogHeader>
+
+        {/* Task Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Title Field */}
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input
@@ -116,6 +133,8 @@ export function TaskDialog({
               required
             />
           </div>
+
+          {/* Description Field (Optional) */}
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
@@ -127,7 +146,10 @@ export function TaskDialog({
               placeholder="Task description"
             />
           </div>
+
+          {/* Status and Priority Controls */}
           <div className="grid grid-cols-2 gap-4">
+            {/* Status Select */}
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <Select
@@ -145,6 +167,8 @@ export function TaskDialog({
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Priority Select */}
             <div className="space-y-2">
               <Label htmlFor="priority">Priority</Label>
               <Select
@@ -164,6 +188,8 @@ export function TaskDialog({
               </Select>
             </div>
           </div>
+
+          {/* Modal Footer Actions */}
           <DialogFooter>
             <Button
               type="button"

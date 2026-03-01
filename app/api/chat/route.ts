@@ -1,13 +1,18 @@
 import { streamText } from '@/llm/streamText';
-
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { MESSAGE_ROLE } from '@/generated/prisma/enums';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
+/**
+ * POST /api/chat
+ * Handles incoming AI chat requests, implements rate limiting,
+ * persists user messages, and streams the AI response.
+ */
 export async function POST(req: Request) {
   try {
+    // 1. Authenticate the request using better-auth session
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -16,7 +21,7 @@ export async function POST(req: Request) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    // Rate limiting: 10 messages per day
+    // 2. Implement Rate Limiting: Max 10 messages per day for free tier
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { dailyMessageCount: true, lastMessageReset: true },
@@ -27,14 +32,18 @@ export async function POST(req: Request) {
     }
 
     const now = new Date();
-    const lastReset = user.lastMessageReset ? new Date(user.lastMessageReset) : null;
+    const lastReset = user.lastMessageReset
+      ? new Date(user.lastMessageReset)
+      : null;
 
     let currentCount = user.dailyMessageCount;
     let resetDate = lastReset;
 
-    const isNewDay = !lastReset || 
-      now.getFullYear() !== lastReset.getFullYear() || 
-      now.getMonth() !== lastReset.getMonth() || 
+    // Check if a new day has started to reset the daily count
+    const isNewDay =
+      !lastReset ||
+      now.getFullYear() !== lastReset.getFullYear() ||
+      now.getMonth() !== lastReset.getMonth() ||
       now.getDate() !== lastReset.getDate();
 
     if (isNewDay) {
@@ -42,17 +51,19 @@ export async function POST(req: Request) {
       resetDate = now;
     }
 
+    // Block the request if the daily limit is reached
     if (currentCount >= 10) {
       return NextResponse.json(
-        { 
-          error: 'Daily limit reached', 
-          message: 'You have reached your limit of 10 messages per day. Please upgrade your plan to continue.' 
-        }, 
-        { status: 403 }
+        {
+          error: 'Daily limit reached',
+          message:
+            'You have reached your limit of 10 messages per day. Please upgrade your plan to continue.',
+        },
+        { status: 403 },
       );
     }
 
-    // Increment count
+    // 3. Increment the daily message count for the user
     await prisma.user.update({
       where: { id: session.user.id },
       data: {
@@ -61,9 +72,10 @@ export async function POST(req: Request) {
       },
     });
 
+    // 4. Parse messages from request body
     const { messages } = await req.json();
 
-    // Get the last message (user's current message)
+    // Validate that the request contains a valid user message
     const lastMessage = messages[messages.length - 1];
     if (!lastMessage || lastMessage.role !== 'user') {
       return NextResponse.json(
@@ -72,11 +84,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // Ensure parts exist, fallback to content if possible or empty array
+    // Format parts for database storage (supports text and multi-modal in future)
     const parts =
       lastMessage.parts ||
       (lastMessage.content ? [{ text: lastMessage.content }] : []);
 
+    // 5. Persist the user's message to the database
     await prisma.message.create({
       data: {
         role: MESSAGE_ROLE.user,
@@ -85,17 +98,21 @@ export async function POST(req: Request) {
       },
     });
 
+    // 6. Initiate the AI streaming process
     const result = await streamText(messages, session.user.id);
 
-    // Create a custom response that saves the assistant message after streaming
+    // 7. Return the UI-compatible stream response
     const response = result.toUIMessageStreamResponse({
-      sendReasoning: true,
-      sendSources: true,
+      sendReasoning: true, // Include the AI's "thought" process if available
+      sendSources: true, // Include any referenced context sources
     });
 
     return response;
   } catch (error) {
-    console.error('[CHAT]', error);
-    return NextResponse.json({ error: 'Failed to chat' }, { status: 500 });
+    console.error('[CHAT_ERROR]', error);
+    return NextResponse.json(
+      { error: 'An internal server error occurred during chat' },
+      { status: 500 },
+    );
   }
 }

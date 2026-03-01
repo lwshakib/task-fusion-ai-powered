@@ -40,35 +40,65 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+/**
+ * AccountPage Component
+ * Handles user profile management, active session tracking, and account deletion.
+ */
 export default function AccountPage() {
-  const { data: session, isPending: isSessionPending } = authClient.useSession();
+  // Authentication session data
+  const { data: session, isPending: isSessionPending } =
+    authClient.useSession();
+
+  // State for profile name update
   const [isUpdatingName, setIsUpdatingName] = useState(false);
   const [userName, setUserName] = useState('');
-  const [sessions, setSessions] = useState<{ token: string; userAgent?: string; updatedAt: string }[]>([]);
+
+  // State for active user sessions
+  const [sessions, setSessions] = useState<
+    { token: string; userAgent?: string; updatedAt: string }[]
+  >([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
+
   const router = useRouter();
 
+  // Initialize userName state when session data is available
   useEffect(() => {
     if (session?.user?.name) {
       setUserName(session.user.name);
     }
   }, [session]);
 
+  // Fetch active sessions for the current user
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        if (typeof (authClient as unknown as Record<string, unknown>).listSessions === 'function') {
-          const res = await (authClient as unknown as { listSessions: () => Promise<unknown> }).listSessions();
+        // Safe check for listSessions method on authClient
+        if (
+          typeof (authClient as unknown as Record<string, unknown>)
+            .listSessions === 'function'
+        ) {
+          const res = await (
+            authClient as unknown as { listSessions: () => Promise<unknown> }
+          ).listSessions();
           // better-auth returns { data: [...] } — extract the array safely
           const resObj = res as Record<string, unknown> | undefined;
-          const list = Array.isArray(res) ? res : Array.isArray(resObj?.data) ? resObj.data : [];
-          setSessions(list as { token: string; userAgent?: string; updatedAt: string }[]);
+          const list = Array.isArray(res)
+            ? res
+            : Array.isArray(resObj?.data)
+              ? resObj.data
+              : [];
+          setSessions(
+            list as { token: string; userAgent?: string; updatedAt: string }[],
+          );
         } else {
-          // Fallback: show current session only
+          // Fallback: show current session only if listSessions is not available
           setSessions([
             {
               token: session?.session.token ?? '',
-              userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'Current Session',
+              userAgent:
+                typeof window !== 'undefined'
+                  ? navigator.userAgent
+                  : 'Current Session',
               updatedAt: new Date().toISOString(),
             },
           ]);
@@ -85,6 +115,9 @@ export default function AccountPage() {
     }
   }, [session]);
 
+  /**
+   * Updates the user's display name
+   */
   const handleUpdateName = async () => {
     if (!userName.trim()) return;
     setIsUpdatingName(true);
@@ -101,9 +134,18 @@ export default function AccountPage() {
     }
   };
 
+  /**
+   * Revokes a specific active session
+   * @param token - The unique token of the session to revoke
+   */
   const handleRevokeSession = async (token: string) => {
     try {
-      await (authClient as unknown as { revokeSession: (opts: { token: string }) => Promise<void> }).revokeSession({ token });
+      await (
+        authClient as unknown as {
+          revokeSession: (opts: { token: string }) => Promise<void>;
+        }
+      ).revokeSession({ token });
+      // Remove the revoked session from local state
       setSessions((prev) => prev.filter((s) => s.token !== token));
       toast.success('Session revoked');
     } catch (err) {
@@ -112,10 +154,14 @@ export default function AccountPage() {
     }
   };
 
+  /**
+   * Completely deletes the user's account and all associated data
+   */
   const handleDeleteAccount = async () => {
     try {
       await authClient.deleteUser();
       toast.success('Account deleted successfully');
+      // Redirect to sign-in page after deletion
       router.push('/sign-in');
     } catch (err) {
       toast.error('Failed to delete account');
@@ -123,6 +169,7 @@ export default function AccountPage() {
     }
   };
 
+  // Show loading state while session is being verified
   if (isSessionPending) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -131,6 +178,7 @@ export default function AccountPage() {
     );
   }
 
+  // Redirect to sign-in if no active session is found
   if (!session) {
     router.replace('/sign-in');
     return null;
@@ -138,6 +186,7 @@ export default function AccountPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      {/* Header with navigation back to tasks and account utilities */}
       <header className="sticky top-0 flex h-16 shrink-0 items-center justify-between px-6 bg-background/95 backdrop-blur-md border-b z-20">
         <Link
           href="/tasks"
@@ -156,14 +205,16 @@ export default function AccountPage() {
       <main className="flex-1 p-6 md:p-10">
         <div className="mx-auto max-w-4xl space-y-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Account Settings
+            </h1>
             <p className="text-muted-foreground">
               Manage your account settings and active sessions.
             </p>
           </div>
 
           <div className="grid gap-8">
-            {/* Profile Section */}
+            {/* Profile Management Section */}
             <Card>
               <CardHeader>
                 <CardTitle>Profile</CardTitle>
@@ -172,6 +223,7 @@ export default function AccountPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Email field (read-only for security) */}
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -184,6 +236,7 @@ export default function AccountPage() {
                     Email address cannot be changed.
                   </p>
                 </div>
+                {/* Editable Name field */}
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <Input
@@ -207,7 +260,7 @@ export default function AccountPage() {
               </CardFooter>
             </Card>
 
-            {/* Connected Accounts */}
+            {/* External Authentication Providers section */}
             <Card>
               <CardHeader>
                 <CardTitle>Connected Accounts</CardTitle>
@@ -216,7 +269,7 @@ export default function AccountPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Simplified list based on available providers in auth.ts (Google) */}
+                {/* Google Connection (Currently active) */}
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="size-8 bg-zinc-100 dark:bg-zinc-800 rounded flex items-center justify-center font-bold">
@@ -230,6 +283,7 @@ export default function AccountPage() {
                   <CheckCircle2 className="size-5 text-green-500" />
                 </div>
 
+                {/* Microsoft Connection (Placeholder for future use) */}
                 <div className="flex items-center justify-between p-4 border rounded-lg opacity-50">
                   <div className="flex items-center gap-3">
                     <div className="size-8 bg-zinc-100 dark:bg-zinc-800 rounded flex items-center justify-center font-bold">
@@ -237,14 +291,16 @@ export default function AccountPage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium">Microsoft</p>
-                      <p className="text-xs text-muted-foreground">Not available right now</p>
+                      <p className="text-xs text-muted-foreground">
+                        Not available right now
+                      </p>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Sessions Section */}
+            {/* Active Login Sessions Monitoring Section */}
             <Card>
               <CardHeader>
                 <CardTitle>Active Sessions</CardTitle>
@@ -279,6 +335,7 @@ export default function AccountPage() {
                           <div>
                             <p className="text-sm font-medium">
                               {sess.userAgent || 'Unknown Device'}
+                              {/* Label for the current browser session */}
                               {sess.token === session.session.token && (
                                 <span className="ml-2 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded-full">
                                   Current
@@ -286,10 +343,12 @@ export default function AccountPage() {
                               )}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              Last active: {new Date(sess.updatedAt).toLocaleDateString()}
+                              Last active:{' '}
+                              {new Date(sess.updatedAt).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
+                        {/* Option to revoke other (non-current) sessions */}
                         {sess.token !== session.session.token && (
                           <Button
                             variant="ghost"
@@ -307,7 +366,7 @@ export default function AccountPage() {
               </CardContent>
             </Card>
 
-            {/* Danger Zone */}
+            {/* Account Deletion Section (High Risk) */}
             <Card className="border-destructive/50">
               <CardHeader>
                 <CardTitle className="text-destructive">Danger Zone</CardTitle>
@@ -325,6 +384,7 @@ export default function AccountPage() {
                 </div>
               </CardContent>
               <CardFooter>
+                {/* Confirmation dialog for account deletion */}
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive">
@@ -334,10 +394,13 @@ export default function AccountPage() {
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete your
-                        account and remove your data from our servers.
+                        This action cannot be undone. This will permanently
+                        delete your account and remove your data from our
+                        servers.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

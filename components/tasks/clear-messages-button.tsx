@@ -16,10 +16,19 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
+/**
+ * ClearMessagesButton Component
+ * Provides a UI to permanently delete the user's chat history.
+ * Includes a confirmation dialog to prevent accidental deletion.
+ */
 export function ClearMessagesButton() {
   const [isClearing, setIsClearing] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
+  /**
+   * Sends a DELETE request to clear the server-side message history
+   * and dispatches a local event to update the UI.
+   */
   const handleClear = async () => {
     setIsClearing(true);
     try {
@@ -28,7 +37,7 @@ export function ClearMessagesButton() {
       });
 
       if (response.ok) {
-        // Dispatch custom event to notify ChatInterface
+        // Notify ChatInterface and other listeners to clear their local states
         window.dispatchEvent(new CustomEvent('clear-chat'));
         toast.success('Chat history cleared');
       } else {
@@ -45,6 +54,7 @@ export function ClearMessagesButton() {
 
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+      {/* Trigger button for the alert dialog */}
       <AlertDialogTrigger asChild>
         <Button
           variant="ghost"
@@ -56,6 +66,8 @@ export function ClearMessagesButton() {
           <span className="hidden sm:inline">Clear Chat</span>
         </Button>
       </AlertDialogTrigger>
+
+      {/* Confirmation Dialog Content */}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -68,6 +80,7 @@ export function ClearMessagesButton() {
           <AlertDialogCancel disabled={isClearing}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
+              // Prevent default to handle the async clearing process manually
               e.preventDefault();
               handleClear();
             }}

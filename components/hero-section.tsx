@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,10 @@ import { TextEffect } from '@/components/ui/text-effect';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { HeroHeader } from './header';
 
+/**
+ * Standard animation variants for staggered entrance effects.
+ * Used for fading in and slightly moving elements upwards.
+ */
 const transitionVariants = {
   item: {
     hidden: {
@@ -27,11 +30,18 @@ const transitionVariants = {
   },
 } as const;
 
+/**
+ * HeroSection Component
+ * The primary landing page section. Contains a high-impact headline,
+ * descriptive subtext, and clear calls to action.
+ * Features advanced animations and SVG/CSS-based decorative backgrounds.
+ */
 export default function HeroSection() {
   return (
     <>
       <HeroHeader />
       <main className="overflow-hidden">
+        {/* Decorative background gradients (Desktop only) */}
         <div
           aria-hidden
           className="absolute inset-0 isolate hidden opacity-65 contain-strict lg:block"
@@ -42,6 +52,7 @@ export default function HeroSection() {
         </div>
         <section>
           <div className="relative pt-24 md:pt-36">
+            {/* Background Image with entrance animation */}
             <AnimatedGroup
               variants={
                 {
@@ -80,6 +91,7 @@ export default function HeroSection() {
               />
             </AnimatedGroup>
 
+            {/* Bottom-to-top background fade to ensure content readability */}
             <div
               aria-hidden
               className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--color-background)_75%)]"
@@ -87,6 +99,7 @@ export default function HeroSection() {
 
             <div className="mx-auto max-w-7xl px-6">
               <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
+                {/* Product Badge / Announcement */}
                 <AnimatedGroup variants={transitionVariants}>
                   <Link
                     href="/tasks"
@@ -97,6 +110,7 @@ export default function HeroSection() {
                     </span>
                     <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
 
+                    {/* Animated arrow icon on hover */}
                     <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
                       <div className="flex w-12 -translate-x-1/2 duration-500 ease-in-out group-hover:translate-x-0">
                         <span className="flex size-6">
@@ -110,6 +124,7 @@ export default function HeroSection() {
                   </Link>
                 </AnimatedGroup>
 
+                {/* Main Headline with character/word animation */}
                 <TextEffect
                   preset="fade-in-blur"
                   speedSegment={0.3}
@@ -118,6 +133,7 @@ export default function HeroSection() {
                 >
                   Unleash the Power of AI-Driven Task Fusion
                 </TextEffect>
+                {/* Subheadline with line-by-line animation */}
                 <TextEffect
                   per="line"
                   preset="fade-in-blur"
@@ -131,6 +147,7 @@ export default function HeroSection() {
                   agents that understand your workflow.
                 </TextEffect>
 
+                {/* CTA Button Group */}
                 <AnimatedGroup
                   variants={
                     {
@@ -176,6 +193,7 @@ export default function HeroSection() {
               </div>
             </div>
 
+            {/* Application Preview Image (Light/Dark mode responsive) */}
             <AnimatedGroup
               variants={
                 {

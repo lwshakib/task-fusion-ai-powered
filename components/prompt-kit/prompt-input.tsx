@@ -16,6 +16,16 @@ import React, {
   useState,
 } from 'react';
 
+/**
+ * PromptInput System
+ * A modular, context-driven input kit for building advanced chat/prompt interfaces.
+ * Features auto-resizing textareas, standard action groupings, and built-in tooltips.
+ */
+
+/**
+ * Context type for the PromptInput system.
+ * Shares input state and configuration across nested components (Textarea, Actions).
+ */
 type PromptInputContextType = {
   isLoading: boolean;
   value: string;
@@ -26,6 +36,7 @@ type PromptInputContextType = {
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 };
 
+// Internal context for the PromptInput components
 const PromptInputContext = createContext<PromptInputContextType>({
   isLoading: false,
   value: '',
@@ -36,6 +47,9 @@ const PromptInputContext = createContext<PromptInputContextType>({
   textareaRef: React.createRef<HTMLTextAreaElement>(),
 });
 
+/**
+ * Internal hook to consume the PromptInput context.
+ */
 function usePromptInput() {
   return useContext(PromptInputContext);
 }
@@ -51,6 +65,11 @@ export type PromptInputProps = {
   disabled?: boolean;
 } & React.ComponentProps<'div'>;
 
+/**
+ * PromptInput (Root Component)
+ * Provides the context and the main styled container for the input kit.
+ * Clicking anywhere in the container triggers focus on the nested textarea.
+ */
 function PromptInput({
   className,
   isLoading = false,
@@ -63,14 +82,21 @@ function PromptInput({
   onClick,
   ...props
 }: PromptInputProps) {
+  // Local state for when the component is used in an uncontrolled manner
   const [internalValue, setInternalValue] = useState(value || '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  /**
+   * Internal change handler to bridge controlled/uncontrolled usage
+   */
   const handleChange = (newValue: string) => {
     setInternalValue(newValue);
     onValueChange?.(newValue);
   };
 
+  /**
+   * Focus Logic: Ensures that clicking anywhere in the container focuses the textarea.
+   */
   const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
     if (!disabled) textareaRef.current?.focus();
     onClick?.(e);
@@ -106,9 +132,15 @@ function PromptInput({
 }
 
 export type PromptInputTextareaProps = {
+  /** Prevents the textarea from expanding vertically as the user types. */
   disableAutosize?: boolean;
 } & React.ComponentProps<typeof Textarea>;
 
+/**
+ * PromptInputTextarea Component
+ * A specialized textarea that dynamically adjusts its height based on the text.
+ * Triggers `onSubmit` when the user presses Enter (without Shift).
+ */
 function PromptInputTextarea({
   className,
   onKeyDown,
@@ -118,6 +150,10 @@ function PromptInputTextarea({
   const { value, setValue, maxHeight, onSubmit, disabled, textareaRef } =
     usePromptInput();
 
+  /**
+   * Height Adjustment Logic:
+   * Dynamically sets the height based on scrollHeight, constrained by `maxHeight`.
+   */
   const adjustHeight = (el: HTMLTextAreaElement | null) => {
     if (!el || disableAutosize) return;
 
@@ -130,11 +166,17 @@ function PromptInputTextarea({
     }
   };
 
+  /**
+   * Ref Hook: Captures the element and performs initial height adjustment.
+   */
   const handleRef = (el: HTMLTextAreaElement | null) => {
     textareaRef.current = el;
     adjustHeight(el);
   };
 
+  /**
+   * Reactivity: Synchronizes height whenever the text value or maxHeight changes.
+   */
   useLayoutEffect(() => {
     if (!textareaRef.current || disableAutosize) return;
 
@@ -146,14 +188,21 @@ function PromptInputTextarea({
     } else {
       el.style.height = `min(${el.scrollHeight}px, ${maxHeight})`;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, maxHeight, disableAutosize]);
 
+  /**
+   * Change Handler: Updates state and recalculates height.
+   */
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     adjustHeight(e.target);
     setValue(e.target.value);
   };
 
+  /**
+   * Keystroke Logic:
+   * - Enter (no Shift): Triggers form submission/send message.
+   * - Shift + Enter: Standard newline behavior.
+   */
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -181,6 +230,10 @@ function PromptInputTextarea({
 
 export type PromptInputActionsProps = React.HTMLAttributes<HTMLDivElement>;
 
+/**
+ * PromptInputActions (Container)
+ * A flexbox grouping for action buttons like attachments or send.
+ */
 function PromptInputActions({
   children,
   className,
@@ -200,6 +253,11 @@ export type PromptInputActionProps = {
   side?: 'top' | 'bottom' | 'left' | 'right';
 } & React.ComponentProps<typeof Tooltip>;
 
+/**
+ * PromptInputAction (Individual Action)
+ * Wraps action buttons with Tooltip functionality.
+ * Prevents click propagation to the root container to avoid focus conflicts.
+ */
 function PromptInputAction({
   tooltip,
   children,
@@ -214,6 +272,11 @@ function PromptInputAction({
       <TooltipTrigger
         asChild
         disabled={disabled}
+        /**
+         * Event Management:
+         * Prevents the root PromptInput's handleClick (which focuses the textarea)
+         * from interfering with the action button's own click event.
+         */
         onClick={(event) => event.stopPropagation()}
       >
         {children}

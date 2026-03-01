@@ -10,6 +10,12 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+/**
+ * SignUp Component
+ * Provides a user registration interface supporting both email/password
+ * and Google OAuth.
+ * Handles the multi-step flow: data entry -> email verification trigger -> confirmation view.
+ */
 export default function SignUp() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -19,6 +25,10 @@ export default function SignUp() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
 
+  /**
+   * Handles traditional email registration.
+   * On success, Better Auth sends a verification email and we switch to the "Check Email" UI.
+   */
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -45,6 +55,9 @@ export default function SignUp() {
     }
   };
 
+  /**
+   * Initiates Google Social Sign-Up.
+   */
   const handleGoogleSignUp = async () => {
     setIsGoogleLoading(true);
     try {
@@ -58,6 +71,9 @@ export default function SignUp() {
     }
   };
 
+  /**
+   * Post-Registration View: Prompting the user to verify their email.
+   */
   if (isEmailSent) {
     return (
       <section className="flex min-h-screen px-4 py-16 md:py-32 bg-transparent">
@@ -69,11 +85,17 @@ export default function SignUp() {
           </div>
           <h1 className="text-xl font-semibold mb-2">Check your email</h1>
           <p className="text-sm text-muted-foreground mb-6">
-            We&apos;ve sent a verification link to <span className="font-medium text-foreground">{email}</span>. You must verify your email before you can log in.
+            We&apos;ve sent a verification link to{' '}
+            <span className="font-medium text-foreground">{email}</span>. You
+            must verify your email before you can log in.
           </p>
           <div className="space-y-3">
             <Button asChild className="w-full">
-              <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer">
+              <a
+                href="https://mail.google.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Go to Gmail
               </a>
             </Button>
@@ -86,14 +108,17 @@ export default function SignUp() {
     );
   }
 
-
+  /**
+   * Default View: The registration form.
+   */
   return (
-    <section className="flex min-h-screen  px-4 py-16 md:py-32 bg-transparent">
+    <section className="flex min-h-screen px-4 py-16 md:py-32 bg-transparent">
       <form
         onSubmit={handleEmailSignUp}
         className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)]"
       >
         <div className="p-8 pb-6">
+          {/* Header and Branding */}
           <div>
             <Link href="/" aria-label="go home">
               <LogoIcon />
@@ -104,6 +129,7 @@ export default function SignUp() {
             <p className="text-sm">Welcome! Create an account to get started</p>
           </div>
 
+          {/* Social Sign-Up Section */}
           <div className="mt-6 grid grid-cols-2 gap-3">
             <Button
               type="button"
@@ -140,6 +166,7 @@ export default function SignUp() {
               )}
               <span>Google</span>
             </Button>
+            {/* Placeholder for future auth methods */}
             <Button type="button" variant="outline" disabled>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -164,6 +191,7 @@ export default function SignUp() {
 
           <hr className="my-4 border-dashed" />
 
+          {/* Email Registration Fields */}
           <div className="space-y-5">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
@@ -243,6 +271,7 @@ export default function SignUp() {
           </div>
         </div>
 
+        {/* Footnote: Navigation to Login */}
         <div className="bg-muted rounded-(--radius) border p-3">
           <p className="text-accent-foreground text-center text-sm">
             Have an account ?
