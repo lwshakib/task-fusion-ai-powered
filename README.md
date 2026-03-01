@@ -1,4 +1,4 @@
-# Task Fusion AI 🚀
+# <img src="./public/logo.svg" width="40" height="40" align="center" /> Task Fusion AI
 
 [![Made with Bun](https://img.shields.io/badge/Bun-%23000000.svg?style=for-the-badge&logo=bun&logoColor=white)](https://bun.sh)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org)
