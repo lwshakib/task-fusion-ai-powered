@@ -98,9 +98,14 @@ export const SolutionSection = () => {
               </div>
 
               {/* Floating AI badge */}
-              <div className="absolute bottom-12 right-12 bg-primary text-white px-4 py-2 rounded-full text-sm font-medium shadow-xl shadow-primary/20 flex items-center gap-2 animate-bounce">
-                <Sparkles className="size-3" />
-                AI Optimized
+              <div className="absolute bottom-12 right-8 px-5 py-2.5 rounded-full bg-background/40 backdrop-blur-2xl border border-primary/10 shadow-2xl shadow-primary/5 flex items-center gap-3 animate-bounce group transform-gpu">
+                <div className="relative">
+                  <Sparkles className="size-4 text-primary fill-primary animate-pulse" />
+                  <div className="absolute inset-0 blur-md bg-primary/40 animate-pulse rounded-full" />
+                </div>
+                <span className="text-sm font-bold tracking-tight bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  AI Optimized
+                </span>
               </div>
             </div>
           </div>

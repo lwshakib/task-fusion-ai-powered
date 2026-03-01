@@ -96,9 +96,13 @@ graph TD
 
    ```env
    DATABASE_URL="postgresql://user:password@localhost:5432/taskfusion"
-   GOOGLE_GENERATIVE_AI_API_KEY="your_api_key_here"
+   GOOGLE_API_KEY="your_api_key_here"
    BETTER_AUTH_SECRET="your_secret_here"
-   NEXT_PUBLIC_APP_URL="http://localhost:3000"
+   BETTER_AUTH_URL="http://localhost:3000"
+   NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+   RESEND_API_KEY="your_resend_api_key_here"
+   GOOGLE_CLIENT_ID="your_google_client_id_here"
+   GOOGLE_CLIENT_SECRET="your_google_client_secret_here"
    ```
 
 4. **Run Database Migrations**:

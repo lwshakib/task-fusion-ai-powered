@@ -26,6 +26,9 @@ model User {
   tasks         Task[]
   messages      Message[]
 
+  dailyMessageCount Int       @default(0)
+  lastMessageReset  DateTime  @default(now())
+
   @@unique([email])
   @@map("user")
 }

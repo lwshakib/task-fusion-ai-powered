@@ -24,9 +24,15 @@ interface TaskState {
 export const useTaskStore = create<TaskState>((set) => ({
   tasks: [],
   setTasks: (tasks) => set({ tasks }),
-  addTask: (task) => set((state) => ({ tasks: [task, ...state.tasks] })),
+  addTask: (task) =>
+    set((state) => ({
+      tasks: [task, ...state.tasks.filter((t) => t.id !== task.id)],
+    })),
   addTasks: (newTasks) =>
-    set((state) => ({ tasks: [...newTasks, ...state.tasks] })),
+    set((state) => {
+      const newIds = new Set(newTasks.map((t) => t.id));
+      return { tasks: [...newTasks, ...state.tasks.filter((t) => !newIds.has(t.id))] };
+    }),
   updateTask: (id, updates) =>
     set((state) => ({
       tasks: state.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)),

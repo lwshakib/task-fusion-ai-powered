@@ -41,6 +41,7 @@ import { PromptSuggestion } from '@/components/ai-elements/prompt-suggestion';
 import { useTaskStore } from '@/context';
 import { useEffect, useRef, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
+import { useRouter } from 'next/navigation';
 import { MESSAGE_ROLE } from '@/generated/prisma/enums';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -340,6 +341,7 @@ export function ChatInterface() {
   const { addTasks, updateTasks, removeTasks } = useTaskStore();
   const processedToolInvocationIds = useRef(new Set<string>());
   const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const { messages, sendMessage, status, setMessages } = useChat({
     onFinish: async (data) => {
@@ -357,15 +359,23 @@ export function ChatInterface() {
       });
     },
     onError: (error) => {
-      toast.error('Failed to send message', {
-        description:
-          error.message || 'An unexpected error occurred. Please try again.',
+      const isLimitError = error.message?.includes('limit') || error.message?.includes('403');
+      
+      toast.error(isLimitError ? 'Daily Limit Reached' : 'Failed to send message', {
+        description: isLimitError 
+          ? 'You have reached your limit of 10 messages per day. Please upgrade your plan to continue.'
+          : error.message || 'An unexpected error occurred. Please try again.',
+        action: isLimitError ? {
+          label: 'Upgrade Plan',
+          onClick: () => router.push('/billing'),
+        } : undefined,
       });
     },
   });
 
   const handleSuggestionClick = (text: string) => {
     sendMessage({ text });
+    window.dispatchEvent(new CustomEvent('message-sent'));
   };
 
   // Fetch initial messages
@@ -436,10 +446,16 @@ export function ChatInterface() {
     }
   }, [messages, status]);
 
-  const handleSubmit = (message: { text: string; files: any[] }) => {
+  const handleSubmit = async (message: { text: string; files: any[] }) => {
     if (message.text.trim()) {
-      sendMessage({ text: message.text });
-      setInputValue('');
+      try {
+        await sendMessage({ text: message.text });
+        setInputValue('');
+        window.dispatchEvent(new CustomEvent('message-sent'));
+      } catch (err: any) {
+        // useChat's onError usually handles this, but we catch just in case
+        console.error('Chat error:', err);
+      }
     }
   };
 

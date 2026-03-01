@@ -15,6 +15,52 @@ export async function POST(req: Request) {
     if (!session) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
+
+    // Rate limiting: 10 messages per day
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { dailyMessageCount: true, lastMessageReset: true },
+    });
+
+    if (!user) {
+      return new NextResponse('User not found', { status: 404 });
+    }
+
+    const now = new Date();
+    const lastReset = user.lastMessageReset ? new Date(user.lastMessageReset) : null;
+
+    let currentCount = user.dailyMessageCount;
+    let resetDate = lastReset;
+
+    const isNewDay = !lastReset || 
+      now.getFullYear() !== lastReset.getFullYear() || 
+      now.getMonth() !== lastReset.getMonth() || 
+      now.getDate() !== lastReset.getDate();
+
+    if (isNewDay) {
+      currentCount = 0;
+      resetDate = now;
+    }
+
+    if (currentCount >= 10) {
+      return NextResponse.json(
+        { 
+          error: 'Daily limit reached', 
+          message: 'You have reached your limit of 10 messages per day. Please upgrade your plan to continue.' 
+        }, 
+        { status: 403 }
+      );
+    }
+
+    // Increment count
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        dailyMessageCount: currentCount + 1,
+        lastMessageReset: resetDate || new Date(),
+      },
+    });
+
     const { messages } = await req.json();
 
     // Get the last message (user's current message)
