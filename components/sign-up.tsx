@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { authClient } from '@/lib/auth-client';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -19,6 +19,7 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isEmailSent, setIsEmailSent] = useState(false);
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +30,7 @@ export default function SignUp() {
         email,
         password,
         name: `${firstName} ${lastName}`.trim(),
+        callbackURL: '/tasks',
       });
 
       if (error) {
@@ -36,9 +38,8 @@ export default function SignUp() {
         return;
       }
 
-      toast.success('Account created successfully!');
-      router.push('/tasks');
-      router.refresh();
+      setIsEmailSent(true);
+      toast.success('Verification email sent!');
     } catch (error) {
       toast.error('An unexpected error occurred');
     } finally {
@@ -59,6 +60,35 @@ export default function SignUp() {
     }
   };
 
+  if (isEmailSent) {
+    return (
+      <section className="flex min-h-screen px-4 py-16 md:py-32 bg-transparent">
+        <div className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-8 shadow-md text-center">
+          <div className="mb-4 flex justify-center">
+            <div className="rounded-full bg-primary/10 p-3 text-primary">
+              <Mail className="h-6 w-6" />
+            </div>
+          </div>
+          <h1 className="text-xl font-semibold mb-2">Check your email</h1>
+          <p className="text-sm text-muted-foreground mb-6">
+            We've sent a verification link to <span className="font-medium text-foreground">{email}</span>. You must verify your email before you can log in.
+          </p>
+          <div className="space-y-3">
+            <Button asChild className="w-full">
+              <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer">
+                Go to Gmail
+              </a>
+            </Button>
+            <Button asChild variant="ghost" className="w-full">
+              <Link href="/sign-in">Back to Login</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+
   return (
     <section className="flex min-h-screen  px-4 py-16 md:py-32 bg-transparent">
       <form
@@ -71,7 +101,7 @@ export default function SignUp() {
               <LogoIcon />
             </Link>
             <h1 className="mb-1 mt-4 text-xl font-semibold">
-              Create a Task Fusion Account
+              Create a Task Fusion AI Account
             </h1>
             <p className="text-sm">Welcome! Create an account to get started</p>
           </div>

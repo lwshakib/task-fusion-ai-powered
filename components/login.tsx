@@ -68,7 +68,7 @@ export default function LoginPage() {
               <LogoIcon />
             </Link>
             <h1 className="mb-1 mt-4 text-xl font-semibold">
-              Sign In to Task Fusion
+              Sign In to Task Fusion AI
             </h1>
             <p className="text-sm">Welcome back! Sign in to continue</p>
           </div>
@@ -156,11 +156,12 @@ export default function LoginPage() {
                 </Label>
                 <Button asChild variant="link" size="sm">
                   <Link
-                    href="#"
+                    href="/forgot-password"
                     className="link intent-info variant-ghost text-sm"
                   >
                     Forgot your Password ?
                   </Link>
+
                 </Button>
               </div>
               <Input
