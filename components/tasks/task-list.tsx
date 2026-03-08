@@ -32,7 +32,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { toast } from 'sonner';
-import { useTaskStore, Task } from '@/context';
+import { useTaskStore, Task } from '@/hooks/use-task-store';
 
 /**
  * TaskList Component

@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 
+/**
+ * Zod schema for a Task object.
+ * Defines the structure and validation rules for tasks created or updated via AI tools.
+ */
 export const taskSchema = z.object({
   title: z.string().describe('The title of the task'),
   description: z
@@ -17,14 +21,23 @@ export const taskSchema = z.object({
     .describe('The priority level of the task'),
 });
 
-// Tool Category Factory Type
+/**
+ * Tool Category Factory Type.
+ * A function that takes a userId and returns a record of AI tools.
+ * Using factory pattern ensures that the userId is available to all tool execution functions.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK tool registries use any for generality
 type ToolCategoryFactory = (userId: string) => Record<string, any>;
 
 /**
- * Task Management Tools
+ * Task Management Tools.
+ * This factory provides tools for creating, updating, deleting, and querying tasks.
+ * All tools are scoped to the provided userId for security.
  */
 export const taskTools: ToolCategoryFactory = (userId: string) => ({
+  /**
+   * createTasks: Allows the AI to create one or more tasks at once.
+   */
   createTasks: {
     description: 'Create one or multiple new tasks.',
     parameters: z.object({
@@ -34,11 +47,14 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
     execute: async (args: any) => {
       let tasks = args.tasks as unknown[];
 
-      // Handle cases where the LLM might send a single task at the root or miss the 'tasks' key
+      // Flexibility check: LLMs sometimes send a single object or an array directly
+      // instead of wrapping it in a 'tasks' key. This block normalizes the input.
       if (!tasks) {
         if (args.title) {
+          // If the root object looks like a single task
           tasks = [args] as unknown[];
         } else if (Array.isArray(args)) {
+          // If the root object is an array of tasks
           tasks = args as unknown[];
         } else {
           return {
@@ -48,14 +64,16 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
         }
       }
 
+      // Map over the tasks and create them in the database using Prisma
       const createdTasks = await Promise.all(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         tasks.map(async (task: any) => {
+          // Validate each task against the schema
           const validatedTask = taskSchema.parse(task);
           return prisma.task.create({
             data: {
               ...validatedTask,
-              userId,
+              userId, // Ensure the task belongs to the current user
             },
           });
         }),
@@ -63,6 +81,10 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
       return { success: true, tasks: createdTasks };
     },
   },
+
+  /**
+   * updateTasks: Allows the AI to modify existing tasks by ID.
+   */
   updateTasks: {
     description: 'Update existing tasks by their IDs.',
     parameters: z.object({
@@ -70,7 +92,7 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
         .array(
           z.object({
             id: z.string().describe('The UUID of the task to update'),
-            updates: taskSchema.partial(),
+            updates: taskSchema.partial(), // Accepts a partial task object
           }),
         )
         .describe(
@@ -79,10 +101,12 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
     }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     execute: async (args: any) => {
+      // Normalize input handles 'updates', 'tasks', or direct array inputs
       let updates = (args.updates ||
         args.tasks ||
         (Array.isArray(args) ? args : null)) as unknown[] | null;
 
+      // Single update case: if 'id' is present at the root
       if (!updates && args.id) {
         updates = [args] as unknown[];
       }
@@ -94,6 +118,7 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
         };
       }
 
+      // Execute all updates in parallel
       const updatedTasks = await Promise.all(
         (
           updates as Array<
@@ -102,17 +127,24 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
           >
         ).map(async (item) => {
           const id = (item as { id: string }).id;
-          // Support both { id, updates: { ... } } and { id, ...item }
+          
+          // Determine the source of updates. Support both:
+          // 1. { id, updates: { title: '...' } } 
+          // 2. { id, title: '...' }
           const taskUpdates = (
             item as { updates?: Partial<z.infer<typeof taskSchema>> }
           ).updates || { ...item };
+          
+          // Clean up the updates object if it still contains the ID (Prisma doesn't want ID in data field)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           if ((taskUpdates as any).id) delete (taskUpdates as any).id;
 
+          // Validate the partial updates
           const validatedUpdates = taskSchema.partial().parse(taskUpdates);
 
+          // Perform the update in the database
           return prisma.task.update({
-            where: { id, userId },
+            where: { id, userId }, // Must match ID and userId for security
             data: validatedUpdates,
           });
         }),
@@ -120,6 +152,10 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
       return { success: true, tasks: updatedTasks };
     },
   },
+
+  /**
+   * deleteTasks: Allows the AI to remove tasks by their IDs.
+   */
   deleteTasks: {
     description: 'Delete existing tasks by their IDs.',
     parameters: z.object({
@@ -127,12 +163,14 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
     }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     execute: async (args: any) => {
+      // Handle various parameter names used by LLMs
       let ids =
         args.ids ||
         args.id ||
         args.task_ids ||
         (Array.isArray(args) ? args : null);
 
+      // Support single ID string input
       if (typeof ids === 'string') {
         ids = [ids] as string[];
       }
@@ -144,6 +182,7 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
         };
       }
 
+      // Bulk delete tasks belonging to this user
       await prisma.task.deleteMany({
         where: {
           id: { in: ids },
@@ -153,10 +192,15 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
       return { success: true, deletedIds: ids };
     },
   },
+
+  /**
+   * getTasks: Fetches all tasks associated with the current user.
+   */
   getTasks: {
     description: 'Fetch all tasks for the current user.',
     parameters: z.object({}),
     execute: async () => {
+      // Retrieval from Prisma ordered by creation date
       const tasks = await prisma.task.findMany({
         where: { userId },
         orderBy: { createdAt: 'desc' },
@@ -164,6 +208,10 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
       return { success: true, tasks };
     },
   },
+
+  /**
+   * searchTasks: Performs an insensitive search across task titles and descriptions.
+   */
   searchTasks: {
     description: 'Search for tasks by title or description query.',
     parameters: z.object({
@@ -189,14 +237,19 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
 });
 
 /**
- * Tools Registry
- * To add new functionality to the AI, create a new ToolCategoryFactory and add it to this array.
+ * Tools Registry.
+ * A central collection of all tool factories. 
+ * To add new functionality groups (e.g., CalendarTools, EmailTools), create a new factory 
+ * and register it here.
  */
 const registry: ToolCategoryFactory[] = [taskTools];
 
 /**
- * Aggregates all registered tools for a given user.
- * This is used in streamText.ts to provide the full tool suite to the LLM.
+ * Aggregates all registered tools into a single flat object for a specific user.
+ * This is consumed by the LLM streamText or generateText functions.
+ * 
+ * @param userId - The ID of the user requesting tool access.
+ * @returns A record of all executable AI tools merged together.
  */
 export const getAllTools = (userId: string) => {
   return registry.reduce(

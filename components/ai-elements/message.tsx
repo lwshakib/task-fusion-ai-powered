@@ -10,7 +10,16 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import type { FileUIPart, UIMessage } from 'ai';
+// Local type definitions to remove 'ai' SDK dependency
+type FileUIPart = {
+  url: string;
+  mediaType?: string;
+  filename?: string;
+};
+
+type UIMessage = {
+  role: 'user' | 'assistant' | 'system' | 'data';
+};
 import {
   ChevronLeftIcon,
   ChevronRightIcon,

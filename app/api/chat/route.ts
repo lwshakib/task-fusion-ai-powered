@@ -52,12 +52,12 @@ export async function POST(req: Request) {
     }
 
     // Block the request if the daily limit is reached
-    if (currentCount >= 10) {
+    if (currentCount >= 20) {
       return NextResponse.json(
         {
           error: 'Daily limit reached',
           message:
-            'You have reached your limit of 10 messages per day. Please upgrade your plan to continue.',
+            'You have reached your limit of 20 messages per day. Please upgrade your plan to continue.',
         },
         { status: 403 },
       );
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
     // Format parts for database storage (supports text and multi-modal in future)
     const parts =
       lastMessage.parts ||
-      (lastMessage.content ? [{ text: lastMessage.content }] : []);
+      (lastMessage.content ? [{ type: 'text', text: lastMessage.content }] : []);
 
     // 5. Persist the user's message to the database
     await prisma.message.create({

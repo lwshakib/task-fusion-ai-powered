@@ -36,7 +36,15 @@ import {
 } from '@/components/ui/select';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import type { ChatStatus, FileUIPart } from 'ai';
+// Local type definitions to remove 'ai' SDK dependency
+type ChatStatus = 'idle' | 'submitted' | 'streaming' | 'error' | 'ready';
+
+type FileUIPart = {
+  url: string;
+  mediaType?: string;
+  filename?: string;
+  type?: 'file' | 'image';
+};
 import {
   CornerDownLeftIcon,
   ImageIcon,

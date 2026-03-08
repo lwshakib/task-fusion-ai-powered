@@ -38,30 +38,21 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { PromptSuggestion } from '@/components/ai-elements/prompt-suggestion';
-import { useTaskStore } from '@/context';
-import { useEffect, useRef, useState } from 'react';
-import { useChat } from '@ai-sdk/react';
+import { useTaskStore } from '@/hooks/use-task-store';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { MESSAGE_ROLE } from '@/generated/prisma/enums';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';
+import { nanoid } from 'nanoid';
 
 /**
  * ChatInterface Component
  *
  * The primary interaction hub for the AI Task Fusion system.
- * This component orchestrates:
- * 1. AI Conversation: Streaming messages and reasoning using @ai-sdk/react.
- * 2. Tool Execution: Rendering specialized UI for task-related tool calls (CRUD operations).
- * 3. State Sync: Automatically applying AI-driven task changes to the local Zustand store.
- * 4. Persistence: Saving/Loading chat history via backend API routes.
+ * This component orchestrates AI interaction without Vercel AI SDK.
  */
 
-/**
- * Interface representing a part of an AI message.
- * Messages can contain multiple parts: plain text, reasoning blocks, or tool invocations.
- */
 interface MessagePart {
   type: string;
   state?:
@@ -70,9 +61,7 @@ interface MessagePart {
     | 'approval-requested'
     | 'output-available'
     | 'output-error';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK tool parts have dynamic shapes
   input?: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK tool parts have dynamic shapes
   output?: any;
   errorText?: string;
   reasoning?: string;
@@ -81,11 +70,14 @@ interface MessagePart {
   toolCallId?: string;
 }
 
-/**
- * TaskToolCall Component
- * A specialized renderer for task-related tool calls.
- * Instead of raw JSON, it provides tailored visual feedback for users.
- */
+interface UIMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  parts: MessagePart[];
+  createdAt?: Date;
+}
+
 const TaskToolCall = ({ part }: { part: MessagePart }) => {
   const toolName = part.type.replace('tool-', '');
   const { state, input, output, errorText } = part;
@@ -96,7 +88,6 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
   const isSuccess = state === 'output-available' && !errorText;
   const isError = state === 'output-error' || !!errorText;
 
-  // Visual for 'createTasks'
   if (toolName === 'createTasks') {
     if (isPending) {
       return (
@@ -149,7 +140,6 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
     }
   }
 
-  // Visual for 'updateTasks'
   if (toolName === 'updateTasks') {
     if (isPending) {
       return (
@@ -202,7 +192,6 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
     }
   }
 
-  // Visual for 'deleteTasks'
   if (toolName === 'deleteTasks') {
     if (isPending) {
       return (
@@ -243,7 +232,6 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
     }
   }
 
-  // Visual for 'getTasks'
   if (toolName === 'getTasks') {
     if (isPending) {
       return (
@@ -266,7 +254,6 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
     }
   }
 
-  // Visual for 'searchTasks'
   if (toolName === 'searchTasks') {
     if (isPending) {
       return (
@@ -293,7 +280,6 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
     }
   }
 
-  // Generalized Error View for complex tool failures
   if (isError) {
     const errorAction =
       toolName === 'searchTasks'
@@ -316,9 +302,6 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
     );
   }
 
-  /**
-   * Generates a readable title for the tool header.
-   */
   const getDisplayTitle = () => {
     switch (toolName) {
       case 'updateTasks':
@@ -334,11 +317,10 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
     }
   };
 
-  // Fallback to standard generic tool UI from ai-elements
   return (
     <Tool className="my-2" defaultOpen={isError}>
       <ToolHeader
-        type={part.type as 'tool-createTasks'}
+        type={part.type as any}
         state={state || 'input-streaming'}
         title={getDisplayTitle()}
       />
@@ -350,118 +332,50 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
   );
 };
 
-// Initial suggestions shown in empty state
 const TASK_SUGGESTIONS = [
-  'Create a high priority task to finish the project report',
-  'List all my pending tasks',
-  "Mark my 'buy groceries' task as completed",
-  'Search for tasks related to documentation',
-  'Delete all tasks from last week',
+  'Create a project roadmap: 5 high-priority tasks for the Q2 launch',
+  "Find all 'Marketing' tasks and update their status to COMPLETED",
+  'List all pending tasks that were created in the last 7 days',
+  "Search for 'Frontend' tasks and set their priority to HIGH",
+  'Declutter my workspace: delete all tasks that are already COMPLETED',
 ];
 
 export function ChatInterface() {
+  const [messages, setMessages] = useState<UIMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<'idle' | 'streaming' | 'submitted'>('idle');
   const { addTasks, updateTasks, removeTasks } = useTaskStore();
-
-  // Track tool IDs that have already been synced with the local store to prevent duplicate state updates
   const processedToolInvocationIds = useRef(new Set<string>());
   const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  /**
-   * AI Configuration:
-   * Handles message streaming, database persistence, and specialized error handling (e.g., rate limits).
-   */
-  const { messages, sendMessage, status, setMessages } = useChat({
-    onFinish: async (data) => {
-      // 1. Save the AI's final multi-part message (text + tools) to the database history.
-      const body = {
-        parts: data.message.parts,
-        role: MESSAGE_ROLE.assistant,
-      };
-
-      await fetch('/api/message', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-    },
-    onError: (error) => {
-      // User-friendly feedback for API errors or message limits.
-      const isLimitError =
-        error.message?.includes('limit') || error.message?.includes('403');
-
-      toast.error(
-        isLimitError ? 'Daily Limit Reached' : 'Failed to send message',
-        {
-          description: isLimitError
-            ? 'You have reached your limit of 10 messages per day. Please upgrade your plan to continue.'
-            : error.message ||
-              'An unexpected error occurred. Please try again.',
-          action: isLimitError
-            ? {
-                label: 'Upgrade Plan',
-                onClick: () => router.push('/billing'),
-              }
-            : undefined,
-        },
-      );
-    },
-  });
-
-  /**
-   * Suggestion Click:
-   * Triggers an AI message and local UI events (like updating usage counts).
-   */
-  const handleSuggestionClick = (text: string) => {
-    sendMessage({ text });
-    window.dispatchEvent(new CustomEvent('message-sent'));
-  };
-
-  /**
-   * Initialization Logic:
-   * Fetches existing chat history from the user's session.
-   */
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/message');
-        if (response.ok) {
-          const data = await response.json();
-          setMessages(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch messages:', error);
-      } finally {
-        setLoading(false);
+  const fetchMessages = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/message');
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data);
       }
-    };
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
     fetchMessages();
-
-    // Reset listener for manual chat clearing
-    const handleClearChat = () => {
-      setMessages([]);
-    };
-
+    const handleClearChat = () => setMessages([]);
     window.addEventListener('clear-chat', handleClearChat);
     return () => window.removeEventListener('clear-chat', handleClearChat);
-  }, [setMessages]);
+  }, [fetchMessages]);
 
-  /**
-   * Tool Sync Logic:
-   * Scans messages for successful tool outputs and applies the changes to the local task store.
-   * This ensures the AI's "actions" are reflected in the UI immediately after execution.
-   */
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- UIMessage parts are dynamic from the SDK
-    messages.forEach((message: any) => {
-      const parts = (message.parts as MessagePart[]) || [];
-      parts.forEach((part: MessagePart) => {
-        // Condition: Tool succeeded and hasn't been processed yet
+    messages.forEach((message) => {
+      const parts = message.parts || [];
+      parts.forEach((part) => {
         if (
           part.type.startsWith('tool-') &&
           part.state === 'output-available' &&
@@ -472,56 +386,194 @@ export function ChatInterface() {
           const output = part.output;
 
           if (output?.success) {
-            // Mapping tool results to Zustand store actions
             if (toolName === 'createTasks' && output.tasks) {
               addTasks(output.tasks);
             } else if (toolName === 'updateTasks' && output.tasks) {
               updateTasks(
-                output.tasks.map(
-                  (t: { id: string; [key: string]: unknown }) => ({
-                    id: t.id,
-                    updates: t,
-                  }),
-                ),
+                output.tasks.map((t: any) => ({
+                  id: t.id,
+                  updates: t,
+                })),
               );
             } else if (toolName === 'deleteTasks' && output.deletedIds) {
               removeTasks(output.deletedIds);
             }
           }
-          // Mark as processed to prevent duplicate state manipulation
           processedToolInvocationIds.current.add(part.toolCallId);
         }
       });
     });
   }, [messages, addTasks, updateTasks, removeTasks]);
 
-  /**
-   * Auto-scroll Logic:
-   * Keeps the most recent message in view during streaming.
-   */
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, status]);
 
-  /**
-   * User Prompt Submission:
-   * Sends the text to the AI and triggers local message-sent orchestration.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- File attachments currently not implemented but types ready
-  const handleSubmit = async (message: { text: string; files: any[] }) => {
-    if (message.text.trim()) {
-      try {
-        await sendMessage({ text: message.text });
-        setInputValue('');
-        window.dispatchEvent(new CustomEvent('message-sent'));
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          console.error('Chat error:', err.message);
+  const sendMessage = async (prompt: string) => {
+    if (!prompt.trim()) return;
+
+    const userMessage: UIMessage = {
+      id: nanoid(),
+      role: 'user',
+      content: prompt,
+      parts: [{ type: 'text', text: prompt }],
+      createdAt: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue('');
+    setStatus('submitted');
+    window.dispatchEvent(new CustomEvent('message-sent'));
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage].map((m) => ({
+            role: m.role,
+            content: m.content,
+            parts: m.parts,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send message');
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No reader available');
+
+      const assistantId = nanoid();
+      const assistantMessage: UIMessage = {
+        id: assistantId,
+        role: 'assistant',
+        content: '',
+        parts: [],
+        createdAt: new Date(),
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+      setStatus('streaming');
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const code = line[0];
+          const content = line.slice(2);
+
+          if (code === '0') {
+            const text = JSON.parse(content);
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantId ? { ...m, content: m.content + text } : m,
+              ),
+            );
+          } else if (code === 'b') {
+            const part = JSON.parse(content);
+            setMessages((prev) =>
+              prev.map((m) => {
+                if (m.id !== assistantId) return m;
+
+                const newParts = [...m.parts];
+                const lastPart = newParts[newParts.length - 1];
+
+                // Merge consecutive text parts
+                if (part.type === 'text' && lastPart?.type === 'text') {
+                  newParts[newParts.length - 1] = {
+                    ...lastPart,
+                    text: (lastPart.text || '') + (part.text || ''),
+                  };
+                  return { ...m, parts: newParts };
+                }
+
+                // Merge consecutive reasoning parts
+                if (part.type === 'reasoning' && lastPart?.type === 'reasoning') {
+                  newParts[newParts.length - 1] = {
+                    ...lastPart,
+                    reasoning: (lastPart.reasoning || '') + (part.reasoning || ''),
+                    isStreaming: part.isStreaming ?? lastPart.isStreaming,
+                  };
+                  return { ...m, parts: newParts };
+                }
+
+                // Update existing tool parts (by toolCallId)
+                const existingPartIndex = m.parts.findIndex(
+                  (p) =>
+                    p.toolCallId &&
+                    p.toolCallId === part.toolCallId &&
+                    part.toolCallId,
+                );
+
+                if (existingPartIndex !== -1 && part.toolCallId) {
+                  newParts[existingPartIndex] = {
+                    ...newParts[existingPartIndex],
+                    ...part,
+                  };
+                } else {
+                  newParts.push(part);
+                }
+
+                return { ...m, parts: newParts };
+              }),
+            );
+          } else if (code === '3') {
+            const errorMsg = JSON.parse(content);
+            throw new Error(errorMsg);
+          } else if (code === 'd') {
+            // Finish turn and mark reasoning as not streaming (triggering auto-collapse)
+            setMessages((prev) =>
+              prev.map((m) => {
+                if (m.id !== assistantId) return m;
+                return {
+                  ...m,
+                  parts: m.parts.map((p) =>
+                    p.type === 'reasoning' ? { ...p, isStreaming: false } : p,
+                  ),
+                };
+              }),
+            );
+          }
         }
       }
+
+      // Note: Message persistence is now handled on the server side in streamText.ts
+
+    } catch (error: any) {
+      console.error('Chat error:', error);
+      const isLimitError = error.message?.includes('limit') || error.message?.includes('403');
+      toast.error(isLimitError ? 'Daily Limit Reached' : 'Failed to send message', {
+        description: isLimitError 
+          ? 'You have reached your limit of 20 messages per day.' 
+          : error.message,
+      });
+    } finally {
+      setStatus('idle');
     }
+  };
+
+  const handleSubmit = (message: { text: string; files: any[] }) => {
+    sendMessage(message.text);
+  };
+
+  const handleSuggestionClick = (text: string) => {
+    sendMessage(text);
   };
 
   return (
@@ -529,23 +581,11 @@ export function ChatInterface() {
       <Conversation className="flex-1 overflow-hidden">
         <ConversationContent className="p-4 md:p-6 space-y-6">
           {loading ? (
-            // Fetching state skeleton
             <div className="flex flex-col gap-6">
               {[...Array(3)].map((_, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    'flex gap-3',
-                    i % 2 === 1 && 'flex-row-reverse',
-                  )}
-                >
+                <div key={i} className={cn('flex gap-3', i % 2 === 1 && 'flex-row-reverse')}>
                   <Skeleton className="h-8 w-8 rounded-full shrink-0" />
-                  <div
-                    className={cn(
-                      'space-y-2 flex-1 max-w-[80%]',
-                      i % 2 === 1 && 'items-end flex flex-col',
-                    )}
-                  >
+                  <div className={cn('space-y-2 flex-1 max-w-[80%]', i % 2 === 1 && 'items-end flex flex-col')}>
                     <Skeleton className="h-4 w-full" />
                     <Skeleton className="h-4 w-2/3" />
                   </div>
@@ -553,20 +593,14 @@ export function ChatInterface() {
               ))}
             </div>
           ) : messages.length === 0 ? (
-            // Brand-centric Empty State
             <div className="flex flex-col h-full max-w-2xl mx-auto">
               <ConversationEmptyState
-                icon={
-                  <div className="p-4 rounded-full bg-primary/10 mb-4">
-                    <List className="size-10 text-primary/60" />
-                  </div>
-                }
+                icon={<div className="p-4 rounded-full bg-primary/10 mb-4"><List className="size-10 text-primary/60" /></div>}
                 title="Task Assistant"
-                description="I'm here to help you manage your tasks. You can ask me to create, update, search or delete tasks."
+                description="I'm here to help you manage your tasks. Create, update, search or delete tasks."
               />
-
               <div className="mt-8 space-y-3 px-4">
-                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                   <Sparkles className="size-3 text-primary/60" />
                   Try asking
                 </div>
@@ -574,7 +608,6 @@ export function ChatInterface() {
                   {TASK_SUGGESTIONS.map((suggestion) => (
                     <PromptSuggestion
                       key={suggestion}
-                      highlight={inputValue}
                       onClick={() => handleSuggestionClick(suggestion)}
                       className="border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all duration-200"
                     >
@@ -585,49 +618,34 @@ export function ChatInterface() {
               </div>
             </div>
           ) : (
-            // Full Conversation Rendering
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK types
-            messages.map((message: any) => {
-              const parts = (message.parts as MessagePart[]) || [];
-
+            messages.map((message) => {
+              const parts = message.parts || [];
               return (
                 <Message key={message.id} from={message.role}>
                   <MessageContent>
-                    {parts.map((part: MessagePart, i: number) => {
-                      const key = `${message.id}-${i}`;
-
-                      // AI Internal Monologue
-                      if (part.type === 'reasoning') {
-                        return (
-                          <Reasoning key={key} isStreaming={!!part.isStreaming}>
-                            <ReasoningTrigger />
-                            <ReasoningContent>
-                              {part.reasoning ?? part.text ?? ''}
-                            </ReasoningContent>
-                          </Reasoning>
-                        );
-                      }
-
-                      // AI Direct Text Response
-                      if (part.type === 'text') {
-                        if (!part.text?.trim()) return null;
-                        return (
-                          <MessageResponse
-                            key={key}
-                            className="leading-relaxed"
-                          >
-                            {part.text}
-                          </MessageResponse>
-                        );
-                      }
-
-                      // AI Tool Visualizations
-                      if (part.type.startsWith('tool-')) {
-                        return <TaskToolCall key={key} part={part} />;
-                      }
-
-                      return null;
-                    })}
+                    {parts.length > 0 ? (
+                      parts.map((part: MessagePart, i: number) => {
+                        const key = `${message.id}-${i}`;
+                        if (part.type === 'reasoning') {
+                          return (
+                            <Reasoning key={key} isStreaming={!!part.isStreaming}>
+                              <ReasoningTrigger />
+                              <ReasoningContent>{part.reasoning ?? part.text ?? ''}</ReasoningContent>
+                            </Reasoning>
+                          );
+                        }
+                        if (part.type === 'text' || (!part.type && part.text)) {
+                          if (!part.text?.trim()) return null;
+                          return <MessageResponse key={key} className="leading-relaxed">{part.text}</MessageResponse>;
+                        }
+                        if (part.type?.startsWith('tool-') || part.type === 'tool-invocation' || part.type === 'tool-call') {
+                          return <TaskToolCall key={key} part={part} />;
+                        }
+                        return null;
+                      })
+                    ) : (
+                      <MessageResponse className="leading-relaxed">{message.content}</MessageResponse>
+                    )}
                   </MessageContent>
                 </Message>
               );
@@ -638,7 +656,6 @@ export function ChatInterface() {
         <ConversationScrollButton />
       </Conversation>
 
-      {/* Persistent Prompt Section */}
       <div className="p-4 sticky bottom-0 z-10">
         <div className="max-w-2xl mx-auto">
           <PromptInput
@@ -654,11 +671,7 @@ export function ChatInterface() {
             />
             <div className="absolute bottom-1.5 right-1.5 flex items-center justify-center">
               <PromptInputSubmit
-                status={
-                  status === 'streaming' || status === 'submitted'
-                    ? status
-                    : 'ready'
-                }
+                status={status === 'streaming' || status === 'submitted' ? status : 'ready'}
                 disabled={!inputValue.trim() && status === 'streaming'}
                 className="size-9 rounded-full shadow-md hover:shadow-lg transition-all duration-200"
               />

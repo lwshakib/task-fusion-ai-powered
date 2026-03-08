@@ -12,14 +12,14 @@ export function UsageText() {
 
   /**
    * Fetches the current message count from the user usage API
-   * and calculates the remaining balance based on a daily limit of 10.
+   * and calculates the remaining balance based on a daily limit of 20.
    */
   const fetchUsage = useCallback(async () => {
     try {
       const res = await fetch('/api/user/usage');
       if (res.ok) {
         const data = await res.json();
-        setRemaining(Math.max(0, 10 - (data.count || 0)));
+        setRemaining(Math.max(0, 20 - (data.count || 0)));
       }
     } catch {
       console.error('Failed to fetch usage');

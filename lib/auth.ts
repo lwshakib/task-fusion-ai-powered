@@ -4,15 +4,35 @@ import prisma from './prisma';
 import { Resend } from 'resend';
 import { AuthEmailTemplate } from '@/components/emails/auth-email-template';
 
+/**
+ * Initialize Resend client for sending transactional emails (verification, password resets).
+ */
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+/**
+ * Better Auth Configuration.
+ * This object configures the authentication system including database adapters, 
+ * authentication methods (email, social), and lifecycle hooks for email communication.
+ */
 export const auth = betterAuth({
+  /**
+   * Database Adapter: Connects Better Auth to our Prisma PostgreSQL instance.
+   */
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
+
+  /**
+   * Email and Password Strategy.
+   * Handles user registration, login, and password management.
+   */
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    /**
+     * Hook called when a password reset is requested.
+     * Uses Resend to send a styled email to the user.
+     */
     sendResetPassword: async ({ user, url }) => {
       try {
         const { error } = await resend.emails.send({
@@ -32,6 +52,11 @@ export const auth = betterAuth({
       }
     },
   },
+
+  /**
+   * Social Authentication Providers.
+   * Currently configured for Google OAuth.
+   */
   socialProviders: {
     google: {
       enabled: true,
@@ -39,6 +64,11 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
+
+  /**
+   * Email Verification Configuration.
+   * Ensures users verify their email addresses upon sign up.
+   */
   emailVerification: {
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url }) => {
@@ -54,7 +84,15 @@ export const auth = betterAuth({
       }
     },
   },
+
+  /**
+   * Account Level Settings.
+   */
   account: {
+    /**
+     * Account Linking: Allows users to link multiple providers (e.g., Google and Email) 
+     * to the same account if they share the same email address.
+     */
     accountLinking: {
       enabled: true,
     },
