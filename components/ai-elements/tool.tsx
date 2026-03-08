@@ -8,20 +8,7 @@ import {
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 // Local type definitions to remove 'ai' SDK dependency
-type ToolUIPart = {
-  type: string;
-  state:
-    | 'input-streaming'
-    | 'input-available'
-    | 'approval-requested'
-    | 'approval-responded'
-    | 'output-available'
-    | 'output-error'
-    | 'output-denied';
-  input: any;
-  output: any;
-  errorText?: string;
-};
+import { type ToolUIPart } from '@/lib/ai-types';
 import {
   CheckCircleIcon,
   ChevronDownIcon,

@@ -32,7 +32,7 @@ interface TaskState {
 /**
  * useTaskStore Hook.
  * A Zustand-based store for global task state management.
- * This hook replaces the previous React Context implementation for better performance 
+ * This hook replaces the previous React Context implementation for better performance
  * and developer experience.
  */
 export const useTaskStore = create<TaskState>((set) => ({

@@ -1,7 +1,7 @@
 /**
  * SYSTEM_PROMPT.
  * This is the core identity and behavioral guideline for the AI assistant.
- * It defines the mission, available tools, strict guidelines for tool usage, 
+ * It defines the mission, available tools, strict guidelines for tool usage,
  * and the tone of the conversation.
  */
 export const SYSTEM_PROMPT = `

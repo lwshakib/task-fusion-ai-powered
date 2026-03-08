@@ -11,7 +11,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * Better Auth Configuration.
- * This object configures the authentication system including database adapters, 
+ * This object configures the authentication system including database adapters,
  * authentication methods (email, social), and lifecycle hooks for email communication.
  */
 export const auth = betterAuth({
@@ -90,7 +90,7 @@ export const auth = betterAuth({
    */
   account: {
     /**
-     * Account Linking: Allows users to link multiple providers (e.g., Google and Email) 
+     * Account Linking: Allows users to link multiple providers (e.g., Google and Email)
      * to the same account if they share the same email address.
      */
     accountLinking: {

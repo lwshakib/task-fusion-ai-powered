@@ -127,14 +127,14 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
           >
         ).map(async (item) => {
           const id = (item as { id: string }).id;
-          
+
           // Determine the source of updates. Support both:
-          // 1. { id, updates: { title: '...' } } 
+          // 1. { id, updates: { title: '...' } }
           // 2. { id, title: '...' }
           const taskUpdates = (
             item as { updates?: Partial<z.infer<typeof taskSchema>> }
           ).updates || { ...item };
-          
+
           // Clean up the updates object if it still contains the ID (Prisma doesn't want ID in data field)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           if ((taskUpdates as any).id) delete (taskUpdates as any).id;
@@ -238,8 +238,8 @@ export const taskTools: ToolCategoryFactory = (userId: string) => ({
 
 /**
  * Tools Registry.
- * A central collection of all tool factories. 
- * To add new functionality groups (e.g., CalendarTools, EmailTools), create a new factory 
+ * A central collection of all tool factories.
+ * To add new functionality groups (e.g., CalendarTools, EmailTools), create a new factory
  * and register it here.
  */
 const registry: ToolCategoryFactory[] = [taskTools];
@@ -247,7 +247,7 @@ const registry: ToolCategoryFactory[] = [taskTools];
 /**
  * Aggregates all registered tools into a single flat object for a specific user.
  * This is consumed by the LLM streamText or generateText functions.
- * 
+ *
  * @param userId - The ID of the user requesting tool access.
  * @returns A record of all executable AI tools merged together.
  */

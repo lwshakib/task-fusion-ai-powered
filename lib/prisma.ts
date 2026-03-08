@@ -14,7 +14,7 @@ const adapter = new PrismaPg({ connectionString });
 
 /**
  * Prisma Client Singleton Pattern.
- * This ensures that only one instance of the Prisma client is created even during 
+ * This ensures that only one instance of the Prisma client is created even during
  * Hot Module Replacement (HMR) in development.
  */
 const globalForPrisma = global as unknown as { prisma: PrismaClient };

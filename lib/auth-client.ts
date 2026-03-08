@@ -2,7 +2,7 @@ import { createAuthClient } from 'better-auth/react';
 
 /**
  * Better Auth Client for React.
- * This client is used in the frontend to interact with the authentication system 
+ * This client is used in the frontend to interact with the authentication system
  * (login, logout, session management, etc.).
  */
 export const authClient = createAuthClient({

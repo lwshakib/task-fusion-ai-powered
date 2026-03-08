@@ -87,7 +87,9 @@ export async function POST(req: Request) {
     // Format parts for database storage (supports text and multi-modal in future)
     const parts =
       lastMessage.parts ||
-      (lastMessage.content ? [{ type: 'text', text: lastMessage.content }] : []);
+      (lastMessage.content
+        ? [{ type: 'text', text: lastMessage.content }]
+        : []);
 
     // 5. Persist the user's message to the database
     await prisma.message.create({
