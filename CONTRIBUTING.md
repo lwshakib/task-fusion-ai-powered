@@ -21,18 +21,23 @@ By participating in this project, you are expected to uphold our [Code of Conduc
 
 1. **Fork the repository** and create your branch from `main`.
 2. **Install dependencies** using `bun install`.
-3. **If you've added code** that should be tested, add tests.
+3. **If you've added code** that should be tested, add unit or E2E tests.
 4. **If you've changed APIs**, update the documentation.
-5. **Ensure the test suite passes**.
-6. **Make sure your code lints**.
-7. **Submit a pull request**!
+5. **Ensure the test suite passes** by running `bun run test`.
+6. **Verify E2E tests** (if applicable) with `bun run test:e2e`.
+7. **Make sure your code lints and is formatted**:
+   - `bun run lint`
+   - `bun run format`
+8. **Submit a pull request**!
 
 ## Style Guide
 
-- We use **TypeScript** for everything.
-- We use **Tailwind CSS 4** for styling.
-- We use **Prisma** for database interactions.
-- Follow the existing code style and formatting (Prettier/ESLint).
+- **Language**: TypeScript for both frontend and backend logic.
+- **Framework**: Next.js (App Router) with React 19.
+- **Styling**: Tailwind CSS 4. Follow mobile-first responsive design.
+- **Database**: Prisma ORM. Ensure migrations are updated if schema changes.
+- **State Management**: Zustand for global client-side state.
+- **Formatting**: We use Prettier and ESLint. Please run `bun run format` before committing.
 
 ## Development Setup
 

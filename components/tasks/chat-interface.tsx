@@ -38,7 +38,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { PromptSuggestion } from '@/components/ai-elements/prompt-suggestion';
-import { useTaskStore } from '@/hooks/use-task-store';
+import { useTaskStore, type Task } from '@/hooks/use-task-store';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -97,7 +97,8 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
       );
     }
     if (isSuccess) {
-      const createdTasks = (output as any)?.tasks || []; // eslint-disable-line @typescript-eslint/no-explicit-any
+      const outputData = output as { tasks?: { id: string; title: string }[] };
+      const createdTasks = outputData?.tasks || [];
       return (
         <div className="flex flex-col gap-2 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
           <div className="flex items-center gap-2 text-[13px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50/50 dark:bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-100/50 dark:border-emerald-500/20 w-fit">
@@ -149,7 +150,8 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
       );
     }
     if (isSuccess) {
-      const updatedTasks = (output as any)?.tasks || []; // eslint-disable-line @typescript-eslint/no-explicit-any
+      const outputData = output as { tasks?: { id: string; title: string }[] };
+      const updatedTasks = outputData?.tasks || [];
       return (
         <div className="flex flex-col gap-2 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
           <div className="flex items-center gap-2 text-[13px] text-blue-600 dark:text-blue-400 font-semibold bg-blue-50/50 dark:bg-blue-500/10 px-3 py-1 rounded-lg border border-blue-100/50 dark:border-blue-500/20 w-fit">
@@ -201,7 +203,8 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
       );
     }
     if (isSuccess) {
-      const deletedIds = (output as any)?.deletedIds || []; // eslint-disable-line @typescript-eslint/no-explicit-any
+      const outputData = output as { deletedIds?: string[] };
+      const deletedIds = outputData?.deletedIds || [];
       return (
         <div className="flex flex-col gap-2 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
           <div className="flex items-center gap-2 text-[13px] text-destructive font-semibold bg-destructive/5 px-3 py-1 rounded-lg border border-destructive/10 w-fit">
@@ -241,7 +244,8 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
       );
     }
     if (isSuccess) {
-      const tasks = (output as any)?.tasks || []; // eslint-disable-line @typescript-eslint/no-explicit-any
+      const outputData = output as { tasks?: { id: string; title: string }[] };
+      const tasks = outputData?.tasks || [];
       return (
         <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium bg-muted/30 px-3 py-1 rounded-lg border border-muted-foreground/10 w-fit my-2">
           <List className="size-3.5" />
@@ -263,7 +267,8 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
       );
     }
     if (isSuccess) {
-      const tasks = (output as any)?.tasks || []; // eslint-disable-line @typescript-eslint/no-explicit-any
+      const outputData = output as { tasks?: { id: string; title: string }[] };
+      const tasks = outputData?.tasks || [];
       return (
         <div className="flex flex-col gap-1.5 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
           <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium bg-muted/30 px-3 py-1 rounded-lg border border-muted-foreground/10 w-fit">
@@ -320,13 +325,13 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
     <Tool className="my-2" defaultOpen={isError}>
       <ToolHeader
         type={part.type}
-        state={(state as any) || 'input-streaming'} // eslint-disable-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        state={(state as any) || 'input-streaming'}
         title={getDisplayTitle()}
       />
       <ToolContent>
         <ToolInput input={input} />
-        <ToolOutput output={output as any} errorText={errorText} />{' '}
-        {/* eslint-disable-line @typescript-eslint/no-explicit-any */}
+        <ToolOutput output={output} errorText={errorText} />
       </ToolContent>
     </Tool>
   );
@@ -386,26 +391,24 @@ export function ChatInterface() {
           const toolName = part.type.replace('tool-', '');
           const output = part.output;
 
-          if ((output as any)?.success) {
-            // eslint-disable-line @typescript-eslint/no-explicit-any
-            if (toolName === 'createTasks' && (output as any).tasks) {
-              // eslint-disable-line @typescript-eslint/no-explicit-any
-              addTasks((output as any).tasks); // eslint-disable-line @typescript-eslint/no-explicit-any
-            } else if (toolName === 'updateTasks' && (output as any).tasks) {
-              // eslint-disable-line @typescript-eslint/no-explicit-any
+          const outputData = output as {
+            success?: boolean;
+            tasks?: Task[];
+            deletedIds?: string[];
+          };
+
+          if (outputData?.success) {
+            if (toolName === 'createTasks' && outputData.tasks) {
+              addTasks(outputData.tasks);
+            } else if (toolName === 'updateTasks' && outputData.tasks) {
               updateTasks(
-                (output as any).tasks.map((t: { id: string }) => ({
-                  // eslint-disable-line @typescript-eslint/no-explicit-any
+                outputData.tasks.map((t: { id: string }) => ({
                   id: t.id,
                   updates: t,
                 })),
               );
-            } else if (
-              toolName === 'deleteTasks' &&
-              (output as any).deletedIds
-            ) {
-              // eslint-disable-line @typescript-eslint/no-explicit-any
-              removeTasks((output as any).deletedIds); // eslint-disable-line @typescript-eslint/no-explicit-any
+            } else if (toolName === 'deleteTasks' && outputData.deletedIds) {
+              removeTasks(outputData.deletedIds);
             }
           }
           processedToolInvocationIds.current.add(part.toolCallId);

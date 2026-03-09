@@ -9,28 +9,18 @@ export const Logo = ({ className }: { className?: string }) => {
     <div className={cn('flex items-center gap-2', className)}>
       <LogoIcon className="size-8" />
       <span className="text-xl font-bold tracking-tight">
-        Task <span className="text-primary">Fusion</span>
+        Task{' '}
+        <span className="bg-gradient-to-br from-[#FF512F] to-[#DD2476] bg-clip-text text-transparent">
+          Fusion
+        </span>
       </span>
     </div>
   );
 };
 
-/**
- * LogoIcon Component
- * A standalone SVG representation of the brand.
- * Features a multi-layered geometric "stack" design.
- *
- * @param uniColor If true, uses `currentColor` for all paths (good for monochrome overlays).
- */
-export const LogoIcon = ({
-  className,
-  uniColor,
-}: {
-  className?: string;
-  uniColor?: boolean;
-}) => {
-  // Determine fill color based on uniColor prop
-  const fill = uniColor ? 'currentColor' : 'url(#stack-logo-gradient)';
+export const LogoIcon = ({ className }: { className?: string }) => {
+  // Determine fill color
+  const fill = 'url(#sunset-gradient)';
 
   return (
     <svg
@@ -63,22 +53,19 @@ export const LogoIcon = ({
         <path d="m35.4181 15.1015-5.1378-8.89886-5.1377 8.89886 5.1377 8.8989z" />
       </g>
 
-      {/* Define the signature brand gradient if not in uniColor mode */}
-      {!uniColor && (
-        <defs>
-          <linearGradient
-            id="stack-logo-gradient"
-            x1="20"
-            y1="0"
-            x2="20"
-            y2="48"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stopColor="#9B99FE" />
-            <stop offset="1" stopColor="#2BC8B7" />
-          </linearGradient>
-        </defs>
-      )}
+      <defs>
+        <linearGradient
+          id="sunset-gradient"
+          x1="0"
+          y1="0"
+          x2="48"
+          y2="48"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#FF512F" />
+          <stop offset="1" stopColor="#DD2476" />
+        </linearGradient>
+      </defs>
     </svg>
   );
 };

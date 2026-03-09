@@ -27,7 +27,7 @@ const plans = [
     price: '$0',
     description: 'Perfect for getting started with AI-powered task management.',
     features: [
-      '10 AI messages per day',
+      '20 AI messages per day',
       'Unlimited tasks',
       'Basic context fusion',
       'Community support',

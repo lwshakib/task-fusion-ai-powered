@@ -5,7 +5,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)](https://prisma.io)
 
-**Task Fusion AI** is an intelligent, agent-driven productivity platform designed to bridge the gap between complex planning and seamless execution. Powered by advanced AI models, it decomposes goals, synthesizes context, and prioritizes your workflow so you can focus on what truly matters.
+**Task Fusion AI** is an intelligent, agent-driven productivity platform designed to bridge the gap between complex planning and seamless execution. Powered by advanced **GLM-4.7-Flash** models, it decomposes goals, synthesizes context, and prioritizes your workflow so you can focus on what truly matters.
 
 ---
 
@@ -27,12 +27,13 @@
 
 ## ✨ Features
 
-- 🧠 **AI Task Decomposition**: Transform high-level objectives into granular, actionable steps automatically.
-- 🔗 **Smart Context Fusion**: Merge tasks from disparate sources (Email, Slack, Calendar) into a single source of truth.
-- 💬 **Real-time Agent Chat**: Interact with your tasks using natural language via our integrated AI assistant.
-- ⚡ **Intelligent Prioritization**: AI-driven suggestions based on deadlines, effort, and historical performance.
+- 🧠 **AI Task Decomposition**: Transform high-level objectives into granular, actionable steps automatically using GLM-4.7-Flash.
+- ⚙️ **Autonomous Agent Tools**: The assistant can interact directly with your database to create, update, and manage tasks.
+- 💭 **Reasoning & Thinking**: See the AI's step-by-step thinking process as it breaks down complex requests.
+- 💬 **Real-time Agent Chat**: Interact with your workspace using natural language via our integrated streaming AI assistant.
+- ⚡ **Intelligent Prioritization**: AI-driven suggestions based on deadlines, effort, and project context.
 - 🎨 **Premium UI/UX**: Built with **Tailwind CSS 4** and **Framer Motion** for a smooth, high-fidelity experience.
-- 🔒 **Secure Authentication**: Built on **Better Auth** for robust user security and session management.
+- 🔒 **Secure Authentication**: Robust user security and session management via **Better Auth**.
 
 ---
 
@@ -40,7 +41,8 @@
 
 - **Framework**: [Next.js 16 (App Router)](https://nextjs.org)
 - **Runtime**: [Bun](https://bun.sh)
-- **AI Engine**: [Google Gemini Pro](https://deepmind.google/technologies/gemini/) via [AI SDK](https://sdk.vercel.ai)
+- **Frontend**: [React 19](https://react.dev)
+- **AI Engine**: **GLM-4.7-Flash** via Cloudflare Workers
 - **Database**: [PostgreSQL](https://www.postgresql.org) with [Prisma ORM](https://www.prisma.io)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
@@ -55,14 +57,16 @@
 graph TD
     User([User])
     Frontend[Next.js Frontend]
-    AIService[AI SDK / Gemini Pro]
+    Worker[Cloudflare Worker Proxy]
+    AIService[GLM-4.7-Flash]
     Database[(Postgres Database)]
     Auth[Better Auth]
 
-    User <-->|React Interface| Frontend
-    Frontend <-->|Tools & Streaming| AIService
+    User <-->|React 19 Interface| Frontend
+    Frontend <-->|Streaming SSE| Worker
+    Worker <-->|Chat Completion API| AIService
     Frontend <-->|Prisma Client| Database
-    Frontend <-->|Middleware| Auth
+    Frontend <-->|Session Management| Auth
     Auth <--> Database
 ```
 
@@ -74,7 +78,7 @@ graph TD
 
 - [Bun](https://bun.sh) installed.
 - A PostgreSQL database instance.
-- A Google AI (Gemini) API Key.
+- A Cloudflare API Key and GLM Worker URL.
 
 ### Installation
 
@@ -95,14 +99,24 @@ graph TD
    Create a `.env` file in the root directory and add the following:
 
    ```env
+   # Database
    DATABASE_URL="postgresql://user:password@localhost:5432/taskfusion"
-   GOOGLE_API_KEY="your_api_key_here"
+
+   # Authentication
    BETTER_AUTH_SECRET="your_secret_here"
    BETTER_AUTH_URL="http://localhost:3000"
    NEXT_PUBLIC_BASE_URL="http://localhost:3000"
-   RESEND_API_KEY="your_resend_api_key_here"
+
+   # Google Auth
    GOOGLE_CLIENT_ID="your_google_client_id_here"
    GOOGLE_CLIENT_SECRET="your_google_client_secret_here"
+
+   # Email Service
+   RESEND_API_KEY="your_resend_api_key_here"
+
+   # AI Service (GLM-4.7-Flash)
+   CLOUDFLARE_API_KEY="your_cloudflare_api_key_here"
+   GLM_WORKER_URL="your_worker_url_here"
    ```
 
 4. **Run Database Migrations**:

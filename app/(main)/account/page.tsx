@@ -17,21 +17,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import {
   Laptop,
   Smartphone,
-  Trash2,
-  AlertTriangle,
   Loader2,
   CheckCircle2,
   ChevronLeft,
@@ -150,21 +137,6 @@ export default function AccountPage() {
       toast.success('Session revoked');
     } catch (err) {
       toast.error('Failed to revoke session');
-      console.error(err);
-    }
-  };
-
-  /**
-   * Completely deletes the user's account and all associated data
-   */
-  const handleDeleteAccount = async () => {
-    try {
-      await authClient.deleteUser();
-      toast.success('Account deleted successfully');
-      // Redirect to sign-in page after deletion
-      router.push('/sign-in');
-    } catch (err) {
-      toast.error('Failed to delete account');
       console.error(err);
     }
   };
@@ -302,58 +274,53 @@ export default function AccountPage() {
 
             {/* Active Login Sessions Monitoring Section */}
             <Card>
-              <CardHeader>
-                <CardTitle>Active Sessions</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Active Sessions</CardTitle>
                 <CardDescription>
                   Devices where you are currently logged in.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent>
                 {isLoadingSessions ? (
-                  <div className="flex justify-center p-4">
-                    <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                  <div className="flex justify-center py-4">
+                    <Loader2 className="size-5 animate-spin text-muted-foreground" />
                   </div>
                 ) : sessions.length === 0 ? (
-                  <p className="text-sm text-muted-foreground p-4 text-center">
+                  <p className="text-xs text-muted-foreground py-2 text-center border rounded-lg border-dashed">
                     No active sessions found.
                   </p>
                 ) : (
-                  <div className="divide-y space-y-4">
+                  <div className="space-y-1">
                     {sessions.map((sess) => (
                       <div
                         key={sess.token}
-                        className="flex items-start justify-between pt-4 first:pt-0"
+                        className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 transition-colors"
                       >
-                        <div className="flex gap-3">
-                          <div className="mt-1 p-2 bg-muted rounded">
-                            {sess.userAgent?.includes('Mobi') ? (
-                              <Smartphone className="size-4" />
-                            ) : (
-                              <Laptop className="size-4" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">
+                        <div className="flex items-center gap-2.5 overflow-hidden">
+                          {sess.userAgent?.includes('Mobi') ? (
+                            <Smartphone className="size-3.5 text-muted-foreground shrink-0" />
+                          ) : (
+                            <Laptop className="size-3.5 text-muted-foreground shrink-0" />
+                          )}
+                          <div className="truncate">
+                            <p className="text-sm font-medium truncate flex items-center gap-2">
                               {sess.userAgent || 'Unknown Device'}
-                              {/* Label for the current browser session */}
                               {sess.token === session.session.token && (
-                                <span className="ml-2 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded-full">
+                                <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded-full font-semibold">
                                   Current
                                 </span>
                               )}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              Last active:{' '}
+                            <p className="text-[10px] text-muted-foreground">
                               {new Date(sess.updatedAt).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
-                        {/* Option to revoke other (non-current) sessions */}
                         {sess.token !== session.session.token && (
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-destructive h-8 px-2"
+                            className="text-destructive h-7 px-2 text-xs hover:bg-destructive/10"
                             onClick={() => handleRevokeSession(sess.token)}
                           >
                             Revoke
@@ -364,57 +331,6 @@ export default function AccountPage() {
                   </div>
                 )}
               </CardContent>
-            </Card>
-
-            {/* Account Deletion Section (High Risk) */}
-            <Card className="border-destructive/50">
-              <CardHeader>
-                <CardTitle className="text-destructive">Danger Zone</CardTitle>
-                <CardDescription>
-                  Irreversible actions for your account.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-destructive/10 p-4 rounded-lg flex items-start gap-3 border border-destructive/20 mb-4">
-                  <AlertTriangle className="size-5 text-destructive shrink-0" />
-                  <p className="text-sm text-destructive font-medium">
-                    Deleting your account is permanent and cannot be undone. All
-                    your tasks and data will be lost.
-                  </p>
-                </div>
-              </CardContent>
-              <CardFooter>
-                {/* Confirmation dialog for account deletion */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive">
-                      <Trash2 className="mr-2 size-4" />
-                      Delete Account
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Are you absolutely sure?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. This will permanently
-                        delete your account and remove your data from our
-                        servers.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        onClick={handleDeleteAccount}
-                      >
-                        Delete Forever
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </CardFooter>
             </Card>
           </div>
         </div>

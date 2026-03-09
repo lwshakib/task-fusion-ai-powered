@@ -52,23 +52,33 @@ export async function streamText(
    */
   const chatMessages: Message[] = [
     { role: 'system', content: SYSTEM_PROMPT },
-    ...messages.map((m: any) => {
-      // eslint-disable-line @typescript-eslint/no-explicit-any
+    ...messages.map((m) => {
       let content = m.content;
       // Extract text from parts if the UI sends a complex message structure
       if (Array.isArray(m.parts)) {
         content = m.parts
-          .map((p: any) => (p as any).text || (p as any).reasoning || '')
-          .join(''); // eslint-disable-line @typescript-eslint/no-explicit-any
+          .map((p) => {
+            const part = p as { text?: string; reasoning?: string };
+            return part.text || part.reasoning || '';
+          })
+          .join('');
       } else if (typeof m.content === 'object' && m.content !== null) {
         content = JSON.stringify(m.content);
       }
+      const msg = m as {
+        role: string;
+        content: string;
+        parts?: unknown[];
+        tool_calls?: unknown[];
+        tool_call_id?: string;
+        name?: string;
+      };
       return {
-        role: m.role,
+        role: msg.role as Message['role'],
         content: content || '',
-        tool_calls: m.tool_calls,
-        tool_call_id: m.tool_call_id,
-        name: m.name,
+        tool_calls: msg.tool_calls,
+        tool_call_id: msg.tool_call_id,
+        name: msg.name,
       };
     }),
   ];
@@ -343,14 +353,14 @@ export async function streamText(
                     name: toolName,
                     content: JSON.stringify(result),
                   });
-                } catch (e: any) {
-                  // eslint-disable-line @typescript-eslint/no-explicit-any
+                } catch (e: unknown) {
+                  const err = e as Error;
                   // Handle and stream tool execution errors
-                  const errorResult = { success: false, error: e.message };
+                  const errorResult = { success: false, error: err.message };
                   const errorPart = {
                     type: `tool-${toolName}`,
                     state: 'output-error',
-                    errorText: e.message,
+                    errorText: err.message,
                     toolCallId: tc.id,
                   };
                   controller.enqueue(
@@ -389,7 +399,8 @@ export async function streamText(
                   data: {
                     userId: userId,
                     role: MESSAGE_ROLE.assistant,
-                    parts: assistantParts,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    parts: assistantParts as any,
                   },
                 });
               } catch (dbErr) {
@@ -407,11 +418,11 @@ export async function streamText(
             return;
           }
         }
-      } catch (err: any) {
-        // eslint-disable-line @typescript-eslint/no-explicit-any
+      } catch (err: unknown) {
+        const error = err as Error;
         // Enforce error streaming if something goes wrong in the outer execution block
         controller.enqueue(
-          encoder.encode(`3:${JSON.stringify(err.message)}\n`),
+          encoder.encode(`3:${JSON.stringify(error.message)}\n`),
         );
         controller.close();
       }
@@ -422,8 +433,7 @@ export async function streamText(
     /**
      * Helper to wrap the stream in a standard text/plain Response compatible with Vercel AI SDK.
      */
-    toUIMessageStreamResponse: (options?: any) => {
-      // eslint-disable-line @typescript-eslint/no-explicit-any
+    toUIMessageStreamResponse: (options?: unknown) => {
       void options;
       return new Response(stream, {
         headers: {
