@@ -1,6 +1,6 @@
 'use client';
 
-import { ModeToggle } from '@/components/mode-toggle';
+import { ModeToggle } from '@/components/layout/mode-toggle';
 import { UserNav } from '@/components/tasks/user-nav';
 import { authClient } from '@/lib/auth-client';
 import {

@@ -1,5 +1,5 @@
-import { Logo } from '@/components/logo';
-import { ModeToggle } from '@/components/mode-toggle';
+import { Logo } from '@/components/layout/logo';
+import { ModeToggle } from '@/components/layout/mode-toggle';
 import { UserNav } from '@/components/tasks/user-nav';
 import { ClearMessagesButton } from '@/components/tasks/clear-messages-button';
 import {

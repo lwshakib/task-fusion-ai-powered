@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ModeToggle } from '@/components/mode-toggle';
+import { ModeToggle } from '@/components/layout/mode-toggle';
 import { UserNav } from '@/components/tasks/user-nav';
 import { UsageText } from '@/components/tasks/usage-text';
 import { authClient } from '@/lib/auth-client';

@@ -1,6 +1,6 @@
 'use client';
 
-import { LogoIcon } from '@/components/logo';
+import { LogoIcon } from '@/components/layout/logo';
 import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
