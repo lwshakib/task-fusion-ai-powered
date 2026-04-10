@@ -78,7 +78,7 @@ graph TD
 
 - [Bun](https://bun.sh) installed.
 - A PostgreSQL database instance.
-- A Cloudflare API Key and GLM Worker URL.
+- A Cloudflare AI Gateway API key and endpoint URL.
 
 ### Installation
 
@@ -114,9 +114,9 @@ graph TD
    # Email Service
    RESEND_API_KEY="your_resend_api_key_here"
 
-   # AI Service (GLM-4.7-Flash)
-   CLOUDFLARE_API_KEY="your_cloudflare_api_key_here"
-   GLM_WORKER_URL="your_worker_url_here"
+   # AI Service (Cloudflare AI Gateway)
+   CLOUDFLARE_AI_GATEWAY_API_KEY="your_cloudflare_ai_gateway_api_key_here"
+   CLOUDFLARE_AI_GATEWAY_ENDPOINT="your_cloudflare_ai_gateway_endpoint_here"
    ```
 
 4. **Run Database Migrations**:

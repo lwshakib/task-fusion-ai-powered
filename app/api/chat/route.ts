@@ -1,4 +1,4 @@
-import { streamText } from '@/llm/streamText';
+import { aiService } from '@/Services/ai.services';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { MESSAGE_ROLE } from '@/generated/prisma/enums';
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
     });
 
     // 6. Initiate the AI streaming process
-    const result = await streamText(messages, session.user.id);
+    const result = await aiService.streamText(messages, session.user.id);
 
     // 7. Return the UI-compatible stream response
     const response = result.toUIMessageStreamResponse({
