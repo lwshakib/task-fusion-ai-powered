@@ -21,14 +21,12 @@ By participating in this project, you are expected to uphold our [Code of Conduc
 
 1. **Fork the repository** and create your branch from `main`.
 2. **Install dependencies** using `bun install`.
-3. **If you've added code** that should be tested, add unit or E2E tests.
+3. **If you've added code** that should be validated, add clear manual verification notes in your pull request.
 4. **If you've changed APIs**, update the documentation.
-5. **Ensure the test suite passes** by running `bun run test`.
-6. **Verify E2E tests** (if applicable) with `bun run test:e2e`.
-7. **Make sure your code lints and is formatted**:
+5. **Make sure your code lints and is formatted**:
    - `bun run lint`
    - `bun run format`
-8. **Submit a pull request**!
+6. **Submit a pull request**!
 
 ## Style Guide
 
