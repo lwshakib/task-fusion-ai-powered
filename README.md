@@ -5,141 +5,118 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)](https://prisma.io)
 
-**Task Fusion AI** is an intelligent, agent-driven productivity platform designed to bridge the gap between complex planning and seamless execution. Powered by advanced **GLM-4.7-Flash** models, it decomposes goals, synthesizes context, and prioritizes your workflow so you can focus on what truly matters.
+Task Fusion AI is an AI-powered task management platform that helps users plan, prioritize, and execute work through real-time chat and tool-assisted automation.
 
----
+![Task Fusion AI Dark Mode](./public/dark-demo.png)
+![Task Fusion AI Light Mode](./public/light-demo.png)
 
-## 📸 Demo
+## Features
 
-<p align="center">
-  <img src="./public/dark-demo.png" alt="Task Fusion AI - Dark Mode" width="100%">
-  <br>
-  <em>Dark Mode</em>
-</p>
+- AI task creation, updating, deletion, and search via tool calls
+- Real-time streaming assistant responses
+- Cloudflare AI Gateway integration for model requests
+- Better Auth-based authentication flow
+- Prisma + PostgreSQL persistence for users, tasks, and messages
+- Modern Next.js App Router architecture with Bun runtime
 
-<p align="center">
-  <img src="./public/light-demo.png" alt="Task Fusion AI - Light Mode" width="100%">
-  <br>
-  <em>Light Mode</em>
-</p>
+## Tech Stack
 
----
+- Next.js 16 (App Router)
+- React 19
+- Bun
+- Prisma ORM + PostgreSQL
+- Tailwind CSS 4
+- Better Auth
+- Cloudflare AI Gateway
 
-## ✨ Features
-
-- 🧠 **AI Task Decomposition**: Transform high-level objectives into granular, actionable steps automatically using GLM-4.7-Flash.
-- ⚙️ **Autonomous Agent Tools**: The assistant can interact directly with your database to create, update, and manage tasks.
-- 💭 **Reasoning & Thinking**: See the AI's step-by-step thinking process as it breaks down complex requests.
-- 💬 **Real-time Agent Chat**: Interact with your workspace using natural language via our integrated streaming AI assistant.
-- ⚡ **Intelligent Prioritization**: AI-driven suggestions based on deadlines, effort, and project context.
-- 🎨 **Premium UI/UX**: Built with **Tailwind CSS 4** and **Framer Motion** for a smooth, high-fidelity experience.
-- 🔒 **Secure Authentication**: Robust user security and session management via **Better Auth**.
-
----
-
-## 🛠️ Tech Stack
-
-- **Framework**: [Next.js 16 (App Router)](https://nextjs.org)
-- **Runtime**: [Bun](https://bun.sh)
-- **Frontend**: [React 19](https://react.dev)
-- **AI Engine**: **GLM-4.7-Flash** via Cloudflare Workers
-- **Database**: [PostgreSQL](https://www.postgresql.org) with [Prisma ORM](https://www.prisma.io)
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/)
-- **Auth**: [Better Auth](https://better-auth.com)
-
----
-
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 graph TD
-    User([User])
-    Frontend[Next.js Frontend]
-    Worker[Cloudflare Worker Proxy]
-    AIService[GLM-4.7-Flash]
-    Database[(Postgres Database)]
+    User[User]
+    UI[Next.js App Router UI]
+    ChatAPI[POST /api/chat]
+    AIService[AIService class]
+    Gateway[Cloudflare AI Gateway]
+    Tools[Task tools in AIService]
+    DB[(PostgreSQL via Prisma)]
     Auth[Better Auth]
 
-    User <-->|React 19 Interface| Frontend
-    Frontend <-->|Streaming SSE| Worker
-    Worker <-->|Chat Completion API| AIService
-    Frontend <-->|Prisma Client| Database
-    Frontend <-->|Session Management| Auth
-    Auth <--> Database
+    User --> UI
+    UI --> ChatAPI
+    ChatAPI --> Auth
+    ChatAPI --> DB
+    ChatAPI --> AIService
+    AIService --> Gateway
+    AIService --> Tools
+    Tools --> DB
+    Auth --> DB
 ```
 
----
+## Setup
 
-## ⚙️ Getting Started
+1. Clone the repository:
 
-### Prerequisites
+```bash
+git clone https://github.com/lwshakib/task-fusion-ai-powered.git
+cd task-fusion-ai-powered
+```
 
-- [Bun](https://bun.sh) installed.
-- A PostgreSQL database instance.
-- A Cloudflare AI Gateway API key and endpoint URL.
+2. Install packages:
 
-### Installation
+```bash
+bun install
+```
 
-1. **Clone the repository**:
+3. Create your environment file:
 
-   ```bash
-   git clone https://github.com/lwshakib/task-fusion-ai-powered.git
-   cd task-fusion-ai-powered
-   ```
+```bash
+cp .env.example .env
+```
 
-2. **Install dependencies**:
+4. Add environment variables in `.env`:
 
-   ```bash
-   bun install
-   ```
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/taskfusion"
 
-3. **Set up environment variables**:
-   Create a `.env` file in the root directory and add the following:
+# Authentication
+BETTER_AUTH_SECRET="your_secret_here"
+BETTER_AUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 
-   ```env
-   # Database
-   DATABASE_URL="postgresql://user:password@localhost:5432/taskfusion"
+# Google Auth
+GOOGLE_CLIENT_ID="your_google_client_id_here"
+GOOGLE_CLIENT_SECRET="your_google_client_secret_here"
 
-   # Authentication
-   BETTER_AUTH_SECRET="your_secret_here"
-   BETTER_AUTH_URL="http://localhost:3000"
-   NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+# Email Service
+RESEND_API_KEY="your_resend_api_key_here"
 
-   # Google Auth
-   GOOGLE_CLIENT_ID="your_google_client_id_here"
-   GOOGLE_CLIENT_SECRET="your_google_client_secret_here"
+# AI Service (Cloudflare AI Gateway)
+CLOUDFLARE_AI_GATEWAY_API_KEY="your_cloudflare_ai_gateway_api_key_here"
+CLOUDFLARE_AI_GATEWAY_ENDPOINT="your_cloudflare_ai_gateway_endpoint_here"
+```
 
-   # Email Service
-   RESEND_API_KEY="your_resend_api_key_here"
+5. Run database migration and generate client:
 
-   # AI Service (Cloudflare AI Gateway)
-   CLOUDFLARE_AI_GATEWAY_API_KEY="your_cloudflare_ai_gateway_api_key_here"
-   CLOUDFLARE_AI_GATEWAY_ENDPOINT="your_cloudflare_ai_gateway_endpoint_here"
-   ```
+```bash
+bun run db:migrate
+```
 
-4. **Run Database Migrations**:
+6. Start development server:
 
-   ```bash
-   bun run db:migrate
-   ```
+```bash
+bun run dev
+```
 
-5. **Start the development server**:
-   ```bash
-   bun run dev
-   ```
+## Contributing
 
----
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
-## 🤝 Contributing
+## Code of Conduct
 
-We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for details.
+Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-Developed with ❤️ by [lwshakib](https://github.com/lwshakib)
+This project is licensed under the MIT License. See [LICENSE](LICENSE).

@@ -1,50 +1,53 @@
 # Contributing to Task Fusion AI
 
-First off, thank you for considering contributing to Task Fusion AI! It's people like you who make Task Fusion AI such a great tool.
+Thank you for your interest in contributing.
 
 ## Code of Conduct
 
-By participating in this project, you are expected to uphold our [Code of Conduct](CODE_OF_CONDUCT.md).
+All contributors are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## How Can I Contribute?
+## Contribution Flow (5 Steps)
 
-### Reporting Bugs
+1. **Fork and clone**
+   - Fork this repository on GitHub.
+   - Clone your fork:
+     - `git clone https://github.com/<your-username>/task-fusion-ai-powered.git`
+     - `cd task-fusion-ai-powered`
 
-- **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/lwshakib/task-fusion-ai-powered/issues).
-- If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/lwshakib/task-fusion-ai-powered/issues/new).
+2. **Install and configure**
+   - Install packages: `bun install`
+   - Create env file: `cp .env.example .env`
+   - Fill required environment variables in `.env`.
+   - Run setup migration: `bun run db:migrate`
 
-### Suggesting Enhancements
+3. **Create a branch**
+   - Create a feature branch from `main`:
+     - `git checkout -b feat/your-change-name`
 
-- **Open a new issue** describing the enhancement and why it would be beneficial to the project.
+4. **Develop and verify**
+   - Start dev server: `bun run dev`
+   - Run lint: `bun run lint`
+   - Run formatting: `bun run format`
+   - Update docs when behavior, APIs, or setup steps change.
 
-### Pull Requests
+5. **Push and open a pull request**
+   - Commit your changes with a clear message.
+   - Push your branch:
+     - `git push origin feat/your-change-name`
+   - Open a Pull Request against `main` with:
+     - What changed
+     - Why it changed
+     - How to verify manually
 
-1. **Fork the repository** and create your branch from `main`.
-2. **Install dependencies** using `bun install`.
-3. **If you've added code** that should be validated, add clear manual verification notes in your pull request.
-4. **If you've changed APIs**, update the documentation.
-5. **Make sure your code lints and is formatted**:
-   - `bun run lint`
-   - `bun run format`
-6. **Submit a pull request**!
+## Pull Request Checklist
 
-## Style Guide
+- Changes are focused and scoped to one concern.
+- Lint/format pass locally.
+- New env/config requirements are documented.
+- README/CONTRIBUTING updates are included when needed.
 
-- **Language**: TypeScript for both frontend and backend logic.
-- **Framework**: Next.js (App Router) with React 19.
-- **Styling**: Tailwind CSS 4. Follow mobile-first responsive design.
-- **Database**: Prisma ORM. Ensure migrations are updated if schema changes.
-- **State Management**: Zustand for global client-side state.
-- **Formatting**: We use Prettier and ESLint. Please run `bun run format` before committing.
+## Reporting Bugs or Requesting Features
 
-## Development Setup
-
-1. **Clone the repo**: `git clone https://github.com/lwshakib/task-fusion-ai-powered.git`
-2. **Install deps**: `bun install`
-3. **Set up environment variables**: Copy `.env.example` to `.env` and fill in the values.
-4. **Initialize the database**: `bun run db:migrate`
-5. **Start developing**: `bun run dev`
-
----
-
-Happy coding! 🚀
+- Search existing issues first.
+- Open an issue with clear reproduction steps or proposal details:
+  - [Issues](https://github.com/lwshakib/task-fusion-ai-powered/issues)
