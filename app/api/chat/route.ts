@@ -1,4 +1,4 @@
-import { aiService } from '@/Services/ai.services';
+import { aiService } from '@/services/ai.services';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { MESSAGE_ROLE } from '@/generated/prisma/enums';
