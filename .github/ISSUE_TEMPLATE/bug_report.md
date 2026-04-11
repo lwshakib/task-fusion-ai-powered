@@ -19,7 +19,7 @@ assignees: []
 - [ ] Auth & Security
 - [ ] AI Gateway & Performance
 - [ ] UI/UX Aesthetics
-- [ ] Other: **__**
+- [ ] Other: **\_\_**
 
 ## 🔁 Reproduction Steps
 

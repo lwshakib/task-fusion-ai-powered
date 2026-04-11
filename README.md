@@ -57,28 +57,34 @@ graph TD
 ## Setup
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/lwshakib/task-fusion-ai-powered.git
    cd task-fusion-ai-powered
    ```
 
 2. **Install dependencies**:
+
    ```bash
    bun install
    ```
 
 3. **Configure Environment**:
+
    ```bash
    cp .env.example .env
    ```
+
    Fill in your `.env` with Database, Auth, AI, and Storage keys.
 
 4. **Initialize Database**:
+
    ```bash
    bun run db:migrate
    ```
 
 5. **Setup Storage Bucket**:
+
    ```bash
    bun run bucket:setup
    ```
