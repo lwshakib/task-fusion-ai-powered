@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
-import { s3Service } from "@/services/s3.services";
+import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
+import { auth } from '@/lib/auth';
+import { s3Service } from '@/services/s3.services';
 
 /**
  * GET /api/s3/signed-url
@@ -16,15 +16,15 @@ export async function GET(req: Request) {
     });
 
     if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     // 2. Extract key from URL
     const { searchParams } = new URL(req.url);
-    const key = searchParams.get("key");
+    const key = searchParams.get('key');
 
     if (!key) {
-      return new NextResponse("Missing key parameter", { status: 400 });
+      return new NextResponse('Missing key parameter', { status: 400 });
     }
 
     // 3. Generate the signed download URL
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ url });
   } catch (error) {
-    console.error("Signed URL error:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    console.error('Signed URL error:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

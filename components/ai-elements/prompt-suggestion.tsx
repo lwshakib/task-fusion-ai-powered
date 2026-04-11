@@ -29,7 +29,10 @@ function PromptSuggestion({
       <Button
         variant={variant || 'outline'}
         size={size || 'lg'}
-        className={cn('h-auto rounded-xl whitespace-normal text-left justify-start py-2.5 px-4', className)}
+        className={cn(
+          'h-auto rounded-xl whitespace-normal text-left justify-start py-2.5 px-4',
+          className,
+        )}
         {...props}
       >
         {children}

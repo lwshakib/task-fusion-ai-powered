@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
-import { s3Service } from "@/services/s3.services";
+import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
+import { auth } from '@/lib/auth';
+import { s3Service } from '@/services/s3.services';
 
 /**
  * POST /api/s3/presigned-url
@@ -16,26 +16,26 @@ export async function POST(req: Request) {
     });
 
     if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     // 2. Parse request body
     const { fileName, fileType } = await req.json();
 
     if (!fileName || !fileType) {
-      return new NextResponse("Missing fileName or fileType", { status: 400 });
+      return new NextResponse('Missing fileName or fileType', { status: 400 });
     }
 
     // 3. Generate the presigned URL via S3 service
     const { url, key } = await s3Service.generatePresignedUploadUrl(
       session.user.id,
       fileName,
-      fileType
+      fileType,
     );
 
     return NextResponse.json({ url, key });
   } catch (error) {
-    console.error("Presigned URL error:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    console.error('Presigned URL error:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

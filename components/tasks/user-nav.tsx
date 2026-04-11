@@ -23,12 +23,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
-import {
-  LogOut,
-  Settings,
-  LayoutDashboard,
-  CreditCard,
-} from 'lucide-react';
+import { LogOut, Settings, LayoutDashboard, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 
 /**
@@ -66,10 +61,10 @@ export function UserNav() {
           {/* User Profile Trigger Button */}
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-              <UserAvatar 
-                className="h-9 w-9" 
-                src={user?.image} 
-                name={user?.name} 
+              <UserAvatar
+                className="h-9 w-9"
+                src={user?.image}
+                name={user?.name}
               />
             </Button>
           </DropdownMenuTrigger>

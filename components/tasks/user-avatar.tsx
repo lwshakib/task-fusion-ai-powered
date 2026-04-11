@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useEffect, useMemo, useState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { User } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type UserAvatarProps = {
   src?: string | null;
@@ -40,13 +40,15 @@ export function UserAvatar({ src, name, className }: UserAvatarProps) {
 
     const fetchSignedUrl = async () => {
       try {
-        const res = await fetch(`/api/s3/signed-url?key=${encodeURIComponent(src)}`);
+        const res = await fetch(
+          `/api/s3/signed-url?key=${encodeURIComponent(src)}`,
+        );
         if (res.ok && !cancelled) {
           const data = await res.json();
           setSignedUrl(data.url);
         }
       } catch (err) {
-        console.error("Failed to resolve S3 key:", err);
+        console.error('Failed to resolve S3 key:', err);
       }
     };
 
@@ -61,12 +63,10 @@ export function UserAvatar({ src, name, className }: UserAvatarProps) {
   const resolvedSrc = isS3Key ? signedUrl : directSrc;
 
   return (
-    <Avatar className={cn("h-9 w-9", className)}>
-      <AvatarImage src={resolvedSrc} alt={name || "User Avatar"} />
+    <Avatar className={cn('h-9 w-9', className)}>
+      <AvatarImage src={resolvedSrc} alt={name || 'User Avatar'} />
       <AvatarFallback className="bg-primary/10 text-primary font-bold select-none">
-        {name?.charAt(0).toUpperCase() || (
-          <User className="size-[50%]" />
-        )}
+        {name?.charAt(0).toUpperCase() || <User className="size-[50%]" />}
       </AvatarFallback>
     </Avatar>
   );

@@ -36,8 +36,8 @@ import Link from 'next/link';
 
 interface SessionData {
   token: string;
-  userAgent?: string;
-  updatedAt: string;
+  userAgent?: string | null;
+  updatedAt: Date;
 }
 
 interface AccountData {
@@ -51,7 +51,11 @@ interface AccountData {
  * connected authentication accounts, and active device sessions.
  */
 export default function AccountPage() {
-  const { data: session, isPending: isSessionPending, refetch } = authClient.useSession();
+  const {
+    data: session,
+    isPending: isSessionPending,
+    refetch,
+  } = authClient.useSession();
   const router = useRouter();
 
   // Profile Update State
@@ -160,12 +164,13 @@ export default function AccountPage() {
 
       toast.success(`${providerId} account unlinked`);
       // Update local state to reflect removal
-      setAccounts((prev) => prev.filter((acc) => acc.providerId !== providerId));
+      setAccounts((prev) =>
+        prev.filter((acc) => acc.providerId !== providerId),
+      );
     } catch {
       toast.error(`Error unlinking ${providerId}`);
     }
   };
-
 
   if (isSessionPending) {
     return (
@@ -209,7 +214,8 @@ export default function AccountPage() {
               Settings
             </h1>
             <p className="text-muted-foreground text-lg">
-              Manage your personal information, connected accounts, and security.
+              Manage your personal information, connected accounts, and
+              security.
             </p>
           </div>
 
@@ -225,10 +231,16 @@ export default function AccountPage() {
                     onSuccess={() => refetch()}
                   />
                   <div className="space-y-2 w-full px-4 overflow-hidden">
-                    <h2 className="text-2xl font-bold truncate" title={session.user.name || ''}>
+                    <h2
+                      className="text-2xl font-bold truncate"
+                      title={session.user.name || ''}
+                    >
                       {session.user.name}
                     </h2>
-                    <p className="text-sm text-muted-foreground truncate" title={session.user.email || ''}>
+                    <p
+                      className="text-sm text-muted-foreground truncate"
+                      title={session.user.email || ''}
+                    >
                       {session.user.email}
                     </p>
                     <div className="pt-4 flex justify-center">
@@ -240,11 +252,11 @@ export default function AccountPage() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-muted/30 border-dashed">
                 <CardContent className="p-4 text-xs text-muted-foreground leading-relaxed">
-                  Your profile information is shared across Task Fusion services to help us 
-                  provide a consistent and personalized experience.
+                  Your profile information is shared across Task Fusion services
+                  to help us provide a consistent and personalized experience.
                 </CardContent>
               </Card>
             </div>
@@ -319,10 +331,12 @@ export default function AccountPage() {
                           </div>
                           <div>
                             <p className="text-sm font-semibold">Google</p>
-                            <p className="text-xs text-muted-foreground">Social Authentication</p>
+                            <p className="text-xs text-muted-foreground">
+                              Social Authentication
+                            </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-3">
                           {isGoogleLinked ? (
                             <>
@@ -363,8 +377,12 @@ export default function AccountPage() {
                             <Mail className="size-5" />
                           </div>
                           <div>
-                            <p className="text-sm font-semibold">Email & Password</p>
-                            <p className="text-xs text-muted-foreground">Standard Credentials</p>
+                            <p className="text-sm font-semibold">
+                              Email & Password
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Standard Credentials
+                            </p>
                           </div>
                         </div>
                         <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2 py-1 rounded">
@@ -415,11 +433,17 @@ export default function AccountPage() {
                                 )}
                               </p>
                               <p className="text-[10px] text-muted-foreground">
-                                Last used: {new Date(sess.updatedAt).toLocaleDateString()} at {new Date(sess.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                Last used:{' '}
+                                {new Date(sess.updatedAt).toLocaleDateString()}{' '}
+                                at{' '}
+                                {new Date(sess.updatedAt).toLocaleTimeString(
+                                  [],
+                                  { hour: '2-digit', minute: '2-digit' },
+                                )}
                               </p>
                             </div>
                           </div>
-                          
+
                           {sess.token !== session.session.token && (
                             <Button
                               variant="ghost"

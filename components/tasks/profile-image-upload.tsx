@@ -19,7 +19,12 @@ type ProfileImageUploadProps = {
  * Features a hoverable avatar with a camera icon for uploading profile images.
  * Coordinates with S3/R2 presigned URL API for direct browser-to-bucket uploads.
  */
-export function ProfileImageUpload({ src, name, className, onSuccess }: ProfileImageUploadProps) {
+export function ProfileImageUpload({
+  src,
+  name,
+  className,
+  onSuccess,
+}: ProfileImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,7 +38,9 @@ export function ProfileImageUpload({ src, name, className, onSuccess }: ProfileI
   /**
    * Handles the file selection and upload process
    */
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -79,11 +86,11 @@ export function ProfileImageUpload({ src, name, className, onSuccess }: ProfileI
       });
 
       toast.success('Profile image updated');
-      
+
       // Notify parent to refresh session data without a full page reload
       onSuccess?.();
     } catch (err) {
-      console.error("Upload error:", err);
+      console.error('Upload error:', err);
       toast.error('Failed to upload image');
     } finally {
       setIsUploading(false);
@@ -91,7 +98,7 @@ export function ProfileImageUpload({ src, name, className, onSuccess }: ProfileI
   };
 
   return (
-    <div className={cn("relative group cursor-pointer", className)}>
+    <div className={cn('relative group cursor-pointer', className)}>
       {/* Hidden file input */}
       <input
         type="file"
@@ -102,16 +109,16 @@ export function ProfileImageUpload({ src, name, className, onSuccess }: ProfileI
       />
 
       {/* Profile Image View */}
-      <div 
+      <div
         onClick={handleTriggerUpload}
         className="relative size-24 md:size-32 rounded-full overflow-hidden border-4 border-background shadow-lg transition-all"
       >
-        <UserAvatar 
-          src={src} 
-          name={name} 
-          className="size-full rounded-none text-4xl md:text-5xl" 
+        <UserAvatar
+          src={src}
+          name={name}
+          className="size-full rounded-none text-4xl md:text-5xl"
         />
-        
+
         {/* Camera Overlay on Hover */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           {isUploading ? (

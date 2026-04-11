@@ -1,5 +1,9 @@
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 /**
  * S3Service Class
@@ -13,7 +17,7 @@ class S3Service {
   constructor() {
     // 1. Initialize S3 client for Cloudflare R2
     this.s3Client = new S3Client({
-      region: process.env.AWS_REGION || "auto",
+      region: process.env.AWS_REGION || 'auto',
       endpoint: process.env.AWS_ENDPOINT,
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
@@ -28,7 +32,7 @@ class S3Service {
 
   /**
    * Generates a presigned URL for uploading a file directly to the S3/R2 bucket.
-   * 
+   *
    * @param userId - Unique identifier of the user (for path namespacing).
    * @param fileName - The original name of the file being uploaded.
    * @param fileType - The MIME type of the file (e.g., 'image/jpeg').
@@ -37,7 +41,7 @@ class S3Service {
   async generatePresignedUploadUrl(
     userId: string,
     fileName: string,
-    fileType: string
+    fileType: string,
   ) {
     const timestamp = Date.now();
     const extension = fileName.split('.').pop();
@@ -57,15 +61,12 @@ class S3Service {
 
   /**
    * Generates a signed URL for reading a private file from the S3/R2 bucket.
-   * 
+   *
    * @param key - The unique object key (path) in the bucket.
    * @param expiresIn - Optional expiration time in seconds (default: 1 hour).
    * @returns A temporary signed URL for viewing the resource.
    */
-  async generateSignedDownloadUrl(
-    key: string,
-    expiresIn = 3600
-  ) {
+  async generateSignedDownloadUrl(key: string, expiresIn = 3600) {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,

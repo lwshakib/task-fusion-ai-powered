@@ -1,14 +1,19 @@
-import { S3Client, CreateBucketCommand, PutBucketCorsCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  CreateBucketCommand,
+  PutBucketCorsCommand,
+  HeadBucketCommand,
+} from '@aws-sdk/client-s3';
 
 /**
  * Bucket Setup Script
- * Use this script to provision your Cloudflare R2 / S3 bucket 
+ * Use this script to provision your Cloudflare R2 / S3 bucket
  * and configure CORS for the Task Fusion application.
  */
 
 async function setup() {
   const client = new S3Client({
-    region: process.env.AWS_REGION || "auto",
+    region: process.env.AWS_REGION || 'auto',
     endpoint: process.env.AWS_ENDPOINT,
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
@@ -27,8 +32,14 @@ async function setup() {
       await client.send(new HeadBucketCommand({ Bucket: bucketName }));
       console.log(`✅ Bucket "${bucketName}" already exists.`);
     } catch (err: unknown) {
-      const s3Err = err as { name?: string; $metadata?: { httpStatusCode?: number } };
-      if (s3Err.name === 'NotFound' || s3Err.$metadata?.httpStatusCode === 404) {
+      const s3Err = err as {
+        name?: string;
+        $metadata?: { httpStatusCode?: number };
+      };
+      if (
+        s3Err.name === 'NotFound' ||
+        s3Err.$metadata?.httpStatusCode === 404
+      ) {
         console.log(`📦 Bucket "${bucketName}" not found. Creating...`);
         await client.send(new CreateBucketCommand({ Bucket: bucketName }));
         console.log(`✅ Bucket "${bucketName}" created successfully.`);
@@ -40,25 +51,26 @@ async function setup() {
     // 2. Apply CORS Configuration
     // Essential for direct browser-to-bucket uploads via presigned URLs.
     console.log(`🛡️  Applying CORS configuration...`);
-    await client.send(new PutBucketCorsCommand({
-      Bucket: bucketName,
-      CORSConfiguration: {
-        CORSRules: [
-          {
-            AllowedHeaders: ["*"],
-            AllowedMethods: ["GET", "PUT", "POST", "HEAD"],
-            AllowedOrigins: [
-              "http://localhost:3000",
-              process.env.NEXT_PUBLIC_BASE_URL || "",
-            ].filter(Boolean),
-            MaxAgeSeconds: 3600,
-          },
-        ],
-      },
-    }));
+    await client.send(
+      new PutBucketCorsCommand({
+        Bucket: bucketName,
+        CORSConfiguration: {
+          CORSRules: [
+            {
+              AllowedHeaders: ['*'],
+              AllowedMethods: ['GET', 'PUT', 'POST', 'HEAD'],
+              AllowedOrigins: [
+                'http://localhost:3000',
+                process.env.NEXT_PUBLIC_BASE_URL || '',
+              ].filter(Boolean),
+              MaxAgeSeconds: 3600,
+            },
+          ],
+        },
+      }),
+    );
     console.log(`✅ CORS configuration applied successfully.`);
     console.log(`\n🎉 Bucket setup complete!\n`);
-
   } catch (error) {
     console.error(`\n❌ Setup failed:`, error);
     process.exit(1);

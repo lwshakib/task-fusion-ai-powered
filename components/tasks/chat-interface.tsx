@@ -131,7 +131,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
             <span>Failed to create tasks</span>
           </div>
           {errorText && (
-          <div className="text-[11px] text-muted-foreground px-1 max-w-full break-words">
+            <div className="text-[11px] text-muted-foreground px-1 max-w-full break-words">
               {errorText}
             </div>
           )}
@@ -184,7 +184,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
             <span>Failed to update tasks</span>
           </div>
           {errorText && (
-          <div className="text-[11px] text-muted-foreground px-1 max-w-full break-words">
+            <div className="text-[11px] text-muted-foreground px-1 max-w-full break-words">
               {errorText}
             </div>
           )}
@@ -225,7 +225,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
             <span>Failed to delete tasks</span>
           </div>
           {errorText && (
-          <div className="text-[11px] text-muted-foreground px-1 max-w-full break-words">
+            <div className="text-[11px] text-muted-foreground px-1 max-w-full break-words">
               {errorText}
             </div>
           )}

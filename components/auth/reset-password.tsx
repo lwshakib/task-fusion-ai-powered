@@ -76,7 +76,6 @@ function ResetPasswordForm() {
     }
   };
 
-
   /**
    * Default View: The password reset form.
    */

@@ -1,5 +1,9 @@
 import prisma from '@/lib/prisma';
-import { MESSAGE_ROLE, TASK_PRIORITY, TASK_STATUS } from '@/generated/prisma/enums';
+import {
+  MESSAGE_ROLE,
+  TASK_PRIORITY,
+  TASK_STATUS,
+} from '@/generated/prisma/enums';
 import type { Prisma } from '@/generated/prisma/client';
 import { CHAT_MODEL_ID } from '@/lib/constants';
 
@@ -53,7 +57,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function toTask(input: unknown): TaskInput {
-  if (!isRecord(input) || typeof input.title !== 'string' || !input.title.trim()) {
+  if (
+    !isRecord(input) ||
+    typeof input.title !== 'string' ||
+    !input.title.trim()
+  ) {
     throw new Error("Each task must include a non-empty 'title'.");
   }
 
@@ -62,7 +70,8 @@ function toTask(input: unknown): TaskInput {
     description:
       typeof input.description === 'string' ? input.description : undefined,
     status:
-      input.status === TASK_STATUS.TODO || input.status === TASK_STATUS.COMPLETED
+      input.status === TASK_STATUS.TODO ||
+      input.status === TASK_STATUS.COMPLETED
         ? input.status
         : TASK_STATUS.TODO,
     priority:
@@ -85,10 +94,14 @@ export class AIService {
     const endpoint = process.env.CLOUDFLARE_AI_GATEWAY_ENDPOINT;
 
     if (!apiKey) {
-      throw new Error('Missing CLOUDFLARE_AI_GATEWAY_API_KEY environment variable.');
+      throw new Error(
+        'Missing CLOUDFLARE_AI_GATEWAY_API_KEY environment variable.',
+      );
     }
     if (!endpoint) {
-      throw new Error('Missing CLOUDFLARE_AI_GATEWAY_ENDPOINT environment variable.');
+      throw new Error(
+        'Missing CLOUDFLARE_AI_GATEWAY_ENDPOINT environment variable.',
+      );
     }
 
     this.cloudflareGatewayApiKey = apiKey;
@@ -141,7 +154,10 @@ export class AIService {
           }
 
           if (!tasksInput) {
-            return { success: false, error: "Invalid input: 'tasks' array is required." };
+            return {
+              success: false,
+              error: "Invalid input: 'tasks' array is required.",
+            };
           }
 
           const createdTasks = await Promise.all(
@@ -213,7 +229,8 @@ export class AIService {
           if (!updates) {
             return {
               success: false,
-              error: "Invalid input: 'updates' array is required with task IDs.",
+              error:
+                "Invalid input: 'updates' array is required with task IDs.",
             };
           }
 
@@ -226,7 +243,8 @@ export class AIService {
               const source = isRecord(item.updates) ? item.updates : item;
               const payload: Record<string, unknown> = {};
 
-              if (typeof source.title === 'string') payload.title = source.title;
+              if (typeof source.title === 'string')
+                payload.title = source.title;
               if (typeof source.description === 'string') {
                 payload.description = source.description;
               }
@@ -280,7 +298,10 @@ export class AIService {
           }
 
           if (!Array.isArray(ids) || ids.some((id) => typeof id !== 'string')) {
-            return { success: false, error: "Invalid input: 'ids' array is required." };
+            return {
+              success: false,
+              error: "Invalid input: 'ids' array is required.",
+            };
           }
 
           await prisma.task.deleteMany({
@@ -319,9 +340,13 @@ export class AIService {
           additionalProperties: false,
         },
         execute: async (args: unknown) => {
-          const query = isRecord(args) && typeof args.query === 'string' ? args.query : '';
+          const query =
+            isRecord(args) && typeof args.query === 'string' ? args.query : '';
           if (!query.trim()) {
-            return { success: false, error: "Invalid input: 'query' is required." };
+            return {
+              success: false,
+              error: "Invalid input: 'query' is required.",
+            };
           }
 
           const tasks = await prisma.task.findMany({
@@ -464,7 +489,9 @@ export class AIService {
                     if (!delta) continue;
 
                     const reasoning =
-                      delta.reasoning_content || delta.thought || delta.thinking;
+                      delta.reasoning_content ||
+                      delta.thought ||
+                      delta.thinking;
                     if (reasoning) {
                       turnHadReasoning = true;
                       const reasoningPart = {
@@ -476,11 +503,15 @@ export class AIService {
                         encoder.encode(`b:${JSON.stringify(reasoningPart)}\n`),
                       );
 
-                      const lastPart = assistantParts[assistantParts.length - 1];
+                      const lastPart =
+                        assistantParts[assistantParts.length - 1];
                       if (lastPart?.type === 'reasoning') {
                         lastPart.reasoning = `${lastPart.reasoning ?? ''}${reasoning}`;
                       } else {
-                        assistantParts.push({ ...reasoningPart, isStreaming: false });
+                        assistantParts.push({
+                          ...reasoningPart,
+                          isStreaming: false,
+                        });
                       }
                     }
 
@@ -504,7 +535,8 @@ export class AIService {
                         encoder.encode(`b:${JSON.stringify(textPart)}\n`),
                       );
 
-                      const lastPart = assistantParts[assistantParts.length - 1];
+                      const lastPart =
+                        assistantParts[assistantParts.length - 1];
                       if (lastPart?.type === 'text') {
                         lastPart.text = `${lastPart.text ?? ''}${delta.content}`;
                       } else {
@@ -528,7 +560,10 @@ export class AIService {
                           turnToolCalls[idx] = {
                             id: tc.id,
                             type: 'function',
-                            function: { name: tc.function?.name, arguments: '' },
+                            function: {
+                              name: tc.function?.name,
+                              arguments: '',
+                            },
                           };
                           tcArgsBuffer[idx] = '';
                         }
@@ -571,7 +606,10 @@ export class AIService {
                 try {
                   args = JSON.parse(tc.function.arguments);
                 } catch {
-                  console.error('Failed to parse tool args:', tc.function.arguments);
+                  console.error(
+                    'Failed to parse tool args:',
+                    tc.function.arguments,
+                  );
                 }
 
                 const callPart = {
@@ -580,7 +618,9 @@ export class AIService {
                   input: args,
                   toolCallId: tc.id,
                 };
-                controller.enqueue(encoder.encode(`b:${JSON.stringify(callPart)}\n`));
+                controller.enqueue(
+                  encoder.encode(`b:${JSON.stringify(callPart)}\n`),
+                );
                 assistantParts.push({ ...callPart });
 
                 const tool = tools[toolName];
