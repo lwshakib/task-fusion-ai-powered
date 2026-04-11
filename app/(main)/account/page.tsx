@@ -27,6 +27,8 @@ import {
   ShieldCheck,
   Globe,
   Trash2,
+  Link as LinkIcon,
+  Unlink,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -117,6 +119,42 @@ export default function AccountPage() {
     }
   };
 
+  /**
+   * Links a social provider to the current account
+   */
+  const handleLinkSocial = async (providerId: 'google') => {
+    try {
+      await authClient.linkSocial({
+        provider: providerId,
+        callbackURL: window.location.href,
+      });
+    } catch (err) {
+      toast.error(`Failed to link ${providerId} account`);
+    }
+  };
+
+  /**
+   * Unlinks a social provider from the current account
+   */
+  const handleUnlinkAccount = async (providerId: string) => {
+    try {
+      const { error } = await authClient.unlinkAccount({
+        providerId,
+      });
+
+      if (error) {
+        toast.error(error.message || `Failed to unlink ${providerId}`);
+        return;
+      }
+
+      toast.success(`${providerId} account unlinked`);
+      // Update local state to reflect removal
+      setAccounts((prev) => prev.filter((acc) => acc.providerId !== providerId));
+    } catch (err) {
+      toast.error(`Error unlinking ${providerId}`);
+    }
+  };
+
   // Helper to map provider IDs to icons/labels
   const getProviderInfo = (providerId: string) => {
     switch (providerId.toLowerCase()) {
@@ -146,6 +184,9 @@ export default function AccountPage() {
     router.replace('/sign-in');
     return null;
   }
+
+  // Derived state for supported providers
+  const isGoogleLinked = accounts.some((acc) => acc.providerId === 'google');
 
   return (
     <div className="flex min-h-screen flex-col bg-background selection:bg-primary/10">
@@ -273,35 +314,69 @@ export default function AccountPage() {
                     <div className="flex justify-center py-6">
                       <Loader2 className="size-6 animate-spin text-muted-foreground" />
                     </div>
-                  ) : accounts.length === 0 ? (
-                    <div className="text-center py-8 border-2 border-dashed rounded-xl text-muted-foreground">
-                      No linked accounts found.
-                    </div>
                   ) : (
                     <div className="grid gap-3">
-                      {accounts.map((acc) => {
-                        const info = getProviderInfo(acc.providerId);
-                        return (
-                          <div 
-                            key={acc.id}
-                            className="flex items-center justify-between p-4 border rounded-xl hover:bg-muted/30 transition-all group"
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className={`p-2.5 rounded-lg bg-secondary ring-1 ring-border group-hover:scale-105 transition-transform ${info.color}`}>
-                                <Globe className="size-5" />
-                              </div>
-                              <div>
-                                <p className="text-sm font-semibold">{info.label}</p>
-                                <p className="text-xs text-muted-foreground">Linked Provider</p>
-                              </div>
-                            </div>
-                            <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2 py-1 rounded">
-                              <div className="size-1.5 rounded-full bg-muted-foreground" />
-                              Active
-                            </span>
+                      {/* Google Connection Row */}
+                      <div className="flex items-center justify-between p-4 border rounded-xl hover:bg-muted/30 transition-all group">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2.5 rounded-lg bg-secondary ring-1 ring-border group-hover:scale-105 transition-transform">
+                            <Globe className="size-5" />
                           </div>
-                        );
-                      })}
+                          <div>
+                            <p className="text-sm font-semibold">Google</p>
+                            <p className="text-xs text-muted-foreground">Social Authentication</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                          {isGoogleLinked ? (
+                            <>
+                              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2 py-1 rounded">
+                                <div className="size-1.5 rounded-full bg-muted-foreground" />
+                                Connected
+                              </span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-xs gap-1.5 text-destructive hover:bg-destructive/10"
+                                onClick={() => handleUnlinkAccount('google')}
+                                // Avoid unlinking if it's potentially the only method
+                                // Better Auth handles this on server, but we could add a check
+                              >
+                                <Unlink className="size-3" />
+                                Disconnect
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="h-8 text-xs gap-1.5"
+                              onClick={() => handleLinkSocial('google')}
+                            >
+                              <LinkIcon className="size-3" />
+                              Connect
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Email/Password Info (Implicitly connected if signed in) */}
+                      <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20 opacity-80">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2.5 rounded-lg bg-background ring-1 ring-border">
+                            <Mail className="size-5" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold">Email & Password</p>
+                            <p className="text-xs text-muted-foreground">Standard Credentials</p>
+                          </div>
+                        </div>
+                        <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2 py-1 rounded">
+                          <div className="size-1.5 rounded-full bg-muted-foreground" />
+                          Primary
+                        </span>
+                      </div>
                     </div>
                   )}
                 </CardContent>
