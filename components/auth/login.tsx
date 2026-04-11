@@ -74,7 +74,7 @@ export default function LoginPage() {
     <section className="flex min-h-screen px-4 py-16 md:py-32 bg-transparent">
       <form
         onSubmit={handleEmailSignIn}
-        className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)]"
+        className="bg-card m-auto h-fit w-[350px] max-w-full rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)]"
       >
         <div className="p-8 pb-6">
           {/* Header and Branding */}
@@ -89,10 +89,11 @@ export default function LoginPage() {
           </div>
 
           {/* Social Login Options */}
-          <div className="mt-6 grid grid-cols-2 gap-3">
+          <div className="mt-6">
             <Button
               type="button"
               variant="outline"
+              className="w-full"
               onClick={handleGoogleSignIn}
               disabled={isGoogleLoading || isLoading}
             >
@@ -101,9 +102,10 @@ export default function LoginPage() {
               ) : (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="0.98em"
-                  height="1em"
+                  width="1.2em"
+                  height="1.2em"
                   viewBox="0 0 256 262"
+                  className="mr-2"
                 >
                   <path
                     fill="#4285f4"
@@ -123,28 +125,7 @@ export default function LoginPage() {
                   ></path>
                 </svg>
               )}
-              <span>Google</span>
-            </Button>
-            {/* Placeholder for future Microsoft auth integration */}
-            <Button type="button" variant="outline" disabled>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1em"
-                height="1em"
-                viewBox="0 0 256 256"
-              >
-                <path fill="#f1511b" d="M121.666 121.666H0V0h121.666z"></path>
-                <path fill="#80cc28" d="M256 121.666H134.335V0H256z"></path>
-                <path
-                  fill="#00adef"
-                  d="M121.663 256.002H0V134.336h121.663z"
-                ></path>
-                <path
-                  fill="#fbbc09"
-                  d="M256 256.002H134.335V134.336H256z"
-                ></path>
-              </svg>
-              <span>Microsoft (N/A)</span>
+              <span>Continue with Google</span>
             </Button>
           </div>
 

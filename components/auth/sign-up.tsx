@@ -38,7 +38,7 @@ export default function SignUp() {
         email,
         password,
         name: `${firstName} ${lastName}`.trim(),
-        callbackURL: '/tasks',
+        callbackURL: '/sign-in',
       });
 
       if (error) {
@@ -130,10 +130,11 @@ export default function SignUp() {
           </div>
 
           {/* Social Sign-Up Section */}
-          <div className="mt-6 grid grid-cols-2 gap-3">
+          <div className="mt-6">
             <Button
               type="button"
               variant="outline"
+              className="w-full"
               onClick={handleGoogleSignUp}
               disabled={isGoogleLoading || isLoading}
             >
@@ -142,9 +143,10 @@ export default function SignUp() {
               ) : (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="0.98em"
-                  height="1em"
+                  width="1.2em"
+                  height="1.2em"
                   viewBox="0 0 256 262"
+                  className="mr-2"
                 >
                   <path
                     fill="#4285f4"
@@ -164,28 +166,7 @@ export default function SignUp() {
                   ></path>
                 </svg>
               )}
-              <span>Google</span>
-            </Button>
-            {/* Placeholder for future auth methods */}
-            <Button type="button" variant="outline" disabled>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1em"
-                height="1em"
-                viewBox="0 0 256 256"
-              >
-                <path fill="#f1511b" d="M121.666 121.666H0V0h121.666z"></path>
-                <path fill="#80cc28" d="M256 121.666H134.335V0H256z"></path>
-                <path
-                  fill="#00adef"
-                  d="M121.663 256.002H0V134.336h121.663z"
-                ></path>
-                <path
-                  fill="#fbbc09"
-                  d="M256 256.002H134.335V134.336H256z"
-                ></path>
-              </svg>
-              <span>Microsoft (N/A)</span>
+              <span>Continue with Google</span>
             </Button>
           </div>
 

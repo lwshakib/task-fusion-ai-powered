@@ -22,7 +22,6 @@ function ResetPasswordForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
 
   // Extract the reset token from the URL query string
   const token = searchParams.get('token');
@@ -68,8 +67,8 @@ function ResetPasswordForm() {
         return;
       }
 
-      setIsSuccess(true);
       toast.success('Password reset successfully!');
+      router.push('/sign-in');
     } catch {
       toast.error('An unexpected error occurred');
     } finally {
@@ -77,34 +76,6 @@ function ResetPasswordForm() {
     }
   };
 
-  /**
-   * Success View: Rendered after a successful password update.
-   */
-  if (isSuccess) {
-    return (
-      <section className="flex min-h-screen px-4 py-16 md:py-32 bg-transparent">
-        <div className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-8 shadow-md">
-          <div className="text-center">
-            <div className="mb-4 flex justify-center">
-              <div className="rounded-full bg-green-100 p-3 text-green-600 dark:bg-green-900/30 dark:text-green-500">
-                <CheckCircle2 className="h-6 w-6" />
-              </div>
-            </div>
-            <h1 className="text-xl font-semibold mb-2">
-              Password Reset Successful
-            </h1>
-            <p className="text-sm text-muted-foreground mb-6">
-              Your password has been successfully reset. You can now log in with
-              your new password.
-            </p>
-            <Button asChild className="w-full">
-              <Link href="/sign-in">Back to Login</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   /**
    * Default View: The password reset form.
