@@ -100,8 +100,8 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
       const outputData = output as { tasks?: { id: string; title: string }[] };
       const createdTasks = outputData?.tasks || [];
       return (
-        <div className="flex flex-col gap-2 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
-          <div className="flex items-center gap-2 text-[13px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50/50 dark:bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-100/50 dark:border-emerald-500/20 w-fit">
+        <div className="flex flex-col gap-2 my-2 animate-in fade-in slide-in-from-top-1 duration-300 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-[13px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50/50 dark:bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-100/50 dark:border-emerald-500/20 w-fit max-w-full">
             <CheckCircle2 className="size-3.5" />
             <span>
               Created task{createdTasks.length !== 1 ? 's' : ''} successfully
@@ -131,7 +131,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
             <span>Failed to create tasks</span>
           </div>
           {errorText && (
-            <div className="text-[11px] text-muted-foreground px-1 max-w-70 wrap-break-word">
+          <div className="text-[11px] text-muted-foreground px-1 max-w-full break-words">
               {errorText}
             </div>
           )}
@@ -153,8 +153,8 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
       const outputData = output as { tasks?: { id: string; title: string }[] };
       const updatedTasks = outputData?.tasks || [];
       return (
-        <div className="flex flex-col gap-2 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
-          <div className="flex items-center gap-2 text-[13px] text-blue-600 dark:text-blue-400 font-semibold bg-blue-50/50 dark:bg-blue-500/10 px-3 py-1 rounded-lg border border-blue-100/50 dark:border-blue-500/20 w-fit">
+        <div className="flex flex-col gap-2 my-2 animate-in fade-in slide-in-from-top-1 duration-300 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-[13px] text-blue-600 dark:text-blue-400 font-semibold bg-blue-50/50 dark:bg-blue-500/10 px-3 py-1 rounded-lg border border-blue-100/50 dark:border-blue-500/20 w-fit max-w-full">
             <CheckCircle2 className="size-3.5" />
             <span>
               Updated task{updatedTasks.length !== 1 ? 's' : ''} successfully
@@ -184,7 +184,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
             <span>Failed to update tasks</span>
           </div>
           {errorText && (
-            <div className="text-[11px] text-muted-foreground px-1 max-w-70 wrap-break-word">
+          <div className="text-[11px] text-muted-foreground px-1 max-w-full break-words">
               {errorText}
             </div>
           )}
@@ -206,8 +206,8 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
       const outputData = output as { deletedIds?: string[] };
       const deletedIds = outputData?.deletedIds || [];
       return (
-        <div className="flex flex-col gap-2 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
-          <div className="flex items-center gap-2 text-[13px] text-destructive font-semibold bg-destructive/5 px-3 py-1 rounded-lg border border-destructive/10 w-fit">
+        <div className="flex flex-col gap-2 my-2 animate-in fade-in slide-in-from-top-1 duration-300 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-[13px] text-destructive font-semibold bg-destructive/5 px-3 py-1 rounded-lg border border-destructive/10 w-fit max-w-full">
             <Trash2 className="size-3.5" />
             <span>
               Deleted {deletedIds.length} task
@@ -225,7 +225,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
             <span>Failed to delete tasks</span>
           </div>
           {errorText && (
-            <div className="text-[11px] text-muted-foreground px-1 max-w-70 wrap-break-word">
+          <div className="text-[11px] text-muted-foreground px-1 max-w-full break-words">
               {errorText}
             </div>
           )}
@@ -247,7 +247,7 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
       const outputData = output as { tasks?: { id: string; title: string }[] };
       const tasks = outputData?.tasks || [];
       return (
-        <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium bg-muted/30 px-3 py-1 rounded-lg border border-muted-foreground/10 w-fit my-2">
+        <div className="flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground font-medium bg-muted/30 px-3 py-1 rounded-lg border border-muted-foreground/10 w-fit max-w-full my-2">
           <List className="size-3.5" />
           <span>
             Found {tasks.length} task{tasks.length !== 1 ? 's' : ''}
@@ -270,8 +270,8 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
       const outputData = output as { tasks?: { id: string; title: string }[] };
       const tasks = outputData?.tasks || [];
       return (
-        <div className="flex flex-col gap-1.5 my-2 animate-in fade-in slide-in-from-top-1 duration-300">
-          <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium bg-muted/30 px-3 py-1 rounded-lg border border-muted-foreground/10 w-fit">
+        <div className="flex flex-col gap-1.5 my-2 animate-in fade-in slide-in-from-top-1 duration-300 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground font-medium bg-muted/30 px-3 py-1 rounded-lg border border-muted-foreground/10 w-fit max-w-full">
             <Search className="size-3.5" />
             <span>
               Found {tasks.length} result{tasks.length !== 1 ? 's' : ''} for
@@ -599,7 +599,7 @@ export function ChatInterface() {
   return (
     <div className="flex h-full flex-col bg-background relative shadow-inner overflow-hidden">
       <Conversation className="flex-1 overflow-hidden">
-        <ConversationContent className="p-4 md:p-6 space-y-6">
+        <ConversationContent className="p-3 sm:p-4 md:p-6 space-y-6 min-w-0 overflow-x-hidden">
           {loading ? (
             <div className="flex flex-col gap-6">
               {[...Array(3)].map((_, i) => (
@@ -624,7 +624,7 @@ export function ChatInterface() {
               ))}
             </div>
           ) : messages.length === 0 ? (
-            <div className="flex flex-col h-full max-w-2xl mx-auto">
+            <div className="flex flex-col h-full w-full max-w-2xl mx-auto min-w-0">
               <ConversationEmptyState
                 icon={
                   <div className="p-4 rounded-full bg-primary/10 mb-4">
@@ -635,9 +635,9 @@ export function ChatInterface() {
                 description="I'm here to help you manage your tasks. Create, update, search or delete tasks."
               />
               <div className="mt-8 space-y-3 px-4">
-                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
-                  <Sparkles className="size-3 text-primary/60" />
-                  Try asking
+                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
+                  <Sparkles className="size-3 text-primary/60 shrink-0" />
+                  <span className="truncate">Try asking</span>
                 </div>
                 <div className="grid gap-2">
                   {TASK_SUGGESTIONS.map((suggestion) => (
@@ -710,7 +710,7 @@ export function ChatInterface() {
       </Conversation>
 
       <div className="p-4 sticky bottom-0 z-10">
-        <div className="max-w-2xl mx-auto">
+        <div className="w-full max-w-2xl mx-auto min-w-0 px-2 sm:px-0">
           <PromptInput
             onSubmit={handleSubmit}
             onError={(err) => toast.error(err.message)}
