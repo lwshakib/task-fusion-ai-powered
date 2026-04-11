@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { ModeToggle } from '@/components/layout/mode-toggle';
 import { UserNav } from '@/components/tasks/user-nav';
-import { UserAvatar } from '@/components/tasks/user-avatar';
 import { ProfileImageUpload } from '@/components/tasks/profile-image-upload';
 import { UsageText } from '@/components/tasks/usage-text';
 import { authClient } from '@/lib/auth-client';
@@ -24,6 +23,10 @@ import {
   Loader2,
   CheckCircle2,
   ChevronLeft,
+  Mail,
+  ShieldCheck,
+  Globe,
+  Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -31,76 +34,55 @@ import Link from 'next/link';
 
 /**
  * AccountPage Component
- * Handles user profile management, active session tracking, and account deletion.
+ * Provides a modern, responsive interface for managing user profile,
+ * connected authentication accounts, and active device sessions.
  */
 export default function AccountPage() {
-  // Authentication session data
-  const { data: session, isPending: isSessionPending } =
-    authClient.useSession();
+  const { data: session, isPending: isSessionPending } = authClient.useSession();
+  const router = useRouter();
 
-  // State for profile name update
+  // Profile Update State
   const [isUpdatingName, setIsUpdatingName] = useState(false);
   const [userName, setUserName] = useState('');
 
-  // State for active user sessions
-  const [sessions, setSessions] = useState<
-    { token: string; userAgent?: string; updatedAt: string }[]
-  >([]);
+  // Dynamic Data State
+  const [sessions, setSessions] = useState<any[]>([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [isLoadingAccounts, setIsLoadingAccounts] = useState(true);
 
-  const router = useRouter();
-
-  // Initialize userName state when session data is available
+  // Initialize name from session
   useEffect(() => {
     if (session?.user?.name) {
       setUserName(session.user.name);
     }
   }, [session]);
 
-  // Fetch active sessions for the current user
+  // Fetch real data from Better Auth
   useEffect(() => {
-    const fetchSessions = async () => {
+    const fetchData = async () => {
       try {
-        // Safe check for listSessions method on authClient
-        if (
-          typeof (authClient as unknown as Record<string, unknown>)
-            .listSessions === 'function'
-        ) {
-          const res = await (
-            authClient as unknown as { listSessions: () => Promise<unknown> }
-          ).listSessions();
-          // better-auth returns { data: [...] } — extract the array safely
-          const resObj = res as Record<string, unknown> | undefined;
-          const list = Array.isArray(res)
-            ? res
-            : Array.isArray(resObj?.data)
-              ? resObj.data
-              : [];
-          setSessions(
-            list as { token: string; userAgent?: string; updatedAt: string }[],
-          );
-        } else {
-          // Fallback: show current session only if listSessions is not available
-          setSessions([
-            {
-              token: session?.session.token ?? '',
-              userAgent:
-                typeof window !== 'undefined'
-                  ? navigator.userAgent
-                  : 'Current Session',
-              updatedAt: new Date().toISOString(),
-            },
-          ]);
+        // 1. Fetch Active Sessions
+        const sessRes = await authClient.listSessions();
+        if (sessRes.data) {
+          setSessions(sessRes.data);
+        }
+
+        // 2. Fetch Connected Accounts
+        const accRes = await authClient.listAccounts();
+        if (accRes.data) {
+          setAccounts(accRes.data);
         }
       } catch (err) {
-        console.error('Failed to fetch sessions:', err);
+        console.error('Failed to fetch account data:', err);
       } finally {
         setIsLoadingSessions(false);
+        setIsLoadingAccounts(false);
       }
     };
 
     if (session) {
-      fetchSessions();
+      fetchData();
     }
   }, [session]);
 
@@ -117,33 +99,41 @@ export default function AccountPage() {
       toast.success('Profile updated successfully');
     } catch (err) {
       toast.error('Failed to update profile');
-      console.error(err);
     } finally {
       setIsUpdatingName(false);
     }
   };
 
   /**
-   * Revokes a specific active session
-   * @param token - The unique token of the session to revoke
+   * Revokes an active session
    */
   const handleRevokeSession = async (token: string) => {
     try {
-      await (
-        authClient as unknown as {
-          revokeSession: (opts: { token: string }) => Promise<void>;
-        }
-      ).revokeSession({ token });
-      // Remove the revoked session from local state
+      await authClient.revokeSession({ token });
       setSessions((prev) => prev.filter((s) => s.token !== token));
-      toast.success('Session revoked');
+      toast.success('Session terminated');
     } catch (err) {
       toast.error('Failed to revoke session');
-      console.error(err);
     }
   };
 
-  // Show loading state while session is being verified
+  // Helper to map provider IDs to icons/labels
+  const getProviderInfo = (providerId: string) => {
+    switch (providerId.toLowerCase()) {
+      case 'google':
+        return { label: 'Google', color: 'text-foreground' };
+      case 'microsoft':
+        return { label: 'Microsoft', color: 'text-foreground' };
+      case 'github':
+        return { label: 'GitHub', color: 'text-foreground' };
+      case 'credential':
+      case 'email':
+        return { label: 'Email & Password', color: 'text-foreground' };
+      default:
+        return { label: providerId, color: 'text-muted-foreground' };
+    }
+  };
+
   if (isSessionPending) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -152,16 +142,15 @@ export default function AccountPage() {
     );
   }
 
-  // Redirect to sign-in if no active session is found
   if (!session) {
     router.replace('/sign-in');
     return null;
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      {/* Header with navigation back to tasks and account utilities */}
-      <header className="sticky top-0 flex h-16 shrink-0 items-center justify-between px-6 bg-background/95 backdrop-blur-md border-b z-20">
+    <div className="flex min-h-screen flex-col bg-background selection:bg-primary/10">
+      {/* Header (Preserved as requested) */}
+      <header className="sticky top-0 flex h-16 shrink-0 items-center justify-between px-6 bg-background/95 backdrop-blur-md border-b z-30">
         <Link
           href="/tasks"
           className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
@@ -176,176 +165,208 @@ export default function AccountPage() {
         </div>
       </header>
 
-      <main className="flex-1 p-6 md:p-10">
-        <div className="mx-auto max-w-4xl space-y-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Account Settings
+      <main className="flex-1 p-4 md:p-8 lg:p-12">
+        <div className="mx-auto max-w-6xl w-full">
+          {/* Page Heading */}
+          <div className="mb-10">
+            <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-foreground">
+              Settings
             </h1>
-            <p className="text-muted-foreground">
-              Manage your account settings and active sessions.
+            <p className="text-muted-foreground text-lg">
+              Manage your personal information, connected accounts, and security.
             </p>
           </div>
 
-          <div className="grid gap-8">
-            {/* Profile Management Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile</CardTitle>
-                <CardDescription>
-                  Update your personal information.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Profile Image Section */}
-                <div className="flex flex-col items-center justify-center py-4 gap-4 border-b pb-8 mb-6">
-                  <ProfileImageUpload 
-                    src={session.user.image} 
-                    name={session.user.name} 
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* LEFT COLUMN: Profile Spotlight */}
+            <div className="lg:sticky lg:top-24 space-y-6 lg:col-span-1">
+              <Card className="overflow-hidden border shadow-lg bg-card ring-1 ring-border/50">
+                <CardContent className="pt-10 pb-8 flex flex-col items-center text-center">
+                  <ProfileImageUpload
+                    src={session.user.image}
+                    name={session.user.name}
+                    className="mb-6"
                   />
-                  <div className="text-center">
-                    <p className="font-semibold text-lg">{session.user.name}</p>
-                    <p className="text-sm text-muted-foreground">{session.user.email}</p>
-                  </div>
-                </div>
-
-                {/* Email field (read-only for security) */}
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    value={session.user.email}
-                    disabled
-                    className="bg-muted"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Email address cannot be changed.
-                  </p>
-                </div>
-                {/* Editable Name field */}
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    placeholder="Enter your name"
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="border-t px-6 py-4">
-                <Button
-                  onClick={handleUpdateName}
-                  disabled={isUpdatingName || userName === session.user.name}
-                >
-                  {isUpdatingName && (
-                    <Loader2 className="mr-2 size-4 animate-spin" />
-                  )}
-                  Save Changes
-                </Button>
-              </CardFooter>
-            </Card>
-
-            {/* External Authentication Providers section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Connected Accounts</CardTitle>
-                <CardDescription>
-                  Manage external authentication providers.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Google Connection (Currently active) */}
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="size-8 bg-zinc-100 dark:bg-zinc-800 rounded flex items-center justify-center font-bold">
-                      G
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Google</p>
-                      <p className="text-xs text-muted-foreground">Connected</p>
+                  <div className="space-y-2 w-full px-4 overflow-hidden">
+                    <h2 className="text-2xl font-bold truncate" title={session.user.name || ''}>
+                      {session.user.name}
+                    </h2>
+                    <p className="text-sm text-muted-foreground truncate" title={session.user.email || ''}>
+                      {session.user.email}
+                    </p>
+                    <div className="pt-4 flex justify-center">
+                      <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground ring-1 ring-inset ring-border">
+                        <ShieldCheck className="mr-1 size-3" />
+                        Active Account
+                      </span>
                     </div>
                   </div>
-                  <CheckCircle2 className="size-5 text-green-500" />
-                </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-muted/30 border-dashed">
+                <CardContent className="p-4 text-xs text-muted-foreground leading-relaxed">
+                  Your profile information is shared across Task Fusion services to help us 
+                  provide a consistent and personalized experience.
+                </CardContent>
+              </Card>
+            </div>
 
-                {/* Microsoft Connection (Placeholder for future use) */}
-                <div className="flex items-center justify-between p-4 border rounded-lg opacity-50">
-                  <div className="flex items-center gap-3">
-                    <div className="size-8 bg-zinc-100 dark:bg-zinc-800 rounded flex items-center justify-center font-bold">
-                      M
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Microsoft</p>
-                      <p className="text-xs text-muted-foreground">
-                        Not available right now
-                      </p>
-                    </div>
+            {/* RIGHT COLUMN: Configuration and Security */}
+            <div className="lg:col-span-2 space-y-8 min-w-0">
+              {/* Basic Information Card */}
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle>Display Name</CardTitle>
+                  <CardDescription>
+                    This is how you will appear to others in collaborate mode.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      value={userName}
+                      onChange={(e) => setUserName(e.target.value)}
+                      placeholder="Your name"
+                      className="max-w-md"
+                    />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="space-y-2 opacity-70">
+                    <Label htmlFor="email">Email Address</Label>
+                    <div className="flex items-center gap-2 text-sm font-medium bg-muted p-2 rounded-md border max-w-md">
+                      <Mail className="size-4 text-muted-foreground" />
+                      {session.user.email}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground italic">
+                      Contact support to change your primary account email.
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter className="bg-muted/20 border-t py-4">
+                  <Button
+                    onClick={handleUpdateName}
+                    disabled={isUpdatingName || userName === session.user.name}
+                  >
+                    {isUpdatingName ? (
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="mr-2 size-4" />
+                    )}
+                    Update Name
+                  </Button>
+                </CardFooter>
+              </Card>
 
-            {/* Active Login Sessions Monitoring Section */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Active Sessions</CardTitle>
-                <CardDescription>
-                  Devices where you are currently logged in.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoadingSessions ? (
-                  <div className="flex justify-center py-4">
-                    <Loader2 className="size-5 animate-spin text-muted-foreground" />
-                  </div>
-                ) : sessions.length === 0 ? (
-                  <p className="text-xs text-muted-foreground py-2 text-center border rounded-lg border-dashed">
-                    No active sessions found.
-                  </p>
-                ) : (
-                  <div className="space-y-1">
-                    {sessions.map((sess) => (
-                      <div
-                        key={sess.token}
-                        className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-center gap-2.5 overflow-hidden">
-                          {sess.userAgent?.includes('Mobi') ? (
-                            <Smartphone className="size-3.5 text-muted-foreground shrink-0" />
-                          ) : (
-                            <Laptop className="size-3.5 text-muted-foreground shrink-0" />
-                          )}
-                          <div className="truncate">
-                            <p className="text-sm font-medium truncate flex items-center gap-2">
-                              {sess.userAgent || 'Unknown Device'}
-                              {sess.token === session.session.token && (
-                                <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded-full font-semibold">
-                                  Current
-                                </span>
-                              )}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {new Date(sess.updatedAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                        {sess.token !== session.session.token && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive h-7 px-2 text-xs hover:bg-destructive/10"
-                            onClick={() => handleRevokeSession(sess.token)}
+              {/* Connected Accounts Card */}
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle>Connected Accounts</CardTitle>
+                  <CardDescription>
+                    Third-party accounts used to sign in to Task Fusion.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {isLoadingAccounts ? (
+                    <div className="flex justify-center py-6">
+                      <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : accounts.length === 0 ? (
+                    <div className="text-center py-8 border-2 border-dashed rounded-xl text-muted-foreground">
+                      No linked accounts found.
+                    </div>
+                  ) : (
+                    <div className="grid gap-3">
+                      {accounts.map((acc) => {
+                        const info = getProviderInfo(acc.providerId);
+                        return (
+                          <div 
+                            key={acc.id}
+                            className="flex items-center justify-between p-4 border rounded-xl hover:bg-muted/30 transition-all group"
                           >
-                            Revoke
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                            <div className="flex items-center gap-4">
+                              <div className={`p-2.5 rounded-lg bg-secondary ring-1 ring-border group-hover:scale-105 transition-transform ${info.color}`}>
+                                <Globe className="size-5" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold">{info.label}</p>
+                                <p className="text-xs text-muted-foreground">Linked Provider</p>
+                              </div>
+                            </div>
+                            <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2 py-1 rounded">
+                              <div className="size-1.5 rounded-full bg-muted-foreground" />
+                              Active
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Security & Sessions Card */}
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle>Active Sessions</CardTitle>
+                  <CardDescription>
+                    Devices currently logged in to your account.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="px-2 sm:px-6">
+                  {isLoadingSessions ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {sessions.map((sess) => (
+                        <div
+                          key={sess.token}
+                          className="flex items-center justify-between gap-4 p-3 rounded-xl border bg-card hover:shadow-sm transition-all min-w-0"
+                        >
+                          <div className="flex items-center gap-3 overflow-hidden min-w-0">
+                            <div className="p-2 bg-muted rounded-lg shrink-0">
+                              {sess.userAgent?.includes('Mobi') ? (
+                                <Smartphone className="size-4 text-muted-foreground" />
+                              ) : (
+                                <Laptop className="size-4 text-muted-foreground" />
+                              )}
+                            </div>
+                            <div className="truncate min-w-0">
+                              <p className="text-sm font-semibold truncate flex items-center gap-2">
+                                {sess.userAgent || 'Unknown Browser'}
+                                {sess.token === session.session.token && (
+                                  <span className="shrink-0 text-[9px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter border">
+                                    Current
+                                  </span>
+                                )}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground">
+                                Last used: {new Date(sess.updatedAt).toLocaleDateString()} at {new Date(sess.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {sess.token !== session.session.token && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:bg-destructive/10 shrink-0 size-8"
+                              onClick={() => handleRevokeSession(sess.token)}
+                              title="Revoke session"
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </main>

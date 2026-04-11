@@ -108,7 +108,7 @@ export function ProfileImageUpload({ src, name, className }: ProfileImageUploadP
         <UserAvatar 
           src={src} 
           name={name} 
-          className="size-full rounded-none" 
+          className="size-full rounded-none text-4xl md:text-5xl" 
         />
         
         {/* Camera Overlay on Hover */}

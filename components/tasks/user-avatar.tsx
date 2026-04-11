@@ -52,9 +52,9 @@ export function UserAvatar({ src, name, className }: UserAvatarProps) {
   return (
     <Avatar className={cn("h-9 w-9", className)}>
       <AvatarImage src={resolvedSrc} alt={name || "User Avatar"} />
-      <AvatarFallback className="bg-primary/10 text-primary">
+      <AvatarFallback className="bg-primary/10 text-primary font-bold select-none">
         {name?.charAt(0).toUpperCase() || (
-          <User className="size-4" />
+          <User className="size-[50%]" />
         )}
       </AvatarFallback>
     </Avatar>

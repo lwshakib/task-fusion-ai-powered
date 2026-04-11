@@ -51,7 +51,7 @@ export function UsageText() {
   if (remaining === null) return null;
 
   return (
-    <span className="text-xs text-muted-foreground tabular-nums select-none animate-in fade-in duration-500">
+    <span className="text-xs text-muted-foreground tabular-nums select-none animate-in fade-in duration-500 whitespace-nowrap">
       {remaining} {remaining === 1 ? 'message' : 'messages'} remaining
     </span>
   );
