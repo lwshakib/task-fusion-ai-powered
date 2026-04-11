@@ -12,13 +12,14 @@ assignees: []
 
 ## 🛠️ Feature Area
 
-- [ ] AI Task Decomposition
-- [ ] Smart Context Fusion
-- [ ] Agent Chat
-- [ ] Intelligent Prioritization
-- [ ] Auth
-- [ ] Navigation/Routing
-- [ ] Other: **\_\_**
+- [ ] AI Task Management (Creation/Tools)
+- [ ] Agent Chat & Streaming
+- [ ] Media Storage (R2/S3 Uploads)
+- [ ] Account Settings & Sessions
+- [ ] Auth & Security
+- [ ] AI Gateway & Performance
+- [ ] UI/UX Aesthetics
+- [ ] Other: **__**
 
 ## 🔁 Reproduction Steps
 

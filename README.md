@@ -8,26 +8,25 @@
 Task Fusion AI is an AI-powered task management platform that helps users plan, prioritize, and execute work through real-time chat and tool-assisted automation.
 
 ![Task Fusion AI Dark Mode](./public/dark-demo.png)
-![Task Fusion AI Light Mode](./public/light-demo.png)
 
 ## Features
 
-- AI task creation, updating, deletion, and search via tool calls
-- Real-time streaming assistant responses
-- Cloudflare AI Gateway integration for model requests
-- Better Auth-based authentication flow
-- Prisma + PostgreSQL persistence for users, tasks, and messages
-- Modern Next.js App Router architecture with Bun runtime
+- **AI Task Management**: Creation, updating, deletion, and search via streaming tool calls.
+- **Media Storage**: Direct-to-bucket profile image uploads via Cloudflare R2 / S3 compatibility.
+- **Advanced Auth**: Better Auth integration with session management and social account linking.
+- **AI Gateway**: Cloudflare AI Gateway integration for optimized and cached model requests.
+- **Responsive Settings**: Modern account management grid with session revocation and live updates.
+- **Real-time Streaming**: Instant assistant responses using streaming text and tool execution.
 
 ## Tech Stack
 
-- Next.js 16 (App Router)
-- React 19
-- Bun
-- Prisma ORM + PostgreSQL
-- Tailwind CSS 4
-- Better Auth
-- Cloudflare AI Gateway
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript & React 19
+- **Runtime**: Bun
+- **Database**: Prisma ORM + PostgreSQL (Neon)
+- **Storage**: Cloudflare R2 (S3 Compatible)
+- **Auth**: Better Auth
+- **AI**: Cloudflare AI Gateway (Gemini/Llama)
 
 ## Architecture
 
@@ -36,86 +35,62 @@ graph TD
     User[User]
     UI[Next.js App Router UI]
     ChatAPI[POST /api/chat]
+    S3API[S3/R2 API]
     AIService[AIService class]
     Gateway[Cloudflare AI Gateway]
-    Tools[Task tools in AIService]
+    Storage[(Cloudflare R2 / S3)]
     DB[(PostgreSQL via Prisma)]
     Auth[Better Auth]
 
     User --> UI
     UI --> ChatAPI
+    UI --> S3API
+    S3API --> Storage
     ChatAPI --> Auth
     ChatAPI --> DB
     ChatAPI --> AIService
     AIService --> Gateway
-    AIService --> Tools
-    Tools --> DB
+    AIService --> DB
     Auth --> DB
 ```
 
 ## Setup
 
-1. Clone the repository:
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/lwshakib/task-fusion-ai-powered.git
+   cd task-fusion-ai-powered
+   ```
 
-```bash
-git clone https://github.com/lwshakib/task-fusion-ai-powered.git
-cd task-fusion-ai-powered
-```
+2. **Install dependencies**:
+   ```bash
+   bun install
+   ```
 
-2. Install packages:
+3. **Configure Environment**:
+   ```bash
+   cp .env.example .env
+   ```
+   Fill in your `.env` with Database, Auth, AI, and Storage keys.
 
-```bash
-bun install
-```
+4. **Initialize Database**:
+   ```bash
+   bun run db:migrate
+   ```
 
-3. Create your environment file:
+5. **Setup Storage Bucket**:
+   ```bash
+   bun run bucket:setup
+   ```
 
-```bash
-cp .env.example .env
-```
-
-4. Add environment variables in `.env`:
-
-```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/taskfusion"
-
-# Authentication
-BETTER_AUTH_SECRET="your_secret_here"
-BETTER_AUTH_URL="http://localhost:3000"
-NEXT_PUBLIC_BASE_URL="http://localhost:3000"
-
-# Google Auth
-GOOGLE_CLIENT_ID="your_google_client_id_here"
-GOOGLE_CLIENT_SECRET="your_google_client_secret_here"
-
-# Email Service
-RESEND_API_KEY="your_resend_api_key_here"
-
-# AI Service (Cloudflare AI Gateway)
-CLOUDFLARE_AI_GATEWAY_API_KEY="your_cloudflare_ai_gateway_api_key_here"
-CLOUDFLARE_AI_GATEWAY_ENDPOINT="your_cloudflare_ai_gateway_endpoint_here"
-```
-
-5. Run database migration and generate client:
-
-```bash
-bun run db:migrate
-```
-
-6. Start development server:
-
-```bash
-bun run dev
-```
+6. **Lunch Development Server**:
+   ```bash
+   bun run dev
+   ```
 
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
-
-## Code of Conduct
-
-Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## License
 
