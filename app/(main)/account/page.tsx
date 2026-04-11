@@ -34,6 +34,17 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+interface SessionData {
+  token: string;
+  userAgent?: string;
+  updatedAt: string;
+}
+
+interface AccountData {
+  id: string;
+  providerId: string;
+}
+
 /**
  * AccountPage Component
  * Provides a modern, responsive interface for managing user profile,
@@ -48,9 +59,9 @@ export default function AccountPage() {
   const [userName, setUserName] = useState('');
 
   // Dynamic Data State
-  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<SessionData[]>([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
-  const [accounts, setAccounts] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(true);
 
   // Initialize name from session
@@ -99,7 +110,7 @@ export default function AccountPage() {
         name: userName,
       });
       toast.success('Profile updated successfully');
-    } catch (err) {
+    } catch {
       toast.error('Failed to update profile');
     } finally {
       setIsUpdatingName(false);
@@ -114,7 +125,7 @@ export default function AccountPage() {
       await authClient.revokeSession({ token });
       setSessions((prev) => prev.filter((s) => s.token !== token));
       toast.success('Session terminated');
-    } catch (err) {
+    } catch {
       toast.error('Failed to revoke session');
     }
   };
@@ -128,7 +139,7 @@ export default function AccountPage() {
         provider: providerId,
         callbackURL: window.location.href,
       });
-    } catch (err) {
+    } catch {
       toast.error(`Failed to link ${providerId} account`);
     }
   };
@@ -150,27 +161,11 @@ export default function AccountPage() {
       toast.success(`${providerId} account unlinked`);
       // Update local state to reflect removal
       setAccounts((prev) => prev.filter((acc) => acc.providerId !== providerId));
-    } catch (err) {
+    } catch {
       toast.error(`Error unlinking ${providerId}`);
     }
   };
 
-  // Helper to map provider IDs to icons/labels
-  const getProviderInfo = (providerId: string) => {
-    switch (providerId.toLowerCase()) {
-      case 'google':
-        return { label: 'Google', color: 'text-foreground' };
-      case 'microsoft':
-        return { label: 'Microsoft', color: 'text-foreground' };
-      case 'github':
-        return { label: 'GitHub', color: 'text-foreground' };
-      case 'credential':
-      case 'email':
-        return { label: 'Email & Password', color: 'text-foreground' };
-      default:
-        return { label: providerId, color: 'text-muted-foreground' };
-    }
-  };
 
   if (isSessionPending) {
     return (

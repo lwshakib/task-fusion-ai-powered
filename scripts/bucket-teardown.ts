@@ -47,11 +47,12 @@ async function teardown() {
     console.log(`✅ Bucket deleted successfully.`);
     console.log(`\n✨ Teardown complete!\n`);
 
-  } catch (error: any) {
-    if (error.name === 'NoSuchBucket' || error.$metadata?.httpStatusCode === 404) {
+  } catch (err: unknown) {
+    const s3Err = err as { name?: string; $metadata?: { httpStatusCode?: number } };
+    if (s3Err.name === 'NoSuchBucket' || s3Err.$metadata?.httpStatusCode === 404) {
       console.log(`ℹ️  Bucket "${bucketName}" does not exist. Skipping teardown.`);
     } else {
-      console.error(`\n❌ Teardown failed:`, error);
+      console.error(`\n❌ Teardown failed:`, err);
       process.exit(1);
     }
   }

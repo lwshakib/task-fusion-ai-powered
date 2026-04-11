@@ -1,6 +1,5 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserAvatar } from '@/components/tasks/user-avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +25,6 @@ import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import {
   LogOut,
-  User,
   Settings,
   LayoutDashboard,
   CreditCard,
