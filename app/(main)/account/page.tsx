@@ -38,7 +38,7 @@ import Link from 'next/link';
  * connected authentication accounts, and active device sessions.
  */
 export default function AccountPage() {
-  const { data: session, isPending: isSessionPending } = authClient.useSession();
+  const { data: session, isPending: isSessionPending, refetch } = authClient.useSession();
   const router = useRouter();
 
   // Profile Update State
@@ -186,6 +186,7 @@ export default function AccountPage() {
                     src={session.user.image}
                     name={session.user.name}
                     className="mb-6"
+                    onSuccess={() => refetch()}
                   />
                   <div className="space-y-2 w-full px-4 overflow-hidden">
                     <h2 className="text-2xl font-bold truncate" title={session.user.name || ''}>

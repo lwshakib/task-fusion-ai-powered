@@ -11,6 +11,7 @@ type ProfileImageUploadProps = {
   src?: string | null;
   name?: string | null;
   className?: string;
+  onSuccess?: () => void;
 };
 
 /**
@@ -18,7 +19,7 @@ type ProfileImageUploadProps = {
  * Features a hoverable avatar with a camera icon for uploading profile images.
  * Coordinates with S3/R2 presigned URL API for direct browser-to-bucket uploads.
  */
-export function ProfileImageUpload({ src, name, className }: ProfileImageUploadProps) {
+export function ProfileImageUpload({ src, name, className, onSuccess }: ProfileImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -79,8 +80,8 @@ export function ProfileImageUpload({ src, name, className }: ProfileImageUploadP
 
       toast.success('Profile image updated');
       
-      // Force a session refresh to reflect changes globally
-      window.location.reload(); 
+      // Notify parent to refresh session data without a full page reload
+      onSuccess?.();
     } catch (err) {
       console.error("Upload error:", err);
       toast.error('Failed to upload image');
