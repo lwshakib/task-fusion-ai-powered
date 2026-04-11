@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { ModeToggle } from '@/components/layout/mode-toggle';
 import { UserNav } from '@/components/tasks/user-nav';
+import { UserAvatar } from '@/components/tasks/user-avatar';
+import { ProfileImageUpload } from '@/components/tasks/profile-image-upload';
 import { UsageText } from '@/components/tasks/usage-text';
 import { authClient } from '@/lib/auth-client';
 import {
@@ -195,6 +197,18 @@ export default function AccountPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Profile Image Section */}
+                <div className="flex flex-col items-center justify-center py-4 gap-4 border-b pb-8 mb-6">
+                  <ProfileImageUpload 
+                    src={session.user.image} 
+                    name={session.user.name} 
+                  />
+                  <div className="text-center">
+                    <p className="font-semibold text-lg">{session.user.name}</p>
+                    <p className="text-sm text-muted-foreground">{session.user.email}</p>
+                  </div>
+                </div>
+
                 {/* Email field (read-only for security) */}
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>

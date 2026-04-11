@@ -1,6 +1,7 @@
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UserAvatar } from '@/components/tasks/user-avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -67,14 +68,11 @@ export function UserNav() {
           {/* User Profile Trigger Button */}
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-              <Avatar className="h-9 w-9">
-                <AvatarImage src={user?.image || ''} alt={user?.name} />
-                <AvatarFallback className="bg-primary/10 text-primary">
-                  {user.name?.charAt(0).toUpperCase() || (
-                    <User className="size-4" />
-                  )}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar 
+                className="h-9 w-9" 
+                src={user?.image} 
+                name={user?.name} 
+              />
             </Button>
           </DropdownMenuTrigger>
 
