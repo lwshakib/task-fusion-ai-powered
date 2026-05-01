@@ -5,28 +5,30 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)](https://prisma.io)
 
-Task Fusion AI is an AI-powered task management platform that helps users plan, prioritize, and execute work through real-time chat and tool-assisted automation.
+Task Fusion AI is a powerful, AI-driven task management platform that enables users to plan, prioritize, and execute workflows through natural language interactions and real-time tool-assisted automation.
 
 ![Task Fusion AI Dark Mode](./public/dark-demo.png)
 
 ## Features
 
-- **AI Task Management**: Creation, updating, deletion, and search via streaming tool calls.
-- **Media Storage**: Direct-to-bucket profile image uploads via Cloudflare R2 / S3 compatibility.
-- **Advanced Auth**: Better Auth integration with session management and social account linking.
-- **AI Gateway**: Cloudflare AI Gateway integration for optimized and cached model requests.
-- **Responsive Settings**: Modern account management grid with session revocation and live updates.
-- **Real-time Streaming**: Instant assistant responses using streaming text and tool execution.
+- **Gemini-Powered Intelligence**: Advanced task orchestration using the latest Google Gemini models.
+- **Natural Language Task Management**: Create, update, search, or delete tasks simply by chatting.
+- **Multi-Turn Tool Execution**: Sophisticated AI logic that can chain multiple actions together in a single request.
+- **Modern Chat UI**: Premium interface featuring real-time streaming, collapsible reasoning, and copy-to-clipboard functionality.
+- **Media Storage**: Seamless profile image management via direct-to-bucket uploads (S3/Cloudflare R2).
+- **Secure Authentication**: Robust session management and social account linking via Better Auth.
+- **Real-time Persistence**: Automatic synchronization between AI interactions and your task database.
 
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript & React 19
 - **Runtime**: Bun
-- **Database**: Prisma ORM + PostgreSQL (Neon)
-- **Storage**: Cloudflare R2 (S3 Compatible)
+- **AI Engine**: Google GenAI SDK (Gemini 2.5 Flash Lite)
+- **Database**: Prisma ORM + PostgreSQL / SQLite
+- **Storage**: Cloudflare R2 / S3 Compatible Storage
 - **Auth**: Better Auth
-- **AI**: Cloudflare AI Gateway (Gemini/Llama)
+- **Styling**: Tailwind CSS & Framer Motion
 
 ## Architecture
 
@@ -36,10 +38,9 @@ graph TD
     UI[Next.js App Router UI]
     ChatAPI[POST /api/chat]
     S3API[S3/R2 API]
-    AIService[AIService class]
-    Gateway[Cloudflare AI Gateway]
+    GenAI[Google GenAI SDK]
     Storage[(Cloudflare R2 / S3)]
-    DB[(PostgreSQL via Prisma)]
+    DB[(Database via Prisma)]
     Auth[Better Auth]
 
     User --> UI
@@ -48,9 +49,8 @@ graph TD
     S3API --> Storage
     ChatAPI --> Auth
     ChatAPI --> DB
-    ChatAPI --> AIService
-    AIService --> Gateway
-    AIService --> DB
+    ChatAPI --> GenAI
+    GenAI --> DB
     Auth --> DB
 ```
 
@@ -75,7 +75,7 @@ graph TD
    cp .env.example .env
    ```
 
-   Fill in your `.env` with Database, Auth, AI, and Storage keys.
+   Fill in your `.env` with your Database URL, Google API Key, Better Auth secrets, and Storage credentials.
 
 4. **Initialize Database**:
 
@@ -89,14 +89,14 @@ graph TD
    bun run bucket:setup
    ```
 
-6. **Lunch Development Server**:
+6. **Start Development Server**:
    ```bash
    bun run dev
    ```
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## License
 
