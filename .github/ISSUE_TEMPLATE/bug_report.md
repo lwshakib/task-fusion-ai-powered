@@ -17,7 +17,7 @@ assignees: []
 - [ ] Media Storage (R2/S3 Uploads)
 - [ ] Account Settings & Sessions
 - [ ] Auth & Security
-- [ ] AI Gateway & Performance
+- [ ] AI Model & Performance
 - [ ] UI/UX Aesthetics
 - [ ] Other: **\_\_**
 
