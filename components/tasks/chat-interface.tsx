@@ -7,11 +7,6 @@ import {
   ConversationScrollButton,
 } from '@/components/ai-elements/conversation';
 import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from '@/components/ai-elements/message';
-import {
   PromptInput,
   PromptInputTextarea,
   PromptInputSubmit,
@@ -36,10 +31,19 @@ import {
   Search,
   Trash2,
   Sparkles,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { PromptSuggestion } from '@/components/ai-elements/prompt-suggestion';
 import { useTaskStore, type Task } from '@/hooks/use-task-store';
 import { useEffect, useRef, useState, useCallback } from 'react';
+import {
+  Message,
+  MessageContent,
+  MessageResponse,
+  MessageActions,
+  MessageAction,
+} from '@/components/ai-elements/message';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';
@@ -337,6 +341,33 @@ const TaskToolCall = ({ part }: { part: MessagePart }) => {
   );
 };
 
+const CopyButton = ({ content }: { content: string }) => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+    }
+  };
+
+  return (
+    <MessageAction
+      onClick={handleCopy}
+      tooltip={isCopied ? 'Copied!' : 'Copy message'}
+      className={cn(
+        'transition-all duration-200',
+        isCopied ? 'text-emerald-500' : 'text-muted-foreground hover:text-foreground'
+      )}
+    >
+      {isCopied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+    </MessageAction>
+  );
+};
+
 const TASK_SUGGESTIONS = [
   'Create a project roadmap: 5 high-priority tasks for the Q2 launch',
   "Find all 'Marketing' tasks and update their status to COMPLETED",
@@ -355,6 +386,7 @@ export function ChatInterface() {
   const { addTasks, updateTasks, removeTasks } = useTaskStore();
   const processedToolInvocationIds = useRef(new Set<string>());
   const scrollRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -439,9 +471,16 @@ export function ChatInterface() {
     setStatus('submitted');
     window.dispatchEvent(new CustomEvent('message-sent'));
 
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
+        signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -585,10 +624,17 @@ export function ChatInterface() {
       );
     } finally {
       setStatus('idle');
+      abortControllerRef.current = null;
     }
   };
 
   const handleSubmit = (message: { text: string; files: unknown[] }) => {
+    if (status === 'streaming' || status === 'submitted') {
+      if (!message.text.trim()) {
+        abortControllerRef.current?.abort();
+        return;
+      }
+    }
     sendMessage(message.text);
   };
 
@@ -597,9 +643,11 @@ export function ChatInterface() {
   };
 
   return (
-    <div className="flex h-full flex-col bg-background relative shadow-inner overflow-hidden">
-      <Conversation className="flex-1 overflow-hidden">
-        <ConversationContent className="p-3 sm:p-4 md:p-6 space-y-6 min-w-0 overflow-x-hidden">
+    <div className="flex h-full flex-col bg-background overflow-hidden min-h-0">
+      <div className="flex-1 min-h-0 relative">
+        <Conversation className="absolute inset-0">
+          <ConversationContent className="p-3 sm:p-4 md:p-6 min-w-0 flex flex-col gap-6">
+          
           {loading ? (
             <div className="flex flex-col gap-6">
               {[...Array(3)].map((_, i) => (
@@ -655,6 +703,16 @@ export function ChatInterface() {
           ) : (
             messages.map((message) => {
               const parts = message.parts || [];
+              
+              // Filter out empty assistant messages to prevent large gaps in UI
+              const hasContent = parts.some(p => 
+                (p.type === 'text' && p.text?.trim()) || 
+                (p.type === 'reasoning' && p.reasoning?.trim()) || 
+                p.type.startsWith('tool-')
+              ) || message.content?.trim();
+
+              if (message.role === 'assistant' && !hasContent) return null;
+
               return (
                 <Message key={message.id} from={message.role}>
                   <MessageContent>
@@ -700,16 +758,32 @@ export function ChatInterface() {
                       </MessageResponse>
                     )}
                   </MessageContent>
+                  {(message.role === 'user' || status === 'idle') && (
+                    <MessageActions 
+                      className={cn(
+                        "mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+                        message.role === 'user' ? "justify-end" : "justify-start"
+                      )}
+                    >
+                      <CopyButton 
+                        content={
+                          parts.length > 0 
+                            ? parts.map(p => p.text || p.reasoning || '').join('\n') 
+                            : message.content
+                        } 
+                      />
+                    </MessageActions>
+                  )}
                 </Message>
               );
             })
           )}
-          <div ref={scrollRef} className="h-4" />
-        </ConversationContent>
-        <ConversationScrollButton />
-      </Conversation>
+          </ConversationContent>
+          <ConversationScrollButton />
+        </Conversation>
+      </div>
 
-      <div className="p-4 sticky bottom-0 z-10">
+      <div className="shrink-0 p-4 border-t bg-background">
         <div className="w-full max-w-2xl mx-auto min-w-0 px-2 sm:px-0">
           <PromptInput
             onSubmit={handleSubmit}
@@ -720,7 +794,7 @@ export function ChatInterface() {
               value={inputValue}
               placeholder="How can I help with your tasks today?"
               onChange={(e) => setInputValue(e.currentTarget.value)}
-              className="min-h-[56px] max-h-[200px] pr-14 py-3.5"
+              className="min-h-[52px] max-h-[200px] pr-14 py-3"
             />
             <div className="absolute bottom-1.5 right-1.5 flex items-center justify-center">
               <PromptInputSubmit
@@ -729,7 +803,7 @@ export function ChatInterface() {
                     ? status
                     : 'ready'
                 }
-                disabled={!inputValue.trim() && status === 'streaming'}
+                disabled={status === 'idle' && !inputValue.trim()}
                 className="size-9 rounded-full shadow-md hover:shadow-lg transition-all duration-200"
               />
             </div>
