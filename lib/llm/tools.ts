@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
+import type { Prisma } from '@/generated/prisma/client';
 import {
   TASK_PRIORITY,
   TASK_STATUS,
@@ -144,7 +145,7 @@ export const toolDefinitions: FunctionDeclaration[] = [
  * Tool Implementation Map
  */
 export const toolHandlers = (userId: string) => ({
-  createTasks: async (args: any) => {
+  createTasks: async (args: Record<string, unknown>) => {
     const { tasks } = CreateTasksSchema.parse(args);
     const createdTasks = await Promise.all(
       tasks.map((task) =>
@@ -152,13 +153,13 @@ export const toolHandlers = (userId: string) => ({
           data: {
             ...task,
             userId,
-          } as any,
+          } as Prisma.TaskUncheckedCreateInput,
         }),
       ),
     );
     return { success: true, tasks: createdTasks };
   },
-  updateTasks: async (args: any) => {
+  updateTasks: async (args: Record<string, unknown>) => {
     const { updates } = UpdateTasksSchema.parse(args);
     const updatedTasks = await Promise.all(
       updates.map((item) =>
@@ -170,7 +171,7 @@ export const toolHandlers = (userId: string) => ({
     );
     return { success: true, tasks: updatedTasks };
   },
-  deleteTasks: async (args: any) => {
+  deleteTasks: async (args: Record<string, unknown>) => {
     const { ids } = DeleteTasksSchema.parse(args);
     await prisma.task.deleteMany({
       where: {
@@ -187,7 +188,7 @@ export const toolHandlers = (userId: string) => ({
     });
     return { success: true, tasks };
   },
-  searchTasks: async (args: any) => {
+  searchTasks: async (args: Record<string, unknown>) => {
     const { query } = SearchTasksSchema.parse(args);
     const tasks = await prisma.task.findMany({
       where: {

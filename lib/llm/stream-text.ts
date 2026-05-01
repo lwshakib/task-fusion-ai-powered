@@ -11,7 +11,7 @@ import type { Prisma } from '@/generated/prisma/client';
  * Handles multi-turn chat, tool execution, and real-time streaming.
  */
 export async function streamText(
-  messages: { role: string; content: string; name?: string; parts?: any[] }[],
+  messages: { role: string; content: string; name?: string; parts?: Record<string, unknown>[] }[],
   userId: string,
   signal?: AbortSignal,
 ) {
@@ -19,21 +19,21 @@ export async function streamText(
   const encoder = new TextEncoder();
 
   // 1. Prepare chat history
-  const history: any[] = [];
+  const history: { role: 'user' | 'model'; parts: { text?: string; functionCall?: Record<string, unknown>; functionResponse?: Record<string, unknown> }[] }[] = [];
   for (let i = 0; i < messages.length - 1; i++) {
     const m = messages[i];
     if (m.role === 'system') continue;
 
     const role = m.role === 'assistant' || m.role === 'model' ? 'model' : 'user';
-    const geminiParts: any[] = [];
+    const geminiParts: { text?: string; functionCall?: Record<string, unknown>; functionResponse?: Record<string, unknown> }[] = [];
 
-    const dbParts = (m.parts as any[]) || [];
+    const dbParts = (m.parts as Record<string, unknown>[]) || [];
     
     // If we have parts, map them. Otherwise fallback to content.
     if (dbParts.length > 0) {
       for (const p of dbParts) {
         if (p.type === 'text' && p.text) {
-          geminiParts.push({ text: p.text });
+          geminiParts.push({ text: p.text as string });
         } else if (p.type === 'reasoning' && p.reasoning) {
           // Map reasoning to text for now so the model sees it
           geminiParts.push({ text: `[Thought: ${p.reasoning}]` });
@@ -87,7 +87,7 @@ export async function streamText(
   const lastMessage = messages[messages.length - 1];
   let lastText = lastMessage.content || '';
   if (Array.isArray(lastMessage.parts)) {
-    const textParts = lastMessage.parts.map((p: any) => p.text || '');
+    const textParts = (lastMessage.parts as Record<string, unknown>[]).map((p) => (p.text as string) || '');
     lastText = textParts.join('').trim();
   }
   
@@ -101,7 +101,7 @@ export async function streamText(
       let iteration = 0;
       const maxIterations = 5;
       const assistantParts: Array<Record<string, unknown>> = [];
-      let currentInput: any = lastText;
+      let currentInput: string | Array<Record<string, unknown>> = lastText;
 
       try {
         while (iteration < maxIterations) {
@@ -111,8 +111,8 @@ export async function streamText(
           }
           iteration++;
 
-          const responseStream = await chat.sendMessageStream({ message: currentInput });
-          let turnToolCalls: any[] = [];
+          const responseStream = await chat.sendMessageStream({ message: currentInput as string | Array<Record<string, unknown>> });
+          const turnToolCalls: Array<{ id: string; name: string; args: Record<string, unknown> }> = [];
 
           for await (const chunk of responseStream) {
             if (signal?.aborted) {
@@ -137,18 +137,18 @@ export async function streamText(
                 }
               }
 
-              if (part.functionCall) {
+              if (part.functionCall && part.functionCall.name) {
                 turnToolCalls.push({
                   id: `call_${Math.random().toString(36).substring(2, 11)}`,
                   name: part.functionCall.name,
-                  args: part.functionCall.args,
+                  args: part.functionCall.args as Record<string, unknown>,
                 });
               }
             }
           }
 
           if (turnToolCalls.length > 0) {
-            const toolResponses: any[] = [];
+            const toolResponses: Array<Record<string, unknown>> = [];
             for (const call of turnToolCalls) {
               if (signal?.aborted) {
                 controller.close();
@@ -166,7 +166,7 @@ export async function streamText(
               controller.enqueue(encoder.encode(`b:${JSON.stringify(callPart)}\n`));
               assistantParts.push({ ...callPart });
 
-              const handler = (handlers as any)[toolName];
+              const handler = (handlers as Record<string, (args: Record<string, unknown>) => Promise<unknown>>)[toolName];
               if (!handler) continue;
 
               try {
@@ -190,7 +190,7 @@ export async function streamText(
                     response: { content: result },
                   },
                 });
-              } catch (e: any) {
+              } catch (e: unknown) {
                 console.error(`AI tool execution failed [${toolName}]:`, e);
                 const errorPart = {
                   type: `tool-${toolName}`,
@@ -240,7 +240,7 @@ export async function streamText(
           encoder.encode(`d:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":0}}\n`),
         );
         controller.close();
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('AI stream execution failed:', err);
         controller.enqueue(encoder.encode(`3:${JSON.stringify('Internal server error. AI execution failed.')}\n`));
         controller.close();
@@ -249,7 +249,7 @@ export async function streamText(
   });
 
   return {
-    toUIMessageStreamResponse: (options?: any) => {
+    toUIMessageStreamResponse: (options?: Record<string, unknown>) => {
       void options;
       return new Response(stream, {
         headers: {
