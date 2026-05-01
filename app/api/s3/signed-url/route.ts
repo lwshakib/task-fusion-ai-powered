@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
-import { s3Service } from '@/services/s3.services';
+import { generateSignedDownloadUrl } from '@/lib/s3';
 
 /**
  * GET /api/s3/signed-url
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
     }
 
     // 3. Generate the signed download URL
-    const url = await s3Service.generateSignedDownloadUrl(key);
+    const url = await generateSignedDownloadUrl(key);
 
     return NextResponse.json({ url });
   } catch (error) {

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
-import { s3Service } from '@/services/s3.services';
+import { generatePresignedUploadUrl } from '@/lib/s3';
 
 /**
  * POST /api/s3/presigned-url
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     }
 
     // 3. Generate the presigned URL via S3 service
-    const { url, key } = await s3Service.generatePresignedUploadUrl(
+    const { url, key } = await generatePresignedUploadUrl(
       session.user.id,
       fileName,
       fileType,
