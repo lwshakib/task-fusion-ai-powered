@@ -7,7 +7,7 @@ import { AuthEmailTemplate } from '@/components/emails/auth-email-template';
 /**
  * Initialize Resend client for sending transactional emails (verification, password resets).
  */
-const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * Better Auth Configuration.
