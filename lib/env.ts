@@ -4,7 +4,4 @@
  */
 
 // AI Service
-export const CLOUDFLARE_AI_GATEWAY_API_KEY =
-  process.env.CLOUDFLARE_AI_GATEWAY_API_KEY;
-export const CLOUDFLARE_AI_GATEWAY_ENDPOINT =
-  process.env.CLOUDFLARE_AI_GATEWAY_ENDPOINT;
+export const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
