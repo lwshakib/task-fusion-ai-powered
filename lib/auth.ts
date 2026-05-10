@@ -7,7 +7,7 @@ import { AuthEmailTemplate } from '@/components/emails/auth-email-template';
 /**
  * Initialize Resend client for sending transactional emails (verification, password resets).
  */
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 're_123');
 
 /**
  * Better Auth Configuration.
@@ -98,4 +98,8 @@ export const auth = betterAuth({
       enabled: true,
     },
   },
+  /**
+   * Secret used for signing session tokens.
+   */
+  secret: process.env.BETTER_AUTH_SECRET || 'secret-for-build-purposes',
 });

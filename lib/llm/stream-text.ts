@@ -11,7 +11,12 @@ import type { Prisma } from '@/generated/prisma/client';
  * Handles multi-turn chat, tool execution, and real-time streaming.
  */
 export async function streamText(
-  messages: { role: string; content: string; name?: string; parts?: Record<string, unknown>[] }[],
+  messages: {
+    role: string;
+    content: string;
+    name?: string;
+    parts?: Record<string, unknown>[];
+  }[],
   userId: string,
   signal?: AbortSignal,
 ) {
@@ -19,16 +24,28 @@ export async function streamText(
   const encoder = new TextEncoder();
 
   // 1. Prepare chat history
-  const history: { role: 'user' | 'model'; parts: { text?: string; functionCall?: Record<string, unknown>; functionResponse?: Record<string, unknown> }[] }[] = [];
+  const history: {
+    role: 'user' | 'model';
+    parts: {
+      text?: string;
+      functionCall?: Record<string, unknown>;
+      functionResponse?: Record<string, unknown>;
+    }[];
+  }[] = [];
   for (let i = 0; i < messages.length - 1; i++) {
     const m = messages[i];
     if (m.role === 'system') continue;
 
-    const role = m.role === 'assistant' || m.role === 'model' ? 'model' : 'user';
-    const geminiParts: { text?: string; functionCall?: Record<string, unknown>; functionResponse?: Record<string, unknown> }[] = [];
+    const role =
+      m.role === 'assistant' || m.role === 'model' ? 'model' : 'user';
+    const geminiParts: {
+      text?: string;
+      functionCall?: Record<string, unknown>;
+      functionResponse?: Record<string, unknown>;
+    }[] = [];
 
     const dbParts = (m.parts as Record<string, unknown>[]) || [];
-    
+
     // If we have parts, map them. Otherwise fallback to content.
     if (dbParts.length > 0) {
       for (const p of dbParts) {
@@ -39,7 +56,7 @@ export async function streamText(
           geminiParts.push({ text: `[Thought: ${p.reasoning}]` });
         } else if (typeof p.type === 'string' && p.type.startsWith('tool-')) {
           const toolName = p.type.replace('tool-', '');
-          
+
           if (p.output !== undefined) {
             // This was a tool response
             geminiParts.push({
@@ -87,10 +104,12 @@ export async function streamText(
   const lastMessage = messages[messages.length - 1];
   let lastText = lastMessage.content || '';
   if (Array.isArray(lastMessage.parts)) {
-    const textParts = (lastMessage.parts as Record<string, unknown>[]).map((p) => (p.text as string) || '');
+    const textParts = (lastMessage.parts as Record<string, unknown>[]).map(
+      (p) => (p.text as string) || '',
+    );
     lastText = textParts.join('').trim();
   }
-  
+
   // Ensure lastText is never empty to avoid 'ContentUnion is required' error
   if (!lastText) {
     lastText = ' ';
@@ -111,8 +130,14 @@ export async function streamText(
           }
           iteration++;
 
-          const responseStream = await chat.sendMessageStream({ message: currentInput as string | Array<Record<string, unknown>> });
-          const turnToolCalls: Array<{ id: string; name: string; args: Record<string, unknown> }> = [];
+          const responseStream = await chat.sendMessageStream({
+            message: currentInput as string | Array<Record<string, unknown>>,
+          });
+          const turnToolCalls: Array<{
+            id: string;
+            name: string;
+            args: Record<string, unknown>;
+          }> = [];
 
           for await (const chunk of responseStream) {
             if (signal?.aborted) {
@@ -125,9 +150,13 @@ export async function streamText(
             const parts = candidate.content?.parts || [];
             for (const part of parts) {
               if (part.text) {
-                controller.enqueue(encoder.encode(`0:${JSON.stringify(part.text)}\n`));
+                controller.enqueue(
+                  encoder.encode(`0:${JSON.stringify(part.text)}\n`),
+                );
                 const textPart = { type: 'text', text: part.text };
-                controller.enqueue(encoder.encode(`b:${JSON.stringify(textPart)}\n`));
+                controller.enqueue(
+                  encoder.encode(`b:${JSON.stringify(textPart)}\n`),
+                );
 
                 const lastPart = assistantParts[assistantParts.length - 1];
                 if (lastPart?.type === 'text') {
@@ -163,10 +192,17 @@ export async function streamText(
                 input: args,
                 toolCallId: call.id,
               };
-              controller.enqueue(encoder.encode(`b:${JSON.stringify(callPart)}\n`));
+              controller.enqueue(
+                encoder.encode(`b:${JSON.stringify(callPart)}\n`),
+              );
               assistantParts.push({ ...callPart });
 
-              const handler = (handlers as Record<string, (args: Record<string, unknown>) => Promise<unknown>>)[toolName];
+              const handler = (
+                handlers as Record<
+                  string,
+                  (args: Record<string, unknown>) => Promise<unknown>
+                >
+              )[toolName];
               if (!handler) continue;
 
               try {
@@ -177,11 +213,18 @@ export async function streamText(
                   output: result,
                   toolCallId: call.id,
                 };
-                controller.enqueue(encoder.encode(`b:${JSON.stringify(resultPart)}\n`));
+                controller.enqueue(
+                  encoder.encode(`b:${JSON.stringify(resultPart)}\n`),
+                );
 
-                const partIdx = assistantParts.findIndex((p) => p.toolCallId === call.id);
+                const partIdx = assistantParts.findIndex(
+                  (p) => p.toolCallId === call.id,
+                );
                 if (partIdx !== -1) {
-                  assistantParts[partIdx] = { ...assistantParts[partIdx], ...resultPart };
+                  assistantParts[partIdx] = {
+                    ...assistantParts[partIdx],
+                    ...resultPart,
+                  };
                 }
 
                 toolResponses.push({
@@ -198,18 +241,28 @@ export async function streamText(
                   errorText: 'AI agent failed to execute this action.',
                   toolCallId: call.id,
                 };
-                controller.enqueue(encoder.encode(`b:${JSON.stringify(errorPart)}\n`));
+                controller.enqueue(
+                  encoder.encode(`b:${JSON.stringify(errorPart)}\n`),
+                );
 
-                const partIdx = assistantParts.findIndex((p) => p.toolCallId === call.id);
+                const partIdx = assistantParts.findIndex(
+                  (p) => p.toolCallId === call.id,
+                );
                 if (partIdx !== -1) {
-                  assistantParts[partIdx] = { ...assistantParts[partIdx], ...errorPart };
+                  assistantParts[partIdx] = {
+                    ...assistantParts[partIdx],
+                    ...errorPart,
+                  };
                 }
 
                 toolResponses.push({
                   functionResponse: {
                     name: toolName,
                     response: {
-                      content: { success: false, error: 'AI tool execution failed.' },
+                      content: {
+                        success: false,
+                        error: 'AI tool execution failed.',
+                      },
                     },
                   },
                 });
@@ -237,12 +290,18 @@ export async function streamText(
         }
 
         controller.enqueue(
-          encoder.encode(`d:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":0}}\n`),
+          encoder.encode(
+            `d:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":0}}\n`,
+          ),
         );
         controller.close();
       } catch (err: unknown) {
         console.error('AI stream execution failed:', err);
-        controller.enqueue(encoder.encode(`3:${JSON.stringify('Internal server error. AI execution failed.')}\n`));
+        controller.enqueue(
+          encoder.encode(
+            `3:${JSON.stringify('Internal server error. AI execution failed.')}\n`,
+          ),
+        );
         controller.close();
       }
     },

@@ -71,7 +71,9 @@ export default function AccountPage() {
   // Initialize name from session
   useEffect(() => {
     if (session?.user?.name) {
-      setUserName(session.user.name);
+      Promise.resolve().then(() => {
+        setUserName(session.user.name);
+      });
     }
   }, [session]);
 

@@ -1,6 +1,6 @@
 # <img src="./public/logo.svg" width="40" height="40" align="center" /> Task Fusion AI
 
-[![Made with Bun](https://img.shields.io/badge/Bun-%23000000.svg?style=for-the-badge&logo=bun&logoColor=white)](https://bun.sh)
+[![pnpm](https://img.shields.io/badge/pnpm-%234a4a4a.svg?style=for-the-badge&logo=pnpm&logoColor=f69220)](https://pnpm.io/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)](https://prisma.io)
@@ -23,7 +23,7 @@ Task Fusion AI is a powerful, AI-driven task management platform that enables us
 
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript & React 19
-- **Runtime**: Bun
+- **Runtime**: Node.js with pnpm
 - **AI Engine**: Google GenAI SDK (Gemini 2.5 Flash Lite)
 - **Database**: Prisma ORM + PostgreSQL / SQLite
 - **Storage**: Cloudflare R2 / S3 Compatible Storage
@@ -66,7 +66,7 @@ graph TD
 2. **Install dependencies**:
 
    ```bash
-   bun install
+   pnpm install
    ```
 
 3. **Configure Environment**:
@@ -80,18 +80,18 @@ graph TD
 4. **Initialize Database**:
 
    ```bash
-   bun run db:migrate
+   pnpm run db:migrate
    ```
 
 5. **Setup Storage Bucket**:
 
    ```bash
-   bun run bucket:setup
+   pnpm run bucket:setup
    ```
 
 6. **Start Development Server**:
    ```bash
-   bun run dev
+   pnpm run dev
    ```
 
 ## Contributing

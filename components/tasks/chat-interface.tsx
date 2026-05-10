@@ -360,10 +360,16 @@ const CopyButton = ({ content }: { content: string }) => {
       tooltip={isCopied ? 'Copied!' : 'Copy message'}
       className={cn(
         'transition-all duration-200',
-        isCopied ? 'text-emerald-500' : 'text-muted-foreground hover:text-foreground'
+        isCopied
+          ? 'text-emerald-500'
+          : 'text-muted-foreground hover:text-foreground',
       )}
     >
-      {isCopied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+      {isCopied ? (
+        <Check className="size-3.5" />
+      ) : (
+        <Copy className="size-3.5" />
+      )}
     </MessageAction>
   );
 };
@@ -404,7 +410,9 @@ export function ChatInterface() {
   }, []);
 
   useEffect(() => {
-    fetchMessages();
+    Promise.resolve().then(() => {
+      fetchMessages();
+    });
     const handleClearChat = () => setMessages([]);
     window.addEventListener('clear-chat', handleClearChat);
     return () => window.removeEventListener('clear-chat', handleClearChat);
@@ -647,137 +655,145 @@ export function ChatInterface() {
       <div className="flex-1 min-h-0 relative">
         <Conversation className="absolute inset-0">
           <ConversationContent className="p-3 sm:p-4 md:p-6 min-w-0 flex flex-col gap-6">
-          
-          {loading ? (
-            <div className="flex flex-col gap-6">
-              {[...Array(3)].map((_, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    'flex gap-3',
-                    i % 2 === 1 && 'flex-row-reverse',
-                  )}
-                >
-                  <Skeleton className="h-8 w-8 rounded-full shrink-0" />
+            {loading ? (
+              <div className="flex flex-col gap-6">
+                {[...Array(3)].map((_, i) => (
                   <div
+                    key={i}
                     className={cn(
-                      'space-y-2 flex-1 max-w-[80%]',
-                      i % 2 === 1 && 'items-end flex flex-col',
+                      'flex gap-3',
+                      i % 2 === 1 && 'flex-row-reverse',
                     )}
                   >
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-2/3" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="flex flex-col h-full w-full max-w-2xl mx-auto min-w-0">
-              <ConversationEmptyState
-                icon={
-                  <div className="p-4 rounded-full bg-primary/10 mb-4">
-                    <List className="size-10 text-primary/60" />
-                  </div>
-                }
-                title="Task Assistant"
-                description="I'm here to help you manage your tasks. Create, update, search or delete tasks."
-              />
-              <div className="mt-8 space-y-3 px-4">
-                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
-                  <Sparkles className="size-3 text-primary/60 shrink-0" />
-                  <span className="truncate">Try asking</span>
-                </div>
-                <div className="grid gap-2">
-                  {TASK_SUGGESTIONS.map((suggestion) => (
-                    <PromptSuggestion
-                      key={suggestion}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all duration-200"
-                    >
-                      {suggestion}
-                    </PromptSuggestion>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            messages.map((message) => {
-              const parts = message.parts || [];
-              
-              // Filter out empty assistant messages to prevent large gaps in UI
-              const hasContent = parts.some(p => 
-                (p.type === 'text' && p.text?.trim()) || 
-                (p.type === 'reasoning' && p.reasoning?.trim()) || 
-                p.type.startsWith('tool-')
-              ) || message.content?.trim();
-
-              if (message.role === 'assistant' && !hasContent) return null;
-
-              return (
-                <Message key={message.id} from={message.role}>
-                  <MessageContent>
-                    {parts.length > 0 ? (
-                      parts.map((part: MessagePart, i: number) => {
-                        const key = `${message.id}-${i}`;
-                        if (part.type === 'reasoning') {
-                          return (
-                            <Reasoning
-                              key={key}
-                              isStreaming={!!part.isStreaming}
-                            >
-                              <ReasoningTrigger />
-                              <ReasoningContent>
-                                {part.reasoning ?? part.text ?? ''}
-                              </ReasoningContent>
-                            </Reasoning>
-                          );
-                        }
-                        if (part.type === 'text' || (!part.type && part.text)) {
-                          if (!part.text?.trim()) return null;
-                          return (
-                            <MessageResponse
-                              key={key}
-                              className="leading-relaxed"
-                            >
-                              {part.text}
-                            </MessageResponse>
-                          );
-                        }
-                        if (
-                          part.type?.startsWith('tool-') ||
-                          part.type === 'tool-invocation' ||
-                          part.type === 'tool-call'
-                        ) {
-                          return <TaskToolCall key={key} part={part} />;
-                        }
-                        return null;
-                      })
-                    ) : (
-                      <MessageResponse className="leading-relaxed">
-                        {message.content}
-                      </MessageResponse>
-                    )}
-                  </MessageContent>
-                  {(message.role === 'user' || status === 'idle') && (
-                    <MessageActions 
+                    <Skeleton className="h-8 w-8 rounded-full shrink-0" />
+                    <div
                       className={cn(
-                        "mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
-                        message.role === 'user' ? "justify-end" : "justify-start"
+                        'space-y-2 flex-1 max-w-[80%]',
+                        i % 2 === 1 && 'items-end flex flex-col',
                       )}
                     >
-                      <CopyButton 
-                        content={
-                          parts.length > 0 
-                            ? parts.map(p => p.text || p.reasoning || '').join('\n') 
-                            : message.content
-                        } 
-                      />
-                    </MessageActions>
-                  )}
-                </Message>
-              );
-            })
-          )}
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-2/3" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="flex flex-col h-full w-full max-w-2xl mx-auto min-w-0">
+                <ConversationEmptyState
+                  icon={
+                    <div className="p-4 rounded-full bg-primary/10 mb-4">
+                      <List className="size-10 text-primary/60" />
+                    </div>
+                  }
+                  title="Task Assistant"
+                  description="I'm here to help you manage your tasks. Create, update, search or delete tasks."
+                />
+                <div className="mt-8 space-y-3 px-4">
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
+                    <Sparkles className="size-3 text-primary/60 shrink-0" />
+                    <span className="truncate">Try asking</span>
+                  </div>
+                  <div className="grid gap-2">
+                    {TASK_SUGGESTIONS.map((suggestion) => (
+                      <PromptSuggestion
+                        key={suggestion}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all duration-200"
+                      >
+                        {suggestion}
+                      </PromptSuggestion>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              messages.map((message) => {
+                const parts = message.parts || [];
+
+                // Filter out empty assistant messages to prevent large gaps in UI
+                const hasContent =
+                  parts.some(
+                    (p) =>
+                      (p.type === 'text' && p.text?.trim()) ||
+                      (p.type === 'reasoning' && p.reasoning?.trim()) ||
+                      p.type.startsWith('tool-'),
+                  ) || message.content?.trim();
+
+                if (message.role === 'assistant' && !hasContent) return null;
+
+                return (
+                  <Message key={message.id} from={message.role}>
+                    <MessageContent>
+                      {parts.length > 0 ? (
+                        parts.map((part: MessagePart, i: number) => {
+                          const key = `${message.id}-${i}`;
+                          if (part.type === 'reasoning') {
+                            return (
+                              <Reasoning
+                                key={key}
+                                isStreaming={!!part.isStreaming}
+                              >
+                                <ReasoningTrigger />
+                                <ReasoningContent>
+                                  {part.reasoning ?? part.text ?? ''}
+                                </ReasoningContent>
+                              </Reasoning>
+                            );
+                          }
+                          if (
+                            part.type === 'text' ||
+                            (!part.type && part.text)
+                          ) {
+                            if (!part.text?.trim()) return null;
+                            return (
+                              <MessageResponse
+                                key={key}
+                                className="leading-relaxed"
+                              >
+                                {part.text}
+                              </MessageResponse>
+                            );
+                          }
+                          if (
+                            part.type?.startsWith('tool-') ||
+                            part.type === 'tool-invocation' ||
+                            part.type === 'tool-call'
+                          ) {
+                            return <TaskToolCall key={key} part={part} />;
+                          }
+                          return null;
+                        })
+                      ) : (
+                        <MessageResponse className="leading-relaxed">
+                          {message.content}
+                        </MessageResponse>
+                      )}
+                    </MessageContent>
+                    {(message.role === 'user' || status === 'idle') && (
+                      <MessageActions
+                        className={cn(
+                          'mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                          message.role === 'user'
+                            ? 'justify-end'
+                            : 'justify-start',
+                        )}
+                      >
+                        <CopyButton
+                          content={
+                            parts.length > 0
+                              ? parts
+                                  .map((p) => p.text || p.reasoning || '')
+                                  .join('\n')
+                              : message.content
+                          }
+                        />
+                      </MessageActions>
+                    )}
+                  </Message>
+                );
+              })
+            )}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>

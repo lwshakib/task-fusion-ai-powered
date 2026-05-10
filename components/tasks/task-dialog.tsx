@@ -54,19 +54,23 @@ export function TaskDialog({
    */
   useEffect(() => {
     if (task) {
-      setFormData({
-        title: task.title,
-        description: task.description || '',
-        status: task.status,
-        priority: task.priority,
+      Promise.resolve().then(() => {
+        setFormData({
+          title: task.title,
+          description: task.description || '',
+          status: task.status,
+          priority: task.priority,
+        });
       });
     } else {
       // Default state for creating a new task
-      setFormData({
-        title: '',
-        description: '',
-        status: 'TODO',
-        priority: 'MEDIUM',
+      Promise.resolve().then(() => {
+        setFormData({
+          title: '',
+          description: '',
+          status: 'TODO',
+          priority: 'MEDIUM',
+        });
       });
     }
   }, [task, open]);

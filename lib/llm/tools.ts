@@ -1,10 +1,7 @@
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import type { Prisma } from '@/generated/prisma/client';
-import {
-  TASK_PRIORITY,
-  TASK_STATUS,
-} from '@/generated/prisma/enums';
+import { TASK_PRIORITY, TASK_STATUS } from '@/generated/prisma/enums';
 import { FunctionDeclaration, Type } from '@google/genai';
 
 /**
@@ -13,10 +10,22 @@ import { FunctionDeclaration, Type } from '@google/genai';
  */
 
 const TaskSchema = z.object({
-  title: z.string().min(1, 'Title is required').describe('The title of the task'),
-  description: z.string().optional().describe('Optional detailed description of the task'),
-  status: z.nativeEnum(TASK_STATUS).default(TASK_STATUS.TODO).describe('The current status of the task'),
-  priority: z.nativeEnum(TASK_PRIORITY).default(TASK_PRIORITY.MEDIUM).describe('The urgency level of the task'),
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .describe('The title of the task'),
+  description: z
+    .string()
+    .optional()
+    .describe('Optional detailed description of the task'),
+  status: z
+    .nativeEnum(TASK_STATUS)
+    .default(TASK_STATUS.TODO)
+    .describe('The current status of the task'),
+  priority: z
+    .nativeEnum(TASK_PRIORITY)
+    .default(TASK_PRIORITY.MEDIUM)
+    .describe('The urgency level of the task'),
 });
 
 const CreateTasksSchema = z.object({
@@ -24,20 +33,34 @@ const CreateTasksSchema = z.object({
 });
 
 const UpdateTasksSchema = z.object({
-  updates: z.array(
-    z.object({
-      id: z.string().min(1, 'Task ID is required').describe('The unique identifier of the task to update'),
-      updates: TaskSchema.partial().describe('The fields to update for this task'),
-    }),
-  ).describe('An array of task updates'),
+  updates: z
+    .array(
+      z.object({
+        id: z
+          .string()
+          .min(1, 'Task ID is required')
+          .describe('The unique identifier of the task to update'),
+        updates: TaskSchema.partial().describe(
+          'The fields to update for this task',
+        ),
+      }),
+    )
+    .describe('An array of task updates'),
 });
 
 const DeleteTasksSchema = z.object({
-  ids: z.array(z.string()).describe('An array of task IDs to be permanently deleted'),
+  ids: z
+    .array(z.string())
+    .describe('An array of task IDs to be permanently deleted'),
 });
 
 const SearchTasksSchema = z.object({
-  query: z.string().min(1, 'Search query is required').describe('The keyword or phrase to search for in task titles and descriptions'),
+  query: z
+    .string()
+    .min(1, 'Search query is required')
+    .describe(
+      'The keyword or phrase to search for in task titles and descriptions',
+    ),
 });
 
 /**
@@ -57,17 +80,23 @@ export const toolDefinitions: FunctionDeclaration[] = [
           items: {
             type: Type.OBJECT,
             properties: {
-              title: { type: Type.STRING, description: 'The title of the task' },
-              description: { type: Type.STRING, description: 'Optional detailed description of the task' },
-              status: { 
-                type: Type.STRING, 
-                description: 'The current status of the task',
-                enum: ['TODO', 'COMPLETED']
+              title: {
+                type: Type.STRING,
+                description: 'The title of the task',
               },
-              priority: { 
-                type: Type.STRING, 
+              description: {
+                type: Type.STRING,
+                description: 'Optional detailed description of the task',
+              },
+              status: {
+                type: Type.STRING,
+                description: 'The current status of the task',
+                enum: ['TODO', 'COMPLETED'],
+              },
+              priority: {
+                type: Type.STRING,
                 description: 'The urgency level of the task',
-                enum: ['LOW', 'MEDIUM', 'HIGH']
+                enum: ['LOW', 'MEDIUM', 'HIGH'],
               },
             },
             required: ['title'],
@@ -89,15 +118,27 @@ export const toolDefinitions: FunctionDeclaration[] = [
           items: {
             type: Type.OBJECT,
             properties: {
-              id: { type: Type.STRING, description: 'The unique identifier of the task to update' },
+              id: {
+                type: Type.STRING,
+                description: 'The unique identifier of the task to update',
+              },
               updates: {
                 type: Type.OBJECT,
                 description: 'The fields to update for this task',
                 properties: {
-                  title: { type: Type.STRING, description: 'New title for the task' },
-                  description: { type: Type.STRING, description: 'New description for the task' },
+                  title: {
+                    type: Type.STRING,
+                    description: 'New title for the task',
+                  },
+                  description: {
+                    type: Type.STRING,
+                    description: 'New description for the task',
+                  },
                   status: { type: Type.STRING, enum: ['TODO', 'COMPLETED'] },
-                  priority: { type: Type.STRING, enum: ['LOW', 'MEDIUM', 'HIGH'] },
+                  priority: {
+                    type: Type.STRING,
+                    enum: ['LOW', 'MEDIUM', 'HIGH'],
+                  },
                 },
               },
             },
@@ -134,7 +175,10 @@ export const toolDefinitions: FunctionDeclaration[] = [
     parameters: {
       type: Type.OBJECT,
       properties: {
-        query: { type: Type.STRING, description: 'The keyword or phrase to search for' },
+        query: {
+          type: Type.STRING,
+          description: 'The keyword or phrase to search for',
+        },
       },
       required: ['query'],
     },

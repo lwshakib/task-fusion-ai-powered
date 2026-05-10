@@ -68,7 +68,9 @@ export function TaskList() {
 
   // Initial fetch on mount
   useEffect(() => {
-    fetchTasks();
+    Promise.resolve().then(() => {
+      fetchTasks();
+    });
   }, [fetchTasks]);
 
   /**
@@ -78,7 +80,9 @@ export function TaskList() {
     if (viewTask) {
       const updatedTask = tasks.find((t) => t.id === viewTask.id);
       if (updatedTask) {
-        setViewTask(updatedTask);
+        Promise.resolve().then(() => {
+          setViewTask(updatedTask);
+        });
       }
     }
   }, [tasks, viewTask, setViewTask]);
