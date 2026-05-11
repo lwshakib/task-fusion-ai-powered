@@ -314,6 +314,8 @@ export async function streamText(
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
           'x-vercel-ai-data-stream': 'v1',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
         },
       });
     },

@@ -9,7 +9,7 @@ import { z } from 'zod';
  */
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  description: z.string().optional(),
+  description: z.string().nullish(),
   status: z.enum(['TODO', 'COMPLETED']),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH']),
 });
